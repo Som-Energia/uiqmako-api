@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "uiqmako-api"
+version = "0.1.0"
+description = ""
+authors = ["Mar Jene <mar.jene@somenergia.coop>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+fastapi = "^0.63.0"
+uvicorn = {extras = ["standard"], version = "^0.13.4"}
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+ipython = "^7.21.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
