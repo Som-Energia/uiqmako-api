@@ -8,10 +8,14 @@ authors = ["Mar Jene <mar.jene@somenergia.coop>"]
 python = "^3.7"
 fastapi = "^0.63.0"
 uvicorn = {extras = ["standard"], version = "^0.13.4"}
+peewee-async = "^0.7.1"
+aiopg = "^1.1.0"
+python-dotenv = "^0.15.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 ipython = "^7.21.0"
+pudb = "^2020.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+def build_app():
+    import config
 
+    app = FastAPI()
 
-@app.get("/")
-async def root():
-    return {"message": "I'm the UI-QMako API"}
+    app.settings = config.settings
+    return app
