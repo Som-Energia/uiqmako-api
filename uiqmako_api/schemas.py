@@ -2,7 +2,6 @@ from pydantic import BaseModel, validator
 from typing import Optional
 
 def validate_xml_id(value: str):
-    print(value)
     if not value:
         return value
     if '.' not in value:
@@ -24,6 +23,9 @@ class TemplateInfoBase(BaseModel):
     def validate_xml_id(cls, v):
         return validate_xml_id(v)
 
+    class Config:
+        orm_mode = True
+
 class CaseBase(BaseModel):
     name: str
     case_xml_id: Optional[str] = None
@@ -33,12 +35,12 @@ class CaseBase(BaseModel):
     def validate_xml_id(cls, v):
         return validate_xml_id(v)
 
-
-class TemplateInfo(TemplateInfoBase):
     class Config:
         orm_mode = True
+
+class TemplateInfo(TemplateInfoBase):
+    pass
 
 
 class Case(CaseBase):
-    class Config:
-        orm_mode = True
+    pass

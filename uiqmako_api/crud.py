@@ -4,10 +4,5 @@ from peewee_async import Manager
 
 async def get_all_templates(db: Manager):
     templates = await db.execute(TemplateInfoModel.select())
-    result = []
-    for t in templates:
-        print("*"*40)
-        print(t)
-        a = TemplateInfo.from_orm(t)
-        result.append(a)
+    result = [TemplateInfoBase.from_orm(t) for t in templates]
     return result
