@@ -11,6 +11,8 @@ uvicorn = {extras = ["standard"], version = "^0.13.4"}
 peewee-async = "^0.7.1"
 aiopg = "^1.1.0"
 python-dotenv = "^0.15.0"
+ERPpeek = "^1.7.1"
+pool-transport = {git = "git@github.com:Som-Energia/pool_transport.git"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

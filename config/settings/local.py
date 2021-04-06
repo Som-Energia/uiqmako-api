@@ -18,4 +18,13 @@ class LocalSettings(APIBaseSettings):
     def __init__(self):
         super(LocalSettings, self).__init__()
 
+    def erp_conn(self):
+        erp_conn = {
+            'db': self.ERP_DB_NAME,
+            'server': '{}:{}'.format(self.ERP_URI, self.ERP_PORT),
+            'user': self.ERP_USER,
+            'password': self.ERP_PWD
+        }
+        return erp_conn
+
 settings = LocalSettings()
