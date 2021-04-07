@@ -5,7 +5,7 @@ description = ""
 authors = ["Mar Jene <mar.jene@somenergia.coop>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8.8"
 fastapi = "^0.63.0"
 uvicorn = {extras = ["standard"], version = "^0.13.4"}
 peewee-async = "^0.7.1"
@@ -13,11 +13,15 @@ aiopg = "^1.1.0"
 python-dotenv = "^0.15.0"
 ERPpeek = "^1.7.1"
 pool-transport = {git = "git@github.com:Som-Energia/pool_transport.git"}
+python-jose = {extras = ["cryptography"], version = "^3.2.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 ipython = "^7.21.0"
 pudb = "^2020.1"
+pytest-cov = "^2.11.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
