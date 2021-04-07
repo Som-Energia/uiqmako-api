@@ -11,6 +11,7 @@ class LocalSettings(APIBaseSettings):
     ERP_PORT: int
     ERP_USER: str
     ERP_PWD: str
+
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'

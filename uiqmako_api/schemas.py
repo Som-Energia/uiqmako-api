@@ -44,3 +44,4 @@ class TemplateInfo(TemplateInfoBase):
 
 class Case(CaseBase):
     pass
+
