@@ -1,4 +1,4 @@
-from .models import *
+from .models.models import *
 from .schemas import *
 from peewee_async import Manager
 

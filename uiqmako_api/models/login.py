@@ -1,4 +1,4 @@
-from ..models import database
+from . import database
 import peewee
 from peewee_async import Manager
 

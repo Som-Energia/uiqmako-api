@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .schemas import TokenData, UserInDB, User
 from peewee_async import Manager
 from ..dependencies import get_db
-from .models import get_user
+from ..models.login import get_user
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

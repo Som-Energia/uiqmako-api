@@ -5,7 +5,7 @@ from uiqmako_api.app import build_app
 def main():
 
     app = build_app()
-    uvicorn.run("uiqmako_api.main:app")
+    uvicorn.run("uiqmako_api.api:app")
 
 if __name__ == '__main__':
     main()

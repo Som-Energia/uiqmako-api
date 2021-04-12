@@ -2,15 +2,7 @@ import asyncio
 import peewee
 import peewee_async
 import config
-
-database = peewee_async.PostgresqlDatabase(
-    database=config.settings.DB_NAME,
-)
-
-def get_db_manager():
-    objects = peewee_async.Manager(database)
-    database.set_allow_sync(False)
-    return objects
+from . import database
 
 class TemplateInfoModel(peewee.Model):
     name = peewee.CharField(unique=True)
@@ -31,10 +23,10 @@ class CaseModel(peewee.Model):
 
 # Look, sync code is working!
 
-def setup_database():
-    TemplateInfoModel.create_table(True)
-    CaseModel.create_table(True)
-    database.close()
+# def setup_database():
+#     TemplateInfoModel.create_table(True)
+#     CaseModel.create_table(True)
+#     database.close()
 
 
 # loop = asyncio.get_event_loop()

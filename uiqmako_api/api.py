@@ -11,7 +11,6 @@ from config import settings
 
 app = build_app()
 
-
 @app.get("/")
 async def root():
     return {"message": "I'm the UI-QMako API"}
