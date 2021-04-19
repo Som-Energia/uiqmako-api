@@ -38,8 +38,19 @@ class CaseBase(BaseModel):
     class Config:
         orm_mode = True
 
-class TemplateInfo(TemplateInfoBase):
-    pass
+class Template(BaseModel):
+    id: int
+    def_subject: str
+    def_subject: str
+    def_body_text: str
+    def_to: str
+    def_cc: str
+    def_bcc: str
+    model_int_name: str
+    lang: str
+
+    class Config:
+        orm_mode = True
 
 
 class Case(CaseBase):
