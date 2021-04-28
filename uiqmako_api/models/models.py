@@ -5,15 +5,17 @@ import config
 from . import database
 
 class TemplateInfoModel(peewee.Model):
+    id = peewee.AutoField()
     name = peewee.CharField(unique=True)
     model = peewee.CharField()
     xml_id = peewee.CharField(null=True, unique=True)
-    template_id = peewee.IntegerField(null=True, unique=True)
+    erp_id = peewee.IntegerField(null=True, unique=True)
     class Meta:
         database = database
         table_name = "template_info"
 
 class CaseModel(peewee.Model):
+    id = peewee.IntegerField(primary_key=True)
     name = peewee.CharField()
     case_id = peewee.IntegerField(null=True)
     case_xml_id = peewee.CharField(null=True)

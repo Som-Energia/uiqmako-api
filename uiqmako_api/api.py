@@ -19,16 +19,16 @@ app = build_app()
 async def root():
     return {"message": "I'm the UI-QMako API"}
 
+
 @app.get("/templates")
 async def templates_list(db: Manager = Depends(get_db)):
-    templates = await get_all_templates(db)
+    templates = await get_all_templates(app.db_manager)
     return templates
+
 
 @app.get("/templates/{template_id}", dependencies=[Depends(check_erp_conn)])
 async def get_template(template_id: int, db: Manager = Depends(get_db)):
-    template = await get_template_orm(db, template_id=template_id)
-    t = get_erp_template(app.ERP, id=template.template_id, xml_id=template.xml_id)
-    return Template.from_orm(t)
+    return await get_single_template(db, app.ERP, template_id)
 
 
 @app.post("/token", response_model=Token)
@@ -41,3 +41,9 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.post("/templates", dependencies=[Depends(check_erp_conn)])
+async def add_new_template(xml_id: str = Form(...), db: Manager = Depends(get_db)):
+    created, template_info = await add_template_from_xml_id(db, app.ERP, xml_id)
+    return {"created": created, "template": template_info}

@@ -13,12 +13,20 @@ class TestApi:
         async with AsyncClient(app=test_app, base_url="http://test") as ac:
             response = await ac.get("/templates")
         assert response.status_code == 200
-        assert response.json() == [{'model': "poweremail.templates", 'name': 'Template test', 'template_id': None, 'xml_id': 'template_module.template_01'},
-                                   {'model': "poweremail.templates", 'name': 'Template2 test', 'template_id': None, 'xml_id': 'template_module.template_02'}]
+        assert response.json() == [{'id': 1, 'model': "poweremail.templates", 'name': 'Template test', 'erp_id': None, 'xml_id': 'template_module.template_01'},
+                                   {'id': 2, 'model': "poweremail.templates", 'name': 'Template2 test', 'erp_id': None, 'xml_id': 'template_module.template_02'}]
 
+    @pytest.mark.skip("Mock return check_erp_conn")
     async def test_check_erp_conn_dependency(self, test_app):
         async with AsyncClient(app=test_app, base_url="http://test") as ac:
             response = await ac.get("/templates/1")
 
         assert response.status_code == 503
         assert response.text == '{"detail":"Can\'t connect to ERP"}'
+
+    async def test_add_new_template(self, test_app):
+        async with AsyncClient(app=test_app, base_url="http://test") as ac:
+            response = await ac.post("/templates", data={"xml_id": "module_test.xml_id"})
+        assert response.status_code == 200
+        assert response.json()['template']['xml_id'] == "module_test.xml_id"
+        assert response.json()['created']

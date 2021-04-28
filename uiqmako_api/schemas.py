@@ -1,23 +1,26 @@
 from pydantic import BaseModel, validator
 from typing import Optional
 
+
 def validate_xml_id(value: str):
     if not value:
         return value
     if '.' not in value:
         raise ValueError("XML ID must contain module and id separeted by '.'")
     module, name = value.split('.')
-    if not value.split('.')[1]:
+    if not name:
         raise ValueError("XML ID name cannot be empty")
-    if not value.split('.')[0]:
+    if not module:
         raise ValueError("XML ID module cannot be empty")
     return value
 
+
 class TemplateInfoBase(BaseModel):
+    id: int
     name: str
     model: str
     xml_id: Optional[str] = None
-    template_id: Optional[int] = None
+    erp_id: Optional[int] = None
 
     @validator('xml_id')
     def validate_xml_id(cls, v):
@@ -48,6 +51,8 @@ class Template(BaseModel):
     def_bcc: str
     model_int_name: str
     lang: str
+    name: str
+    #xml_id: str
 
     class Config:
         orm_mode = True
