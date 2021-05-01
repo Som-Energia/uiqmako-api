@@ -1,10 +1,26 @@
 import pytest
 from .erp_test import PoweremailTemplatesTest
-from uiqmako_api.templates import add_template_from_xml_id
+from uiqmako_api.templates import add_template_from_xml_id, parse_body_by_language
 from uiqmako_api.models.models import TemplateInfoModel
 from uiqmako_api.schemas import TemplateInfoBase, Template
 from pytest_mock import mocker
 from uiqmako_api.models.erp_models import PoweremailTemplates
+
+ONLY_HTML = """
+<!doctype html>
+    <p>Som Energia, SCCL</p>
+    <p><a href=\"http://es.support.somenergia.coop\">Ayuda</a>
+</html>
+"""
+
+ONLY_PYTHON = """<%
+from mako.template import Template
+text_legal = render(
+    t_obj.read(
+    object._cr, object._uid, [template_id], ['def_body_text']
+)[0]['def_body_text'],object)
+%>"""
+
 
 @pytest.mark.asyncio
 class TestTemplates:
@@ -38,4 +54,39 @@ class TestTemplates:
         assert template_info.name == template.name
         assert template_info.model == 'poweremail.templates'
         assert number_templates_post == number_templates_pre
+
+    @pytest.mark.parametrize(
+        "body_text,split", [
+            (ONLY_PYTHON, [('python', ONLY_PYTHON)]),
+            (ONLY_HTML, [('html', ONLY_HTML[1:-1])]),
+            (ONLY_PYTHON+"\n"+ONLY_HTML, [
+                ('python', ONLY_PYTHON),
+                ('html', ONLY_HTML[1:-1])
+            ]),
+            (ONLY_HTML + "\n" + ONLY_PYTHON, [
+                ('html', ONLY_HTML.strip()),
+                ('python', ONLY_PYTHON)
+            ]),
+            (ONLY_HTML + "\n" + ONLY_PYTHON + "\n" + ONLY_PYTHON, [
+                ('html', ONLY_HTML.strip()),
+                ('python', ONLY_PYTHON),
+                ('python', ONLY_PYTHON),
+            ]),
+            ("\n" + ONLY_PYTHON + "\n" + ONLY_PYTHON + ONLY_HTML, [
+                ('python', ONLY_PYTHON),
+                ('python', ONLY_PYTHON),
+                ('html', ONLY_HTML.strip()),
+            ]),
+
+            ("\n" + ONLY_PYTHON + ONLY_HTML + ONLY_PYTHON, [
+                ('python', ONLY_PYTHON),
+                ('html', ONLY_HTML.strip()),
+                ('python', ONLY_PYTHON),
+            ]),
+
+        ]
+    )
+    def test_parse_body_by_language(self, body_text, split):
+        assert parse_body_by_language(body_text) == split
+
 
