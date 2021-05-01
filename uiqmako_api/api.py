@@ -1,12 +1,11 @@
-from fastapi import Depends, HTTPException, status
-from functools import wraps
+from fastapi import Depends, Form
+from peewee_async import Manager
 from datetime import timedelta
 from .registration.schemas import Token
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .dependencies import get_db, check_erp_conn
 from .app import build_app
-from .crud import *
-from .erp_utils import get_erp_template
+from .templates import *
 from .registration.login import authenticate_user, create_access_token
 from config import settings
 from .exceptions import LoginException
@@ -44,6 +43,9 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 
 @app.post("/templates", dependencies=[Depends(check_erp_conn)])
-async def add_new_template(xml_id: str = Form(...), db: Manager = Depends(get_db)):
+async def add_new_template(xml_id: str = Form(..., regex=".+\..+"), db: Manager = Depends(get_db)):
     created, template_info = await add_template_from_xml_id(db, app.ERP, xml_id)
-    return {"created": created, "template": template_info}
+    response = {'conflict': False, "created": created, "template": template_info}
+    if not created and template_info.xml_id != xml_id:
+        response['conflict'] = True
+    return response

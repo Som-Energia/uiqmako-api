@@ -14,7 +14,7 @@ async def get_all_templates_orm(db: Manager):
 async def get_template_orm(db, template_id=None, erp_id=None, xml_id=None, name=None):
     search_fields = {}
     if template_id:
-        search_fields.update({'template_id': template_id})
+        search_fields.update({'id': template_id})
     if erp_id:
         search_fields.update({'erp_id': erp_id})
     if xml_id:

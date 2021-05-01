@@ -4,7 +4,6 @@ class PoweremailTemplatesTest:
     _index = 0
 
     def __init__(self, ERP, xml_id):
-        import pudb; pu.db
         for field in self._fields:
             if field == 'id':
                 setattr(self, field, PoweremailTemplatesTest._index)

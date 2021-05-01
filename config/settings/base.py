@@ -7,3 +7,4 @@ class APIBaseSettings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     ALGORITHM: str
     SECRET_KEY: str
+    TEMPLATE_REPO_PATH: str
