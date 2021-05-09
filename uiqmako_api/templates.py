@@ -1,13 +1,18 @@
 import re
 from .models.erp_models import PoweremailTemplates
-from .crud import get_template_orm, get_all_templates_orm, add_or_get_template_orm
+from .crud import get_template_orm, get_all_templates_orm, add_or_get_template_orm, set_last_updated
 from .schemas import Template, TemplateInfoBase
+from .git_utils import create_or_update_template
 
 
-async def get_single_template(db, erp, template_id):
+async def get_single_template(db, erp, git_repo, template_id):
     template = await get_template_orm(db, template_id=template_id)
     t = PoweremailTemplates(erp, erp_id=template.erp_id, xml_id=template.xml_id)
+    has_changes = await create_or_update_template(template.xml_id, t, git_repo)
+    if has_changes:
+        await set_last_updated(db, template_id=template_id)
     return Template.from_orm(t)
+
 
 async def get_all_templates(db):
     templates = await get_all_templates_orm(db)

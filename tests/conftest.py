@@ -15,9 +15,10 @@ import shutil, os
 
 def create_demo_data(db_manager):
     db_manager.database.set_allow_sync(True)
-    from uiqmako_api.models import models
+    from uiqmako_api.models import models, login
     models.TemplateInfoModel.create(name="Template test", model="poweremail.templates", xml_id="template_module.template_01")
     models.TemplateInfoModel.create(name="Template2 test", model="poweremail.templates", xml_id="template_module.template_02")
+    login.UserModel.create(username="UserAll", hashed_pwd="hashed_pwd", active=True)
     db_manager.database.set_allow_sync(False)
 
 
@@ -59,4 +60,9 @@ def test_template_repo():
     yield test_repo
     shutil.rmtree(settings.TEMPLATE_REPO_PATH)
 
+@pytest.fixture()
+async def override_get_current_active_user(user: str = None):
+    from uiqmako_api.registration.schemas import User
+    return User(username=user, active=True)
 
+#TODO: create db and drop db on test start and end, even when it fails

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from uiqmako_api.erp_utils import ERP
 from uiqmako_api.models import setup_database, get_db_manager
+from uiqmako_api.git_utils import setup_template_repository
 from starlette.middleware.cors import CORSMiddleware
 
 origins = [
@@ -16,6 +17,7 @@ def build_app():
     setup_database(True)
     app.db_manager = get_db_manager()
     app.settings = config.settings
+    app.template_repo = setup_template_repository()
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,

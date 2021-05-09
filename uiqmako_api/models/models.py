@@ -10,6 +10,7 @@ class TemplateInfoModel(peewee.Model):
     model = peewee.CharField()
     xml_id = peewee.CharField(null=True, unique=True)
     erp_id = peewee.IntegerField(null=True, unique=True)
+    last_updated = peewee.DateTimeField(null=True)
     class Meta:
         database = database
         table_name = "template_info"

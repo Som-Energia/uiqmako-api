@@ -9,7 +9,8 @@ from .templates import *
 from .registration.login import authenticate_user, create_access_token
 from config import settings
 from .exceptions import LoginException
-
+from .registration.schemas import User
+from .registration.login import get_current_active_user
 
 app = build_app()
 
@@ -26,10 +27,11 @@ async def templates_list(db: Manager = Depends(get_db)):
 
 
 @app.get("/templates/{template_id}", dependencies=[Depends(check_erp_conn)])
-async def get_template(template_id: int, db: Manager = Depends(get_db)):
-    template = await get_single_template(db, app.ERP, template_id)
-    body_text_by_type = parse_body_by_language(template.def_body_text)
-    return {'body_text_by_type': body_text_by_type, 'template': template}
+async def get_template(template_id: int, db: Manager = Depends(get_db), current_user: User = Depends(get_current_active_user)):
+    if current_user:
+        template = await get_single_template(db, app.ERP, app.template_repo, template_id)
+        body_text_by_type = parse_body_by_language(template.def_body_text)
+        return {'body_text_by_type': body_text_by_type, 'template': template}
 
 
 @app.post("/token", response_model=Token)

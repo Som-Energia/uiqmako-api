@@ -1,4 +1,4 @@
-from .models.models import *
+from datetime import datetime
 from .schemas import *
 from peewee_async import Manager
 from .models.models import TemplateInfoModel
@@ -42,3 +42,10 @@ async def add_or_get_template_orm(db, name, xml_id, erp_id=None):
         )
 
     return created, template_info
+
+
+async def set_last_updated(db, template_id):
+    template_obj = await db.get(TemplateInfoModel, id=template_id)
+    template_obj.last_updated = datetime.now()
+    await db.update(template_obj, only=['last_updated'])
+    return True

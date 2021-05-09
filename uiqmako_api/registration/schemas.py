@@ -12,6 +12,8 @@ class User(BaseModel):
     username: str
     disabled: Optional[bool] = None
     category: Optional[UserCategory] = UserCategory.USER
+    class Config:
+        orm_mode = True
 
 
 class UserInDB(User):

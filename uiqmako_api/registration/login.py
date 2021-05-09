@@ -51,10 +51,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Manager = De
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(db, username=token_data.username)
+    user = await get_user(db, username=token_data.username)
     if user is None:
         raise credentials_exception
-    return UserInDB.from_orm(user)
+    return User.from_orm(user)
 
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):

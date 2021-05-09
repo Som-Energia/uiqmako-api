@@ -6,7 +6,6 @@ from peewee_async import Manager
 class UserModel(peewee.Model):
     username = peewee.CharField(unique=True)
     hashed_pwd = peewee.CharField()
-    category = peewee.CharField()
     active = peewee.BooleanField()
     class Meta:
         database = database

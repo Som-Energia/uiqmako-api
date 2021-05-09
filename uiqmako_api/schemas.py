@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, validator
 from typing import Optional
 
@@ -21,6 +22,7 @@ class TemplateInfoBase(BaseModel):
     model: str
     xml_id: Optional[str] = None
     erp_id: Optional[int] = None
+    last_updated: Optional[datetime] = None
 
     @validator('xml_id')
     def validate_xml_id(cls, v):
@@ -28,6 +30,7 @@ class TemplateInfoBase(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class CaseBase(BaseModel):
     name: str
@@ -40,6 +43,7 @@ class CaseBase(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class Template(BaseModel):
     id: int

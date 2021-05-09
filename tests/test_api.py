@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient
+from uiqmako_api.models.login import UserModel
 @pytest.mark.asyncio
 class TestApi:
 
