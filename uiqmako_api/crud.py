@@ -1,7 +1,8 @@
 from datetime import datetime
 from .schemas import *
 from peewee_async import Manager
-from .models.models import TemplateInfoModel
+from .models.models import TemplateInfoModel, TemplateEditModel
+from .models.login import UserModel
 from peewee import DoesNotExist
 
 
@@ -48,4 +49,42 @@ async def set_last_updated(db, template_id):
     template_obj = await db.get(TemplateInfoModel, id=template_id)
     template_obj.last_updated = datetime.now()
     await db.update(template_obj, only=['last_updated'])
+    return True
+
+
+async def get_or_create_template_edit_orm(db, template_id, user_id, last_updated):
+    try:
+        edit = await db.get(
+            TemplateEditModel, template=template_id, user=user_id
+        )
+        created = False
+    except DoesNotExist as ex:
+        edit = await db.create_or_get(
+            TemplateEditModel, template=template_id, user=user_id, original_update_date=last_updated,
+            date_start=datetime.now()
+        )
+        created = True
+    return edit, created
+
+
+async def get_user_edits_info_orm(db, template_id, exclude_user):
+    try:
+        edits = await db.execute(
+            TemplateEditModel.select(TemplateEditModel, UserModel).where(
+                TemplateEditModel.user_id != exclude_user,
+                TemplateEditModel.template_id == template_id
+            ).join(UserModel, on=(UserModel.id == TemplateEditModel.user))
+        ) #TODO: check date start not empty
+        result = [TemplateEditInfo.from_orm(e) for e in edits]
+        return result
+    except DoesNotExist as e:
+        return []
+
+
+async def update_user_edit_orm(db, template_id, user_id, text, headers):
+    edit = await db.get(TemplateEditModel, template=template_id, user=user_id)
+    edit.body_text = text
+    edit.headers = headers
+    edit.last_modified = datetime.now()
+    await db.update(edit)
     return True

@@ -16,13 +16,29 @@ class TemplateInfoModel(peewee.Model):
         table_name = "template_info"
 
 class CaseModel(peewee.Model):
-    id = peewee.IntegerField(primary_key=True)
+    id = peewee.AutoField()
     name = peewee.CharField()
     case_id = peewee.IntegerField(null=True)
     case_xml_id = peewee.CharField(null=True)
     class Meta:
         database = database
         table_name = "case_info"
+
+
+class TemplateEditModel(peewee.Model):
+    from .login import UserModel
+    id = peewee.AutoField()
+    template = peewee.ForeignKeyField(TemplateInfoModel, backref="edits")
+    user = peewee.ForeignKeyField(UserModel, backref="edits")
+    body_text = peewee.TextField(null=True)
+    headers = peewee.TextField(null=True)
+    date_start = peewee.DateTimeField(null=True)
+    last_modified = peewee.DateTimeField(null=True)
+    original_update_date = peewee.DateTimeField()
+
+    class Meta:
+        database = database
+        table_name = "template_edit"
 
 # Look, sync code is working!
 

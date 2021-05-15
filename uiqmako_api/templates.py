@@ -1,6 +1,15 @@
 import re
+import json
 from .models.erp_models import PoweremailTemplates
-from .crud import get_template_orm, get_all_templates_orm, add_or_get_template_orm, set_last_updated
+from .crud import (
+    get_template_orm,
+    get_all_templates_orm,
+    add_or_get_template_orm,
+    set_last_updated,
+    get_or_create_template_edit_orm,
+    get_user_edits_info_orm,
+    update_user_edit_orm,
+)
 from .schemas import Template, TemplateInfoBase
 from .git_utils import create_or_update_template
 
@@ -26,8 +35,9 @@ async def add_template_from_xml_id(db, erp, xml_id):
         created, template_info = await add_or_get_template_orm(db, name=erp_template.name, xml_id=xml_id, erp_id=erp_template.id)
     return created, TemplateInfoBase.from_orm(template_info) #TODO: if different template
 
+
 def parse_body_by_language(full_text):
-    python_reg = "(<%)(.\\s)*[^%>]*(%>)"
+    python_reg = "(<%)(.\\s)*[^%>]*(%>)|([^\\S\n]*[^\\S]%[^>].*)"
     rex = re.compile(python_reg)
     parts = []
     current_pos = 0
@@ -44,3 +54,20 @@ def parse_body_by_language(full_text):
         if html_text:
             parts.append(('html', html_text))
     return parts
+
+
+async def get_or_create_template_edit(db, template_id, user):
+    last_updated = (await get_template_orm(db, template_id=template_id)).last_updated
+    edit, created = await get_or_create_template_edit_orm(db, template_id, user.id, last_updated)
+    other_edits = await get_user_edits_info_orm(db, template_id, exclude_user=user.id)
+    return edit, created
+
+
+async def check_other_users_edits(db, template_id, user_id):
+    other_edits = await get_user_edits_info_orm(db, template_id, exclude_user=user_id)
+    return other_edits
+
+
+async def save_user_edit(db, template_id, user_id, edit):
+    response = await update_user_edit_orm(db, template_id, user_id, edit.def_body_text, edit.headers)
+    return response

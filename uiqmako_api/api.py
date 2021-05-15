@@ -1,7 +1,8 @@
-from fastapi import Depends, Form
+from fastapi import Depends, Form, Request
+from pydantic.typing import List, Tuple
 from peewee_async import Manager
 from datetime import timedelta
-from .registration.schemas import Token
+from .registration.schemas import Token, User
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .dependencies import get_db, check_erp_conn
 from .app import build_app
@@ -9,7 +10,7 @@ from .templates import *
 from .registration.login import authenticate_user, create_access_token
 from config import settings
 from .exceptions import LoginException
-from .registration.schemas import User
+from .schemas import RawEdit
 from .registration.login import get_current_active_user
 
 app = build_app()
@@ -30,8 +31,12 @@ async def templates_list(db: Manager = Depends(get_db)):
 async def get_template(template_id: int, db: Manager = Depends(get_db), current_user: User = Depends(get_current_active_user)):
     if current_user:
         template = await get_single_template(db, app.ERP, app.template_repo, template_id)
-        body_text_by_type = parse_body_by_language(template.def_body_text)
-        return {'body_text_by_type': body_text_by_type, 'template': template}
+        template_data = {
+            'text': template.body_text(),
+            'meta_data': template.meta_data(),
+            'headers': template.headers()
+        }
+        return template_data
 
 
 @app.post("/token", response_model=Token)
@@ -53,3 +58,36 @@ async def add_new_template(xml_id: str = Form(..., regex=".+\..+"), db: Manager 
     if not created and template_info.xml_id != xml_id:
         response['conflict'] = True
     return response
+
+@app.post("/checkEdits/{template_id}")
+async def check_edits(template_id: int, current_user: User = Depends(get_current_active_user)):
+    check_other_edits = await check_other_users_edits(app.db_manager, template_id, current_user.id)
+    return {'current_edits': check_other_edits}
+
+
+@app.post("/edit/{template_id}")
+async def start_edit(template_id: int, current_user: User = Depends(get_current_active_user)):
+    import pudb; pu.db
+    edit, created = await get_or_create_template_edit(app.db_manager, template_id, current_user)
+    template = await get_single_template(app.db_manager, app.ERP, app.template_repo, template_id)
+    allowed_fields_modify = current_user.get_allowed_fields()
+    edit_data = {'meta_data': template.meta_data(), 'allowed_fields': allowed_fields_modify}
+    if created or not edit.body_text:
+        edit_data['text'] = template.body_text
+        edit_data['headers'] = template.headers()
+    else:
+        edit_data['text'] = {
+            'def_body_text': edit.body_text,
+            'by_type': parse_body_by_language(edit.body_text)
+        }
+        edit_data['headers'] = edit.headers
+    return edit_data
+
+@app.put("/edit/{template_id}")
+async def update_edit(
+        template_id: int,
+        body: RawEdit,
+        current_user: User = Depends(get_current_active_user)):
+    response = await save_user_edit(app.db_manager, template_id, current_user.id, body)
+    return {'result': response}
+

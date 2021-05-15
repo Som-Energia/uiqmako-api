@@ -4,6 +4,7 @@ from peewee_async import Manager
 
 
 class UserModel(peewee.Model):
+    id = peewee.AutoField()
     username = peewee.CharField(unique=True)
     hashed_pwd = peewee.CharField()
     active = peewee.BooleanField()
