@@ -14,4 +14,3 @@ class PoweremailTemplates:
         for field, value in self._PoweremailTemplates.read(erp_id, self._fields).items():
             setattr(self, field, value)
 
-

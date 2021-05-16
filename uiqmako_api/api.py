@@ -67,20 +67,19 @@ async def check_edits(template_id: int, current_user: User = Depends(get_current
 
 @app.post("/edit/{template_id}")
 async def start_edit(template_id: int, current_user: User = Depends(get_current_active_user)):
-    import pudb; pu.db
     edit, created = await get_or_create_template_edit(app.db_manager, template_id, current_user)
     template = await get_single_template(app.db_manager, app.ERP, app.template_repo, template_id)
     allowed_fields_modify = current_user.get_allowed_fields()
     edit_data = {'meta_data': template.meta_data(), 'allowed_fields': allowed_fields_modify}
     if created or not edit.body_text:
-        edit_data['text'] = template.body_text
+        edit_data['text'] = template.body_text()
         edit_data['headers'] = template.headers()
     else:
         edit_data['text'] = {
             'def_body_text': edit.body_text,
             'by_type': parse_body_by_language(edit.body_text)
         }
-        edit_data['headers'] = edit.headers
+        edit_data['headers'] = json.loads(edit.headers)
     return edit_data
 
 @app.put("/edit/{template_id}")
