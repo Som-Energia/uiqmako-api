@@ -11,15 +11,18 @@ class TemplateInfoModel(peewee.Model):
     xml_id = peewee.CharField(null=True, unique=True)
     erp_id = peewee.IntegerField(null=True, unique=True)
     last_updated = peewee.DateTimeField(null=True)
+
     class Meta:
         database = database
         table_name = "template_info"
 
+
 class CaseModel(peewee.Model):
     id = peewee.AutoField()
     name = peewee.CharField()
-    case_id = peewee.IntegerField(null=True)
+    case_erp_id = peewee.IntegerField(null=True)
     case_xml_id = peewee.CharField(null=True)
+    template = peewee.ForeignKeyField(TemplateInfoModel)
     class Meta:
         database = database
         table_name = "case_info"

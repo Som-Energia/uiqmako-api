@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from config import settings
-from jose import JWTError, jwt
+from jose import JWTError, jwt, ExpiredSignatureError
 from passlib.context import CryptContext
 from typing import Optional
 from fastapi import Depends, HTTPException, status
@@ -9,6 +9,7 @@ from .schemas import TokenData, UserInDB, User
 from peewee_async import Manager
 from ..dependencies import get_db
 from ..models.login import get_user
+from ..exceptions import LoginException, ExpiredTokenException
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -38,22 +39,19 @@ async def authenticate_user(username: str, password: str, db: Manager = Depends(
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Manager = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
-            raise credentials_exception
+            raise LoginException
         token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
+    except ExpiredSignatureError:
+        raise ExpiredTokenException
+    except JWTError as e:
+        raise LoginException
     user = await get_user(db, username=token_data.username)
     if user is None:
-        raise credentials_exception
+        raise LoginException
     return User.from_orm(user)
 
 

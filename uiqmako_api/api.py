@@ -1,7 +1,7 @@
 from fastapi import Depends, Form, Request
 from pydantic.typing import List, Tuple
 from peewee_async import Manager
-from datetime import timedelta
+from datetime import timedelta, datetime
 from .registration.schemas import Token, User
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .dependencies import get_db, check_erp_conn
@@ -48,7 +48,10 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
 
 
 @app.post("/templates", dependencies=[Depends(check_erp_conn)])
@@ -67,11 +70,12 @@ async def check_edits(template_id: int, current_user: User = Depends(get_current
 
 @app.post("/edit/{template_id}")
 async def start_edit(template_id: int, current_user: User = Depends(get_current_active_user)):
+    import pudb; pu.db
     edit, created = await get_or_create_template_edit(app.db_manager, template_id, current_user)
     template = await get_single_template(app.db_manager, app.ERP, app.template_repo, template_id)
     allowed_fields_modify = current_user.get_allowed_fields()
-    edit_data = {'meta_data': template.meta_data(), 'allowed_fields': allowed_fields_modify}
-    if created or not edit.body_text:
+    edit_data = {'meta_data': template.meta_data(), 'allowed_fields': allowed_fields_modify, 'edit_id': edit.id}
+    if created or not edit.last_modified:
         edit_data['text'] = template.body_text()
         edit_data['headers'] = template.headers()
     else:
@@ -90,3 +94,15 @@ async def update_edit(
     response = await save_user_edit(app.db_manager, template_id, current_user.id, body)
     return {'result': response}
 
+@app.get("/cases/{template_id}")
+async def get_cases(
+        template_id: int,
+        current_user: User = Depends(get_current_active_user)):
+    cases = await get_template_cases(app.db_manager, template_id)
+    return {'cases': cases}
+
+@app.get("/render/{edit_id}", dependencies=[Depends(check_erp_conn)])
+async def render_template(edit_id: int, case_id: int,
+        current_user: User = Depends(get_current_active_user)):
+    result = await render_edit(app.db_manager, app.ERP, edit_id, case_id)
+    return result

@@ -69,7 +69,7 @@ class ERP:
         return _id
 
 
-    def get_erp_template(self, xml_id=None, id=None):
+    async def get_erp_template(self, xml_id=None, id=None):
         if not xml_id and not id:
             raise KeyError("Missing id and xml_id")
         erp_id = None
@@ -79,3 +79,10 @@ class ERP:
             erp_id = id
         pem_template = PoweremailTemplates(self, erp_id)
         return pem_template
+
+    async def get_object(self, model, id):
+        obj = self[model].browse(id)
+        return obj
+
+    async def render_erp_text(self, text, model, id):
+        return self.get_erp_conn().SomUiqmakoHelper.render_mako_text([], text, model, id)

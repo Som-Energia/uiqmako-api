@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel, validator, Field
 from typing import Optional
+from bs4 import BeautifulSoup
 import json
 
 def validate_xml_id(value: str):
@@ -33,9 +34,11 @@ class TemplateInfoBase(BaseModel):
 
 
 class CaseBase(BaseModel):
+    id: int
     name: str
     case_xml_id: Optional[str] = None
-    case_id: Optional[int] = None
+    case_erp_id: Optional[int] = None
+    template_id: int
 
     @validator('case_xml_id')
     def validate_xml_id(cls, v):
@@ -62,7 +65,6 @@ class Template(BaseModel):
 
     def __init__(self):
         super().__init__()
-        import pudb; pu.db
         self.def_body_text.strip()
 
     def headers(self):
@@ -79,6 +81,9 @@ class Template(BaseModel):
 
         return {'def_body_text': self.def_body_text,
                 'by_type': parse_body_by_language(self.def_body_text)}
+
+    def __getitem__(self, key):
+        return getattr(self, key)
 
 class Case(CaseBase):
     pass
@@ -110,6 +115,7 @@ class RawEdit(BaseModel):
 
     def __init__(self, by_type, def_body_text, headers):
         super(RawEdit, self).__init__()
+
         self.by_type = json.loads(by_type)
         self.headers = headers
         self.def_body_text = def_body_text
@@ -119,7 +125,7 @@ class RawEdit(BaseModel):
         if self.by_type:
             full_text = ''
             for type, text in self.by_type:
-                full_text += text
-            if self.def_body_text and full_text != self.def_body_text:
-                raise Exception("Invalid")
+                #if type == 'html':
+                #    text = BeautifulSoup(text, "html.parser").prettify(formatter=None)
+                full_text += text + '\n'
             self.def_body_text = full_text

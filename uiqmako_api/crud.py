@@ -1,7 +1,7 @@
 from datetime import datetime
 from .schemas import *
 from peewee_async import Manager
-from .models.models import TemplateInfoModel, TemplateEditModel
+from .models.models import TemplateInfoModel, TemplateEditModel, CaseModel
 from .models.login import UserModel
 from peewee import DoesNotExist
 
@@ -29,7 +29,7 @@ async def get_template_orm(db, template_id=None, erp_id=None, xml_id=None, name=
         return None
 
 
-async def add_or_get_template_orm(db, name, xml_id, erp_id=None):
+async def add_or_get_template_orm(db, name, xml_id, model, erp_id=None):
     created = False
     template_info = await get_template_orm(db, xml_id=xml_id)
     if not template_info and erp_id:
@@ -39,7 +39,7 @@ async def add_or_get_template_orm(db, name, xml_id, erp_id=None):
     if not template_info:
         template_info, created = await db.create_or_get(
             TemplateInfoModel,
-            name=name, model='poweremail.templates', xml_id=xml_id, erp_id=erp_id
+            name=name, model=model, xml_id=xml_id, erp_id=erp_id
         )
 
     return created, template_info
@@ -59,11 +59,10 @@ async def get_or_create_template_edit_orm(db, template_id, user_id, last_updated
         )
         created = False
     except DoesNotExist as ex:
-        edit = await db.create_or_get(
+        edit, created = await db.create_or_get(
             TemplateEditModel, template=template_id, user=user_id, original_update_date=last_updated,
             date_start=datetime.now()
         )
-        created = True
     return edit, created
 
 
@@ -88,3 +87,30 @@ async def update_user_edit_orm(db, template_id, user_id, text, headers):
     edit.last_modified = datetime.now()
     await db.update(edit)
     return True
+
+
+async def get_template_cases_orm(db, template_id):
+    try:
+        cases = await db.execute(CaseModel.select().where(CaseModel.template == template_id))
+        result = [CaseBase.from_orm(c) for c in cases]
+        return result
+    except DoesNotExist:
+        return []
+
+
+async def get_edit_orm(db, edit_id):
+    edit = await db.execute(
+        TemplateEditModel.select(TemplateEditModel, TemplateInfoModel).where(
+            TemplateEditModel.id == edit_id
+        ).join(TemplateInfoModel, on=(TemplateInfoModel.id == TemplateEditModel.template)))
+    instances = [e for e in edit]
+    return instances[0] if instances else False
+
+
+async def get_case_orm(db, case_id):
+    try:
+        case = await db.get(CaseModel, id=case_id)
+        return CaseBase.from_orm(case)
+    except DoesNotExist as ex:
+        return False
+
