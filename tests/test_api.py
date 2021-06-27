@@ -31,3 +31,17 @@ class TestApi:
         assert response.status_code == 200
         assert response.json()['template']['xml_id'] == "module_test.xml_id"
         assert response.json()['created']
+
+    #TODO: test add existing template
+    #TODO: test add template coliding xml_id
+
+    async def test_update_template(self, test_app, override_get_current_active_user):
+        from uiqmako_api.registration.login import get_current_active_user
+        test_app.dependency_overrides[get_current_active_user] = lambda: override_get_current_active_user
+        async with AsyncClient(app=test_app, base_url="http://test") as ac:
+            response = await ac.put("/templates/1", headers={'Authorization':"Bearer UserAll"},
+                                    data={"headers": "{'name':'TESTname'}", "body_text": "TEST body",
+                                          "token": 'testToken'})
+        assert response.status_code == 200
+        assert response.json() == 'TestUser'
+        test_app.dependency_overrides = {}
