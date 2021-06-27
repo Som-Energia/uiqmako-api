@@ -17,6 +17,9 @@ python-jose = {extras = ["cryptography"], version = "^3.2.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-multipart = "^0.0.5"
 GitPython = "^3.1.14"
+yamlns = "^0.9.1"
+Mako = "^1.1.4"
+beautifulsoup4 = "^4.9.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
