@@ -12,6 +12,7 @@ from config import settings
 from .exceptions import LoginException
 from .schemas import RawEdit
 from .registration.login import get_current_active_user
+from .exceptions import UnexpectedError
 
 app = build_app()
 
@@ -70,7 +71,6 @@ async def check_edits(template_id: int, current_user: User = Depends(get_current
 
 @app.post("/edit/{template_id}")
 async def start_edit(template_id: int, current_user: User = Depends(get_current_active_user)):
-    import pudb; pu.db
     edit, created = await get_or_create_template_edit(app.db_manager, template_id, current_user)
     template = await get_single_template(app.db_manager, app.ERP, app.template_repo, template_id)
     allowed_fields_modify = current_user.get_allowed_fields()
@@ -106,3 +106,11 @@ async def render_template(edit_id: int, case_id: int,
         current_user: User = Depends(get_current_active_user)):
     result = await render_edit(app.db_manager, app.ERP, edit_id, case_id)
     return result
+
+@app.post("/upload/{edit_id}", dependencies=[Depends(check_erp_conn)])
+async def upload_to_erp(edit_id: int, current_user: User = Depends(get_current_active_user)):
+    updated_template_id = await upload_edit(app.db_manager, app.ERP, edit_id)
+    if updated_template_id:
+        updated_template = await get_single_template(app.db_manager, app.ERP, app.template_repo, updated_template_id)
+        return updated_template
+    raise UnexpectedError

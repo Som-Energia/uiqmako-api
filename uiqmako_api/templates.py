@@ -12,6 +12,7 @@ from .crud import (
     get_template_cases_orm,
     get_edit_orm,
     get_case_orm,
+    delete_edit_orm,
 )
 from .schemas import Template, TemplateInfoBase
 from .git_utils import create_or_update_template
@@ -45,7 +46,6 @@ async def add_template_from_xml_id(db, erp, xml_id):
 
 
 def parse_body_by_language(full_text):
-    import pudb; pu.db
     #python_reg = "(<%)(.\\s)*[^%>]*(%>)|([^\\S\n]*[^\\S]%[^>].*)" Original
     python_reg = "(<%)(.)*[^%>]*(%>)|([^\\S\n]*[^\\S]%[^>][\\S ]*)"
     rex = re.compile(python_reg, re.DOTALL)
@@ -92,7 +92,6 @@ async def render_edit(db, erp, edit_id, case_id):
     from mako.template import Template
     edit = await get_edit_orm(db, edit_id)
     case = await get_case_orm(db, case_id)
-    import pudb; pu.db
     if edit and case:
         if case.case_xml_id:
             model, object_id = erp.get_model_id(case.case_xml_id)
@@ -106,3 +105,16 @@ async def render_edit(db, erp, edit_id, case_id):
         return result
     else:
         return ''
+
+async def delete_edit(db, edit_id):
+    return await delete_edit_orm(db, edit_id)
+
+
+
+async def upload_edit(db, erp, edit_id):
+    edit = await get_edit_orm(db, edit_id)
+    upload_result = await erp.upload_edit(edit.body_text, edit.headers, edit.template.xml_id)
+    if upload_result:
+        _ = await delete_edit_orm(db, edit_id)
+        return edit.template.id
+    return False

@@ -77,7 +77,7 @@ class ERP:
             erp_id = self.get_erp_id(xml_id=xml_id)
         else:
             erp_id = id
-        pem_template = PoweremailTemplates(self, erp_id)
+        pem_template = PoweremailTemplates(self, erp_id=erp_id)
         return pem_template
 
     async def get_object(self, model, id):
@@ -86,3 +86,9 @@ class ERP:
 
     async def render_erp_text(self, text, model, id):
         return self.get_erp_conn().SomUiqmakoHelper.render_mako_text([], text, model, id)
+
+    async def upload_edit(self, body_text, headers, template_xml_id):
+
+        pem_template = PoweremailTemplates(self, xml_id=template_xml_id)
+        return pem_template.upload_edit(body_text, headers)
+
