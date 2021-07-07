@@ -111,10 +111,25 @@ async def delete_edit_orm(db, edit_id):
     return await db.delete(edit)
 
 
-async def get_case_orm(db, case_id):
+async def get_case_orm(db, case_id=None, case_erp_id=None, name=None, template_id=None):
+    search_fields = {}
+    if case_id:
+        search_fields.update({'id': case_id})
+    if case_erp_id:
+        search_fields.update({'case_erp_id': case_erp_id})
+    if name:
+        search_fields.update({'name': name})
+    if template_id:
+        search_fields.update({'template_id': template_id})
     try:
-        case = await db.get(CaseModel, id=case_id)
+        case = await db.get(CaseModel, **search_fields)
         return CaseBase.from_orm(case)
     except DoesNotExist as ex:
         return False
 
+async def get_or_create_template_case_orm(db, template_id, case_name, case_id):
+    case, created = await db.create_or_get(
+        CaseModel,
+        name=case_name, case_erp_id=int(case_id), template=template_id
+    )
+    return case, created

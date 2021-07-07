@@ -13,6 +13,7 @@ from .crud import (
     get_edit_orm,
     get_case_orm,
     delete_edit_orm,
+    get_or_create_template_case_orm,
 )
 from .schemas import Template, TemplateInfoBase
 from .git_utils import create_or_update_template
@@ -91,7 +92,7 @@ async def get_template_cases(db, template_id):
 async def render_edit(db, erp, edit_id, case_id):
     from mako.template import Template
     edit = await get_edit_orm(db, edit_id)
-    case = await get_case_orm(db, case_id)
+    case = await get_case_orm(db, case_id=case_id)
     if edit and case:
         if case.case_xml_id:
             model, object_id = erp.get_model_id(case.case_xml_id)
@@ -118,3 +119,11 @@ async def upload_edit(db, erp, edit_id):
         _ = await delete_edit_orm(db, edit_id)
         return edit.template.id
     return False
+
+async def create_template_case(db, template_id, case_name, case_id):
+    #TODO: Check id semàntic
+    case_same_name = await get_case_orm(db, template_id=template_id, name=case_name)
+    if case_same_name:
+        raise Exception("Existing name case for template")#TODO: define exception
+    case, created = await get_or_create_template_case_orm(db, template_id, case_name, case_id)
+    return created

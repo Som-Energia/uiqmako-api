@@ -101,6 +101,15 @@ async def get_cases(
     cases = await get_template_cases(app.db_manager, template_id)
     return {'cases': cases}
 
+@app.post("/cases/{template_id}")
+async def create_case(
+        template_id: int,
+        case_name: str = Form(...),
+        case_id: str = Form(..., regex=".+\..+|[1-9][0-9]?"),
+        current_user: User = Depends(get_current_active_user)):
+    created = await create_template_case(app.db_manager, template_id, case_name, case_id)
+    return {'result': created}
+
 @app.get("/render/{edit_id}", dependencies=[Depends(check_erp_conn)])
 async def render_template(edit_id: int, case_id: int,
         current_user: User = Depends(get_current_active_user)):
