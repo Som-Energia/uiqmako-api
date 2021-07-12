@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .schemas import TokenData, UserInDB, User
 from peewee_async import Manager
 from ..dependencies import get_db
-from ..models.login import get_user
+from ..models.login import get_user, create_user
 from ..exceptions import LoginException, ExpiredTokenException
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -59,4 +59,22 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
+async def return_acces_token(user: User):
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+async def add_user(username: str, password: str, db: Manager = Depends(get_db)):
+
+    user_exists = await get_user(db, username)
+    if user_exists:
+        raise Exception("Username already in use") #TODO: choose exception
+    return await create_user(db, username, get_password_hash(password))
 

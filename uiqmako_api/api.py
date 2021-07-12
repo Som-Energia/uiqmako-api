@@ -11,7 +11,8 @@ from .registration.login import authenticate_user, create_access_token
 from config import settings
 from .exceptions import LoginException
 from .schemas import RawEdit
-from .registration.login import get_current_active_user
+from .registration.login import get_current_active_user, add_user, return_acces_token
+from .models.login import get_users_list
 from .exceptions import UnexpectedError
 
 app = build_app()
@@ -45,15 +46,19 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     user = await authenticate_user(username=form_data.username, password=form_data.password, db=db)
     if not user:
         raise LoginException()
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
+    return await return_acces_token(user)
 
+@app.post("/users")
+async def add_new_user(username: str = Form(...), password: str = Form(...), db: Manager = Depends(get_db)):
+    user = await add_user(username, password, db)
+    token = await return_acces_token(user)
+    return token
+
+@app.get("/users")
+async def get_users(current_user: User = Depends(get_current_active_user), db: Manager = Depends(get_db)):
+    if current_user.category == 'admin':
+        return await get_users_list(db)
+    return {"message": "Nothing to see here"}
 
 @app.post("/templates", dependencies=[Depends(check_erp_conn)])
 async def add_new_template(xml_id: str = Form(..., regex=".+\..+"), db: Manager = Depends(get_db)):
