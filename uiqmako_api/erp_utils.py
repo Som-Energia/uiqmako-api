@@ -4,13 +4,15 @@ from pool_transport import PoolTransport
 
 from uiqmako_api.models.erp_models import PoweremailTemplates
 
-
 class ERP:
     _instance = None
     _erp_client = None
     _models = dict()
+    _name = None
+    _uri = None
 
     def __new__(cls):
+
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         if cls._erp_client is None:
@@ -24,11 +26,13 @@ class ERP:
         return cls._erp_client
 
     def _connect_with_erp(self):
+
         try:
             self._erp_client = Client(
                  transport=PoolTransport(secure=False),
-                **settings.erp_conn()
+                **settings.erp_conn(self._name)
             )
+            self._uri = settings.erp_conn(self._name)['server']
         except:
             pass
 
@@ -92,3 +96,21 @@ class ERP:
         pem_template = PoweremailTemplates(self, xml_id=template_xml_id)
         return pem_template.upload_edit(body_text, headers)
 
+
+class ERP_PROD(ERP):
+    _name = 'PROD'
+
+    def __new__(cls):
+        return super().__new__(cls)
+
+class ERP_TESTING(ERP):
+    _name = 'TESTING'
+
+    def __new__(cls):
+        return super().__new__(cls)
+
+class ERP_LOCAL(ERP):
+    _name = 'LOCAL'
+
+    def __new__(cls):
+        return super().__new__(cls)

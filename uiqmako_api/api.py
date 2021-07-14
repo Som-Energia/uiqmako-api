@@ -10,7 +10,7 @@ from .templates import *
 from .registration.login import authenticate_user, create_access_token
 from config import settings
 from .exceptions import LoginException
-from .schemas import RawEdit
+from .schemas import RawEdit, SourceInfo
 from .registration.login import get_current_active_user, add_user, return_acces_token
 from .models.login import get_users_list
 from .exceptions import UnexpectedError
@@ -121,10 +121,25 @@ async def render_template(edit_id: int, case_id: int,
     result = await render_edit(app.db_manager, app.ERP, edit_id, case_id)
     return result
 
+@app.get("/sources")
+async def get_sources(current_user: User = Depends(get_current_active_user)):
+    sources = [
+        SourceInfo(name=source._name, uri=source._uri)
+        for k, source in app.ERP_DICT.items()
+    ]
+    return sources
+
 @app.post("/upload/{edit_id}", dependencies=[Depends(check_erp_conn)])
-async def upload_to_erp(edit_id: int, current_user: User = Depends(get_current_active_user)):
-    updated_template_id = await upload_edit(app.db_manager, app.ERP, edit_id)
+async def upload_to_erp(edit_id: int, source: str, current_user: User = Depends(get_current_active_user)):
+
+    delete_current_edit = False
+    if source == app.ERP._name:
+        delete_current_edit = True
+    updated_template_id = await upload_edit(app.db_manager, app.ERP, edit_id, delete_current_edit)
     if updated_template_id:
-        updated_template = await get_single_template(app.db_manager, app.ERP, app.template_repo, updated_template_id)
-        return updated_template
+        if source == app.ERP._name:
+            updated_template = await get_single_template(app.db_manager, app.ERP, app.template_repo, updated_template_id)
+        return updated_template_id
     raise UnexpectedError
+
+

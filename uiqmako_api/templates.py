@@ -112,11 +112,12 @@ async def delete_edit(db, edit_id):
 
 
 
-async def upload_edit(db, erp, edit_id):
+async def upload_edit(db, erp, edit_id, delete_current_edit=True):
     edit = await get_edit_orm(db, edit_id)
     upload_result = await erp.upload_edit(edit.body_text, edit.headers, edit.template.xml_id)
     if upload_result:
-        _ = await delete_edit_orm(db, edit_id)
+        if delete_current_edit:
+            _ = await delete_edit_orm(db, edit_id)
         return edit.template.id
     return False
 
