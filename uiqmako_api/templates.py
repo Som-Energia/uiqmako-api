@@ -14,6 +14,7 @@ from .crud import (
     get_case_orm,
     delete_edit_orm,
     get_or_create_template_case_orm,
+    delete_user_edit_orm,
 )
 from .schemas import Template, TemplateInfoBase
 from .git_utils import create_or_update_template
@@ -70,7 +71,6 @@ def parse_body_by_language(full_text):
 async def get_or_create_template_edit(db, template_id, user):
     last_updated = (await get_template_orm(db, template_id=template_id)).last_updated
     edit, created = await get_or_create_template_edit_orm(db, template_id, user.id, last_updated)
-    other_edits = await get_user_edits_info_orm(db, template_id, exclude_user=user.id)
     return edit, created
 
 
@@ -81,6 +81,10 @@ async def check_other_users_edits(db, template_id, user_id):
 
 async def save_user_edit(db, template_id, user_id, edit):
     response = await update_user_edit_orm(db, template_id, user_id, edit.def_body_text, edit.headers)
+    return response
+
+async def delete_user_edit(db, template_id, user_id):
+    response = await delete_user_edit_orm(db, template_id, user_id)
     return response
 
 

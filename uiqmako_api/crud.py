@@ -88,6 +88,10 @@ async def update_user_edit_orm(db, template_id, user_id, text, headers):
     await db.update(edit)
     return True
 
+async def delete_user_edit_orm(db, template_id, user_id):
+    edit = await db.get(TemplateEditModel, template=template_id, user=user_id)
+    return await delete_edit_orm(db, edit.id)
+
 
 async def get_template_cases_orm(db, template_id):
     try:

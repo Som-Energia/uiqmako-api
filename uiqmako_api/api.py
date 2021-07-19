@@ -79,7 +79,7 @@ async def start_edit(template_id: int, current_user: User = Depends(get_current_
     edit, created = await get_or_create_template_edit(app.db_manager, template_id, current_user)
     template = await get_single_template(app.db_manager, app.ERP, app.template_repo, template_id)
     allowed_fields_modify = current_user.get_allowed_fields()
-    edit_data = {'meta_data': template.meta_data(), 'allowed_fields': allowed_fields_modify, 'edit_id': edit.id}
+    edit_data = {'meta_data': template.meta_data(), 'allowed_fields': allowed_fields_modify, 'edit_id': edit.id, 'created': created}
     if created or not edit.last_modified:
         edit_data['text'] = template.body_text()
         edit_data['headers'] = template.headers()
@@ -98,6 +98,14 @@ async def update_edit(
         current_user: User = Depends(get_current_active_user)):
     response = await save_user_edit(app.db_manager, template_id, current_user.id, body)
     return {'result': response}
+
+@app.delete("/edit/{template_id}")
+async def delete_edit(
+        template_id: int,
+        current_user: User = Depends(get_current_active_user)):
+    response = await delete_user_edit(app.db_manager, template_id, current_user.id)
+    return {'result': response}
+
 
 @app.get("/cases/{template_id}")
 async def get_cases(
