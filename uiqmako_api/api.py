@@ -2,7 +2,7 @@ from fastapi import Depends, Form, Request
 from pydantic.typing import List, Tuple
 from peewee_async import Manager
 from datetime import timedelta, datetime
-from .registration.schemas import Token, User
+from .registration.schemas import Token, User, UserInPost
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .dependencies import get_db, check_erp_conn
 from .app import build_app
@@ -11,7 +11,7 @@ from .registration.login import authenticate_user, create_access_token
 from config import settings
 from .exceptions import LoginException
 from .schemas import RawEdit, SourceInfo
-from .registration.login import get_current_active_user, add_user, return_acces_token
+from .registration.login import get_current_active_user, add_user, return_acces_token, check_current_active_user_is_admin, update_user
 from .models.login import get_users_list
 from .exceptions import UnexpectedError
 
@@ -55,10 +55,10 @@ async def add_new_user(username: str = Form(...), password: str = Form(...), db:
     return token
 
 @app.get("/users")
-async def get_users(current_user: User = Depends(get_current_active_user), db: Manager = Depends(get_db)):
-    if current_user.category == 'admin':
-        return await get_users_list(db)
-    return {"message": "Nothing to see here"}
+async def get_users(is_admin: User = Depends(check_current_active_user_is_admin), db: Manager = Depends(get_db)):
+    user_list = list(filter(lambda x: x.username != 'admin', (await get_users_list(db))))
+    user_list.sort(key=lambda x: x.username)
+    return user_list
 
 @app.post("/templates", dependencies=[Depends(check_erp_conn)])
 async def add_new_template(xml_id: str = Form(..., regex=".+\..+"), db: Manager = Depends(get_db)):
@@ -123,11 +123,12 @@ async def render_template(edit_id: int, case_id: int,
 
 @app.get("/sources")
 async def get_sources(current_user: User = Depends(get_current_active_user)):
+
     sources = [
         SourceInfo(name=source._name, uri=source._uri)
         for k, source in app.ERP_DICT.items()
     ]
-    return sources
+    return {'sources': sources}
 
 @app.post("/upload/{edit_id}", dependencies=[Depends(check_erp_conn)])
 async def upload_to_erp(edit_id: int, source: str, current_user: User = Depends(get_current_active_user)):
@@ -143,3 +144,10 @@ async def upload_to_erp(edit_id: int, source: str, current_user: User = Depends(
     raise UnexpectedError
 
 
+@app.put("/users")
+async def update_users(
+    userdata: UserInPost,
+    is_admin: User = Depends(check_current_active_user_is_admin),
+    db: Manager = Depends(get_db)):
+    result = await update_user(userdata, db)
+    return result

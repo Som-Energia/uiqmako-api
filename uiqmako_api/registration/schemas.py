@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
+from fastapi import Form
 
 
 class UserCategory(str, Enum):
@@ -26,6 +27,13 @@ class User(BaseModel):
             basic_fields += ['html', 'python', 'lang', 'def_body_text', 'def_to', 'def_cc']
         return basic_fields
 
+
+class UserInPost(User):
+
+    def __init__(self, id: int = Form(...), username: str = Form(...),
+            disabled: Optional[bool]= Form(...), category: Optional[UserCategory] = Form(...)
+        ):
+        super().__init__(id=id, username=username, disabled=disabled, category=category)
 
 class UserInDB(User):
     hashed_pwd: str
