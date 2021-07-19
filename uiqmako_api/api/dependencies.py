@@ -1,8 +1,10 @@
-from .models import get_db_manager
-from .exceptions import ERPConnectionException
+from uiqmako_api.models import get_db_manager
+from uiqmako_api.errors.exceptions import ERPConnectionException
+
 
 def get_db(): #TODO: remove
     return get_db_manager()
+
 
 async def check_erp_conn():
     from .api import app

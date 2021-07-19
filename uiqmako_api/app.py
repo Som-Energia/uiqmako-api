@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-from uiqmako_api.erp_utils import ERP_PROD, ERP_LOCAL, ERP_TESTING
-from uiqmako_api.models import setup_database, get_db_manager
-from uiqmako_api.git_utils import setup_template_repository
 from starlette.middleware.cors import CORSMiddleware
+from uiqmako_api.utils.erp import ERP_PROD, ERP_LOCAL, ERP_TESTING
+from uiqmako_api.models import setup_database, get_db_manager
+from uiqmako_api.utils.git import setup_template_repository
+
 
 origins = [
     "http://localhost:3000",

@@ -1,6 +1,5 @@
 from git import Repo
 import os
-from yamlns import namespace as ns
 
 
 def diff_content(repo: Repo):

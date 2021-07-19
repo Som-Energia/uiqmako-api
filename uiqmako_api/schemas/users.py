@@ -16,6 +16,7 @@ class User(BaseModel):
     username: str
     disabled: Optional[bool] = None
     category: Optional[UserCategory] = UserCategory.BASIC_USER
+
     class Config:
         orm_mode = True
 
@@ -31,9 +32,10 @@ class User(BaseModel):
 class UserInPost(User):
 
     def __init__(self, id: int = Form(...), username: str = Form(...),
-            disabled: Optional[bool]= Form(...), category: Optional[UserCategory] = Form(...)
-        ):
+                 disabled: Optional[bool] = Form(...), category: Optional[UserCategory] = Form(...)
+                 ):
         super().__init__(id=id, username=username, disabled=disabled, category=category)
+
 
 class UserInDB(User):
     hashed_pwd: str
@@ -49,4 +51,3 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
-

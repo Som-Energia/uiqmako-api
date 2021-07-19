@@ -1,15 +1,15 @@
 from datetime import datetime, timedelta
-from config import settings
-from jose import JWTError, jwt, ExpiredSignatureError
-from passlib.context import CryptContext
-from typing import Optional
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from .schemas import TokenData, UserInDB, User, UserCategory
-from peewee_async import Manager
-from ..dependencies import get_db
-from ..models.login import get_user, create_user, update_user_orm
-from ..exceptions import LoginException, ExpiredTokenException
+from jose import JWTError, jwt, ExpiredSignatureError
+from typing import Optional
+from passlib.context import CryptContext
+from config import settings
+from uiqmako_api.schemas.users import TokenData, UserInDB, User, UserCategory
+from peewee_async import Manager #TODO: treureho
+from uiqmako_api.api.dependencies import get_db #TODO: treureho
+from uiqmako_api.models.users import get_user, create_user, update_user_orm
+from uiqmako_api.errors.exceptions import LoginException, ExpiredTokenException
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -60,6 +60,7 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
+
 async def check_current_active_user_is_admin(current_user: User = Depends(get_current_active_user)):
     if current_user.category != UserCategory.ADMIN:
         raise HTTPException(status_code=401, detail="Permission denied")
@@ -76,11 +77,13 @@ async def return_acces_token(user: User):
         "token_type": "bearer",
     }
 
+
 async def add_user(username: str, password: str, db: Manager = Depends(get_db)):
     user_exists = await get_user(db, username)
     if user_exists:
         raise Exception("Username already in use") #TODO: choose exception
     return await create_user(db, username, get_password_hash(password))
+
 
 async def update_user(userdata: User, db: Manager = Depends(get_db)):
     result = await update_user_orm(db, userdata)

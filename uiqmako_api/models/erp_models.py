@@ -25,4 +25,3 @@ class PoweremailTemplates:
             for key in self._editable_fields
         }
         return self._PoweremailTemplates.write(self.id, fields_to_write)
-

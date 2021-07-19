@@ -1,23 +1,16 @@
 import re
-import json
-from .models.erp_models import PoweremailTemplates
-from .crud import (
+from uiqmako_api.models.erp_models import PoweremailTemplates
+from uiqmako_api.models.templates import (
     get_template_orm,
     get_all_templates_orm,
     add_or_get_template_orm,
     set_last_updated,
-    get_or_create_template_edit_orm,
-    get_user_edits_info_orm,
-    update_user_edit_orm,
     get_template_cases_orm,
-    get_edit_orm,
     get_case_orm,
-    delete_edit_orm,
     get_or_create_template_case_orm,
-    delete_user_edit_orm,
 )
-from .schemas import Template, TemplateInfoBase
-from .git_utils import create_or_update_template
+from uiqmako_api.schemas.templates import Template, TemplateInfoBase
+from uiqmako_api.utils.git import create_or_update_template
 
 
 async def get_single_template(db, erp, git_repo, template_id):
@@ -48,7 +41,6 @@ async def add_template_from_xml_id(db, erp, xml_id):
 
 
 def parse_body_by_language(full_text):
-    #python_reg = "(<%)(.\\s)*[^%>]*(%>)|([^\\S\n]*[^\\S]%[^>].*)" Original
     python_reg = "(<%)(.)*[^%>]*(%>)|([^\\S\n]*[^\\S]%[^>][\\S ]*)"
     rex = re.compile(python_reg, re.DOTALL)
     parts = []
@@ -68,62 +60,10 @@ def parse_body_by_language(full_text):
     return parts
 
 
-async def get_or_create_template_edit(db, template_id, user):
-    last_updated = (await get_template_orm(db, template_id=template_id)).last_updated
-    edit, created = await get_or_create_template_edit_orm(db, template_id, user.id, last_updated)
-    return edit, created
-
-
-async def check_other_users_edits(db, template_id, user_id):
-    other_edits = await get_user_edits_info_orm(db, template_id, exclude_user=user_id)
-    return other_edits
-
-
-async def save_user_edit(db, template_id, user_id, edit):
-    response = await update_user_edit_orm(db, template_id, user_id, edit.def_body_text, edit.headers)
-    return response
-
-async def delete_user_edit(db, template_id, user_id):
-    response = await delete_user_edit_orm(db, template_id, user_id)
-    return response
-
-
 async def get_template_cases(db, template_id):
     cases = await get_template_cases_orm(db, template_id)
     return cases
 
-
-async def render_edit(db, erp, edit_id, case_id):
-    from mako.template import Template
-    edit = await get_edit_orm(db, edit_id)
-    case = await get_case_orm(db, case_id=case_id)
-    if edit and case:
-        if case.case_xml_id:
-            model, object_id = erp.get_model_id(case.case_xml_id)
-            if model != edit.template.model:
-                raise Exception("Incoherent model ") #TODO: choose exception
-        elif case.case_erp_id:
-            object_id = case.case_erp_id
-        if not object_id:
-            raise Exception("No case found") #TODO: choose exception
-        result = await erp.render_erp_text(edit.body_text, edit.template.model, object_id)
-        return result
-    else:
-        return ''
-
-async def delete_edit(db, edit_id):
-    return await delete_edit_orm(db, edit_id)
-
-
-
-async def upload_edit(db, erp, edit_id, delete_current_edit=True):
-    edit = await get_edit_orm(db, edit_id)
-    upload_result = await erp.upload_edit(edit.body_text, edit.headers, edit.template.xml_id)
-    if upload_result:
-        if delete_current_edit:
-            _ = await delete_edit_orm(db, edit_id)
-        return edit.template.id
-    return False
 
 async def create_template_case(db, template_id, case_name, case_id):
     #TODO: Check id semàntic

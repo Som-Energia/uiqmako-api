@@ -1,8 +1,8 @@
 from config import settings
 from erppeek import Client, Error
 from pool_transport import PoolTransport
-
 from uiqmako_api.models.erp_models import PoweremailTemplates
+
 
 class ERP:
     _instance = None
@@ -65,13 +65,11 @@ class ERP:
         #TODO: if it doesn't exist?
         return model, _id
 
-
     def get_erp_id(self, xml_id, expected_model='poweremail.templates'):
         model, _id = self.get_model_id(xml_id)
         if model != expected_model:
             raise ValueError("xml_id does not refer to {}".format(expected_model))
         return _id
-
 
     async def get_erp_template(self, xml_id=None, id=None):
         if not xml_id and not id:
@@ -103,11 +101,13 @@ class ERP_PROD(ERP):
     def __new__(cls):
         return super().__new__(cls)
 
+
 class ERP_TESTING(ERP):
     _name = 'TESTING'
 
     def __new__(cls):
         return super().__new__(cls)
+
 
 class ERP_LOCAL(ERP):
     _name = 'LOCAL'

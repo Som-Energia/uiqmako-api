@@ -1,15 +1,38 @@
+import peewee
 from datetime import datetime
-from .schemas import *
-from peewee_async import Manager
-from .models.models import TemplateInfoModel, TemplateEditModel, CaseModel
-from .models.login import UserModel
-from peewee import DoesNotExist
+from . import database
+from uiqmako_api.schemas.templates import TemplateInfoBase, CaseBase
 
 
-async def get_all_templates_orm(db: Manager):
+class TemplateInfoModel(peewee.Model):
+    id = peewee.AutoField()
+    name = peewee.CharField(unique=True)
+    model = peewee.CharField()
+    xml_id = peewee.CharField(null=True, unique=True)
+    erp_id = peewee.IntegerField(null=True, unique=True)
+    last_updated = peewee.DateTimeField(null=True)
+
+    class Meta:
+        database = database
+        table_name = "template_info"
+
+
+class CaseModel(peewee.Model):
+    id = peewee.AutoField()
+    name = peewee.CharField()
+    case_erp_id = peewee.IntegerField(null=True)
+    case_xml_id = peewee.CharField(null=True)
+    template = peewee.ForeignKeyField(TemplateInfoModel)
+
+    class Meta:
+        database = database
+        table_name = "case_info"
+
+
+async def get_all_templates_orm(db):
     templates = await db.execute(TemplateInfoModel.select())
     result = [TemplateInfoBase.from_orm(t) for t in templates]
-    return result
+    return templates
 
 
 async def get_template_orm(db, template_id=None, erp_id=None, xml_id=None, name=None):
@@ -25,7 +48,7 @@ async def get_template_orm(db, template_id=None, erp_id=None, xml_id=None, name=
     try:
         template_info = await db.get(TemplateInfoModel, **search_fields)
         return TemplateInfoBase.from_orm(template_info)
-    except DoesNotExist as ex:
+    except peewee.DoesNotExist as ex:
         return None
 
 
@@ -52,68 +75,13 @@ async def set_last_updated(db, template_id):
     return True
 
 
-async def get_or_create_template_edit_orm(db, template_id, user_id, last_updated):
-    try:
-        edit = await db.get(
-            TemplateEditModel, template=template_id, user=user_id
-        )
-        created = False
-    except DoesNotExist as ex:
-        edit, created = await db.create_or_get(
-            TemplateEditModel, template=template_id, user=user_id, original_update_date=last_updated,
-            date_start=datetime.now()
-        )
-    return edit, created
-
-
-async def get_user_edits_info_orm(db, template_id, exclude_user):
-    try:
-        edits = await db.execute(
-            TemplateEditModel.select(TemplateEditModel, UserModel).where(
-                TemplateEditModel.user_id != exclude_user,
-                TemplateEditModel.template_id == template_id
-            ).join(UserModel, on=(UserModel.id == TemplateEditModel.user))
-        ) #TODO: check date start not empty
-        result = [TemplateEditInfo.from_orm(e) for e in edits]
-        return result
-    except DoesNotExist as e:
-        return []
-
-
-async def update_user_edit_orm(db, template_id, user_id, text, headers):
-    edit = await db.get(TemplateEditModel, template=template_id, user=user_id)
-    edit.body_text = text
-    edit.headers = headers
-    edit.last_modified = datetime.now()
-    await db.update(edit)
-    return True
-
-async def delete_user_edit_orm(db, template_id, user_id):
-    edit = await db.get(TemplateEditModel, template=template_id, user=user_id)
-    return await delete_edit_orm(db, edit.id)
-
-
 async def get_template_cases_orm(db, template_id):
     try:
         cases = await db.execute(CaseModel.select().where(CaseModel.template == template_id))
         result = [CaseBase.from_orm(c) for c in cases]
         return result
-    except DoesNotExist:
+    except peewee.DoesNotExist:
         return []
-
-
-async def get_edit_orm(db, edit_id):
-    edit = await db.execute(
-        TemplateEditModel.select(TemplateEditModel, TemplateInfoModel).where(
-            TemplateEditModel.id == edit_id
-        ).join(TemplateInfoModel, on=(TemplateInfoModel.id == TemplateEditModel.template)))
-    instances = [e for e in edit]
-    return instances[0] if instances else False
-
-
-async def delete_edit_orm(db, edit_id):
-    edit = await get_edit_orm(db, edit_id)
-    return await db.delete(edit)
 
 
 async def get_case_orm(db, case_id=None, case_erp_id=None, name=None, template_id=None):
@@ -129,7 +97,7 @@ async def get_case_orm(db, case_id=None, case_erp_id=None, name=None, template_i
     try:
         case = await db.get(CaseModel, **search_fields)
         return CaseBase.from_orm(case)
-    except DoesNotExist as ex:
+    except peewee.DoesNotExist as ex:
         return False
 
 

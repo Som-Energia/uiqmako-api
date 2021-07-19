@@ -25,6 +25,7 @@ class ExpiredTokenException(HTTPException):
             detail="Token has expired",
         )
 
+
 class UnexpectedError(HTTPException):
     def __init__(self):
         super().__init__(

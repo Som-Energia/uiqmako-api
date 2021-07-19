@@ -13,8 +13,10 @@ def get_db_manager():
 
 
 def setup_database(safe=True):
-    from .models import TemplateInfoModel, CaseModel, TemplateEditModel
-    from .login import UserModel
+    from uiqmako_api.models.edits import TemplateEditModel
+    from uiqmako_api.models.users import UserModel
+    from uiqmako_api.models.templates import CaseModel, TemplateInfoModel
+
     TemplateInfoModel.create_table(safe)
     CaseModel.create_table(safe)
     UserModel.create_table(safe)
@@ -23,8 +25,9 @@ def setup_database(safe=True):
 
 
 def drop_database():
-    from .models import TemplateInfoModel, CaseModel, TemplateEditModel
-    from .login import UserModel
+    from .templates import TemplateInfoModel, CaseModel
+    from .edits import TemplateEditModel
+    from .users import UserModel
     with get_db_manager().allow_sync():
         TemplateEditModel.drop_table()
         TemplateInfoModel.drop_table()
