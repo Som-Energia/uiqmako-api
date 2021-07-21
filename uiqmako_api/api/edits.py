@@ -1,14 +1,13 @@
 from fastapi import Depends, APIRouter
 import json
 from uiqmako_api.schemas.users import User
-from .dependencies import check_erp_conn
+from .dependencies import check_erp_conn, get_current_active_user
 from uiqmako_api.utils.edits import *
 from uiqmako_api.utils.templates import (
     get_single_template,
     parse_body_by_language,
 )
-from uiqmako_api.utils.users import get_current_active_user
-from uiqmako_api.errors.exceptions import UnexpectedError
+from uiqmako_api.errors.http_exceptions import UnexpectedError
 from uiqmako_api.schemas.edits import RawEdit
 from . import app
 
@@ -18,7 +17,7 @@ router = APIRouter(
 )
 
 
-@router.post("/{template_id}")
+@router.post("/{template_id}", dependencies=[Depends(check_erp_conn)])
 async def start_edit(template_id: int, current_user: User = Depends(get_current_active_user)):
     edit, created = await get_or_create_template_edit(app.db_manager, template_id, current_user)
     template = await get_single_template(app.db_manager, app.ERP, app.template_repo, template_id)

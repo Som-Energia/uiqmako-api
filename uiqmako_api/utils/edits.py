@@ -1,3 +1,4 @@
+from uiqmako_api.errors.exceptions import InvalidId
 from uiqmako_api.models.edits import (
     delete_edit_orm,
     delete_user_edit_orm,
@@ -40,11 +41,11 @@ async def render_edit(db, erp, edit_id, case_id):
         if case.case_xml_id:
             model, object_id = erp.get_model_id(case.case_xml_id)
             if model != edit.template.model:
-                raise Exception("Incoherent model ") #TODO: choose exception
+                raise InvalidId("XML_ID model is not the requested one")
         elif case.case_erp_id:
             object_id = case.case_erp_id
         if not object_id:
-            raise Exception("No case found") #TODO: choose exception
+            raise InvalidId("No case found")
         result = await erp.render_erp_text(edit.body_text, edit.template.model, object_id)
         return result
     else:

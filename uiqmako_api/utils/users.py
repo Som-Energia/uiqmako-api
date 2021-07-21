@@ -1,17 +1,16 @@
 from datetime import datetime, timedelta
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt, ExpiredSignatureError
+from fastapi import Depends
+from jose import jwt
 from typing import Optional
 from passlib.context import CryptContext
 from config import settings
-from uiqmako_api.schemas.users import TokenData, UserInDB, User, UserCategory
-from peewee_async import Manager #TODO: treureho
-from uiqmako_api.api.dependencies import get_db #TODO: treureho
+from uiqmako_api.errors.exceptions import UsernameExists
+from uiqmako_api.schemas.users import User, TokenInPost
+from peewee_async import Manager
+from uiqmako_api.api.dependencies import get_db
 from uiqmako_api.models.users import get_user, create_user, update_user_orm
-from uiqmako_api.errors.exceptions import LoginException, ExpiredTokenException
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -38,50 +37,18 @@ async def authenticate_user(username: str, password: str, db: Manager = Depends(
     return user
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Manager = Depends(get_db)):
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise LoginException
-        token_data = TokenData(username=username)
-    except ExpiredSignatureError:
-        raise ExpiredTokenException
-    except JWTError as e:
-        raise LoginException
-    user = await get_user(db, username=token_data.username)
-    if user is None:
-        raise LoginException
-    return User.from_orm(user)
-
-
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
-
-
-async def check_current_active_user_is_admin(current_user: User = Depends(get_current_active_user)):
-    if current_user.category != UserCategory.ADMIN:
-        raise HTTPException(status_code=401, detail="Permission denied")
-    return True
-
-
-async def return_acces_token(user: User):
+async def return_access_token(user: User):
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
+    return TokenInPost(access_token=access_token)
 
 
 async def add_user(username: str, password: str, db: Manager = Depends(get_db)):
     user_exists = await get_user(db, username)
     if user_exists:
-        raise Exception("Username already in use") #TODO: choose exception
+        raise UsernameExists
     return await create_user(db, username, get_password_hash(password))
 
 

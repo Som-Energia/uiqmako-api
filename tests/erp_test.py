@@ -50,7 +50,6 @@ class ERPTest:
     def get_model_id(self, xml_id):
         module, name = xml_id.split('.')
         model, _id = self.get_object_reference(module, name)
-        #TODO: if it doesn't exist?
         return model, _id
 
     def get_erp_id(self, xml_id, expected_model='poweremail.templates'):

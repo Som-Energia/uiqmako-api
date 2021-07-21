@@ -1,34 +1,31 @@
-from fastapi import HTTPException, status
+
+class UIQMakoBaseException(Exception):
+
+    def __init__(self, msg):
+        super(UIQMakoBaseException, self).__init__()
+        self.msg = msg
+
+    def __repr__(self):
+        return self.msg
+
+    def __str__(self):
+        return self.__repr__()
 
 
-class ERPConnectionException(HTTPException):
+class UsernameExists(UIQMakoBaseException):
     def __init__(self):
         super().__init__(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Can't connect to ERP",
+            msg="Username already in use"
         )
 
 
-class LoginException(HTTPException):
-    def __init__(self):
+class XmlIdNotFound(UIQMakoBaseException):
+    def __init__(self, msg):
         super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+            msg=msg)
 
 
-class ExpiredTokenException(HTTPException):
-    def __init__(self):
+class InvalidId(UIQMakoBaseException):
+    def __init__(self, msg):
         super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-        )
-
-
-class UnexpectedError(HTTPException):
-    def __init__(self):
-        super().__init__(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Unexpected error",
-        )
+            msg=msg)

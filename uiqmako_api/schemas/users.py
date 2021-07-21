@@ -44,9 +44,9 @@ class UserInDB(User):
         orm_mode = True
 
 
-class Token(BaseModel):
+class TokenInPost(BaseModel):
     access_token: str
-    token_type: str
+    token_type: str = "bearer"
 
 
 class TokenData(BaseModel):

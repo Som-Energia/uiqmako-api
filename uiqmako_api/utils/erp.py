@@ -1,6 +1,10 @@
+import xmlrpc.client
+
 from config import settings
-from erppeek import Client, Error
+from erppeek import Client, Error, Fault
 from pool_transport import PoolTransport
+
+from uiqmako_api.errors.exceptions import UIQMakoBaseException, XmlIdNotFound, InvalidId
 from uiqmako_api.models.erp_models import PoweremailTemplates
 
 
@@ -49,8 +53,11 @@ class ERP:
         return model
 
     def get_object_reference(self, module, name):
-        #TODO: control if it doesn't exist
-        return self.get_erp_conn().IrModelData.get_object_reference(module, name)
+        try:
+            model, _id = self.get_erp_conn().IrModelData.get_object_reference(module, name)
+        except Fault as e:
+            raise XmlIdNotFound(msg=e.faultCode)
+        return model, _id
 
     def test_connection(self):
         try:
@@ -62,18 +69,17 @@ class ERP:
     def get_model_id(self, xml_id):
         module, name = xml_id.split('.')
         model, _id = self.get_object_reference(module, name)
-        #TODO: if it doesn't exist?
         return model, _id
 
     def get_erp_id(self, xml_id, expected_model='poweremail.templates'):
         model, _id = self.get_model_id(xml_id)
         if model != expected_model:
-            raise ValueError("xml_id does not refer to {}".format(expected_model))
+            raise InvalidId("xml_id does not refer to {}".format(expected_model))
         return _id
 
     async def get_erp_template(self, xml_id=None, id=None):
         if not xml_id and not id:
-            raise KeyError("Missing id and xml_id")
+            raise InvalidId("Missing id and xml_id")
         erp_id = None
         if xml_id:
             erp_id = self.get_erp_id(xml_id=xml_id)
@@ -87,7 +93,12 @@ class ERP:
         return obj
 
     async def render_erp_text(self, text, model, id):
-        return self.get_erp_conn().SomUiqmakoHelper.render_mako_text([], text, model, id)
+        try:
+            result = self.get_erp_conn().SomUiqmakoHelper.render_mako_text([], text, model, id)
+        except xmlrpc.client.Fault as e:
+            import pudb; pu.db
+            raise UIQMakoBaseException("An error occurred while rendering: {}".format(e.faultCode))
+        return result
 
     async def upload_edit(self, body_text, headers, template_xml_id):
 

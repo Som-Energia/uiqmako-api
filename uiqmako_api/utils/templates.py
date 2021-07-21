@@ -1,4 +1,6 @@
 import re
+
+from uiqmako_api.errors.exceptions import UIQMakoBaseException
 from uiqmako_api.models.erp_models import PoweremailTemplates
 from uiqmako_api.models.templates import (
     get_template_orm,
@@ -28,7 +30,7 @@ async def get_all_templates(db):
 
 
 async def add_template_from_xml_id(db, erp, xml_id):
-    erp_template = PoweremailTemplates(erp, xml_id=xml_id) #TODO: if it doesn't exist
+    erp_template = PoweremailTemplates(erp, xml_id=xml_id)
     template_info = None
     if erp_template:
         created, template_info = await add_or_get_template_orm(
@@ -69,6 +71,6 @@ async def create_template_case(db, template_id, case_name, case_id):
     #TODO: Check id semàntic
     case_same_name = await get_case_orm(db, template_id=template_id, name=case_name)
     if case_same_name:
-        raise Exception("Existing name case for template")#TODO: define exception
+        raise UIQMakoBaseException("Existing name case for template")
     case, created = await get_or_create_template_case_orm(db, template_id, case_name, case_id)
     return created

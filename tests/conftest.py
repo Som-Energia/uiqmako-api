@@ -62,7 +62,7 @@ def test_template_repo():
 
 @pytest.fixture()
 async def override_get_current_active_user(user: str = None):
-    from uiqmako_api.registration.schemas import User
+    from uiqmako_api.schemas.users import User
     return User(username=user, active=True)
 
 #TODO: create db and drop db on test start and end, even when it fails

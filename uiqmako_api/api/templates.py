@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, Form
 from peewee_async import Manager
 from uiqmako_api.schemas.users import User
-from .dependencies import get_db, check_erp_conn
+from .dependencies import get_db, check_erp_conn, get_current_active_user
 from uiqmako_api.utils.edits import check_other_users_edits
 from uiqmako_api.utils.templates import *
-from uiqmako_api.utils.users import get_current_active_user
 from uiqmako_api.schemas.templates import SourceInfo
 
 
