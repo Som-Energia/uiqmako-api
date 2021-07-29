@@ -4,7 +4,7 @@ from config import settings
 from erppeek import Client, Error, Fault
 from pool_transport import PoolTransport
 
-from uiqmako_api.errors.exceptions import UIQMakoBaseException, XmlIdNotFound, InvalidId
+from uiqmako_api.errors.exceptions import UIQMakoBaseException, XmlIdNotFound, InvalidId, CantConnectERP
 from uiqmako_api.models.erp_models import PoweremailTemplates
 
 
@@ -38,7 +38,7 @@ class ERP:
             )
             self._uri = settings.erp_conn(self._name)['server']
         except:
-            pass
+            raise CantConnectERP("Unable to connect to {} ERP".format(self._name))
 
     def __getitem__(self, model_name):
         model = self._models.get(model_name)
@@ -96,7 +96,6 @@ class ERP:
         try:
             result = self.get_erp_conn().SomUiqmakoHelper.render_mako_text([], text, model, id)
         except xmlrpc.client.Fault as e:
-            import pudb; pu.db
             raise UIQMakoBaseException("An error occurred while rendering: {}".format(e.faultCode))
         return result
 

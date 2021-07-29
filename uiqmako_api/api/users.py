@@ -1,15 +1,12 @@
 from fastapi import APIRouter, Depends, Form
-from fastapi.security import OAuth2PasswordRequestForm
 from peewee_async import Manager
-from uiqmako_api.schemas.users import TokenInPost, User, UserInPost
+from uiqmako_api.schemas.users import User, UserInPost
 from .dependencies import get_db, check_current_active_user_is_admin
 from uiqmako_api.utils.users import (
-    authenticate_user,
     add_user,
     return_access_token,
     update_user
 )
-from uiqmako_api.errors.http_exceptions import LoginException
 from uiqmako_api.models.users import get_users_list
 
 
@@ -17,14 +14,6 @@ router = APIRouter(
     prefix='/users',
     tags=['users'],
 )
-
-
-@router.post("/token", response_model=TokenInPost)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Manager = Depends(get_db)):
-    user = await authenticate_user(username=form_data.username, password=form_data.password, db=db)
-    if not user:
-        raise LoginException()
-    return await return_access_token(user)
 
 
 @router.post("")

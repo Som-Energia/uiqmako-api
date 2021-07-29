@@ -86,4 +86,4 @@ class Template(BaseModel):
 
 class SourceInfo(BaseModel):
     name: str
-    uri: str
+    uri: str = None

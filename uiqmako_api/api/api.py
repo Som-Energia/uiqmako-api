@@ -1,8 +1,18 @@
-from fastapi import Request
+from fastapi import Request, Depends
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
+from peewee_async import Manager
+
 from . import app
 from . import users, edits, templates
+from .dependencies import get_db, get_current_active_user
+from .templates import router
+from .users import router
 from ..errors.exceptions import UsernameExists, UIQMakoBaseException, XmlIdNotFound
+from ..errors.http_exceptions import LoginException
+from ..schemas.templates import SourceInfo
+from ..schemas.users import TokenInPost, User
+from ..utils.users import authenticate_user, return_access_token
 
 app.include_router(users.router)
 app.include_router(edits.router)
@@ -32,3 +42,22 @@ async def username_exists_handler(request: Request, exc: Exception):
 @app.get("/")
 async def root():
     return {"message": "I'm the UI-QMako API"}
+
+
+@app.post("/token", response_model=TokenInPost)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Manager = Depends(get_db)):
+    user = await authenticate_user(username=form_data.username, password=form_data.password, db=db)
+    if not user:
+        raise LoginException()
+    return await return_access_token(user)
+
+
+@app.get("/sources")
+async def get_sources(current_user: User = Depends(get_current_active_user)):
+    from .api import app
+    import pudb; pu.db
+    sources = [
+        SourceInfo(name=source._name, uri=source._uri)
+        for k, source in app.ERP_DICT.items()
+    ]
+    return {'sources': sources}

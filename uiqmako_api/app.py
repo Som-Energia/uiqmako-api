@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
+
+from uiqmako_api.errors.exceptions import CantConnectERP
 from uiqmako_api.utils.erp import ERP_PROD, ERP_LOCAL, ERP_TESTING
 from uiqmako_api.models import setup_database, get_db_manager
 from uiqmako_api.utils.git import setup_template_repository
@@ -35,7 +37,6 @@ def build_app():
         print("Cannot connect to Prod ERP") #TODO: use logging
     try:
         app.ERP_DICT['TESTING'] = ERP_TESTING()
-    except:
-        app.ERP_TESTING = None
+    except CantConnectERP:
         print("Cannot connect to Test ERP") #TODO: use logging
     return app

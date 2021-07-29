@@ -4,8 +4,6 @@ from uiqmako_api.schemas.users import User
 from .dependencies import get_db, check_erp_conn, get_current_active_user
 from uiqmako_api.utils.edits import check_other_users_edits
 from uiqmako_api.utils.templates import *
-from uiqmako_api.schemas.templates import SourceInfo
-
 
 router = APIRouter(
     prefix='/templates',
@@ -73,14 +71,5 @@ async def create_case(
     created = await create_template_case(app.db_manager, template_id, case_name, case_id)
     return {'result': created}
 
-
-@router.get("/sources")
-async def get_sources(current_user: User = Depends(get_current_active_user)):
-    from .api import app
-    sources = [
-        SourceInfo(name=source._name, uri=source._uri)
-        for k, source in app.ERP_DICT.items()
-    ]
-    return {'sources': sources}
 
 
