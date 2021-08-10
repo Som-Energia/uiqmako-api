@@ -1,4 +1,4 @@
-from uiqmako_api.schemas import TemplateInfoBase
+from uiqmako_api.schemas.templates import TemplateInfoBase
 from pydantic import ValidationError
 import pytest
 

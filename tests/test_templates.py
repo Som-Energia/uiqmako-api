@@ -1,10 +1,8 @@
 import pytest
 from .erp_test import PoweremailTemplatesTest
-from uiqmako_api.templates import add_template_from_xml_id, parse_body_by_language
-from uiqmako_api.models.models import TemplateInfoModel
-from uiqmako_api.schemas import TemplateInfoBase, Template
-from pytest_mock import mocker
-from uiqmako_api.models.erp_models import PoweremailTemplates
+from uiqmako_api.utils.templates import add_template_from_xml_id, parse_body_by_language
+from uiqmako_api.models.templates import TemplateInfoModel
+
 
 ONLY_HTML = """
 <!doctype html>
@@ -58,17 +56,17 @@ class TestTemplates:
     @pytest.mark.parametrize(
         "body_text,split", [
             (ONLY_PYTHON, [('python', ONLY_PYTHON)]),
-            (ONLY_HTML, [('html', ONLY_HTML[1:-1])]),
+            (ONLY_HTML, [('html', ONLY_HTML.strip())]),
             (ONLY_PYTHON+"\n"+ONLY_HTML, [
                 ('python', ONLY_PYTHON),
-                ('html', ONLY_HTML[1:-1])
+                ('html', ONLY_HTML.strip())
             ]),
             (ONLY_HTML + "\n" + ONLY_PYTHON, [
-                ('html', ONLY_HTML.strip()),
+                ('html', ONLY_HTML.replace('\n', '')),
                 ('python', ONLY_PYTHON)
             ]),
             (ONLY_HTML + "\n" + ONLY_PYTHON + "\n" + ONLY_PYTHON, [
-                ('html', ONLY_HTML.strip()),
+                ('html', ONLY_HTML.replace('\n', '')),
                 ('python', ONLY_PYTHON),
                 ('python', ONLY_PYTHON),
             ]),
@@ -80,7 +78,7 @@ class TestTemplates:
 
             ("\n" + ONLY_PYTHON + ONLY_HTML + ONLY_PYTHON, [
                 ('python', ONLY_PYTHON),
-                ('html', ONLY_HTML.strip()),
+                ('html', ONLY_HTML.replace('\n', '')),
                 ('python', ONLY_PYTHON),
             ]),
 
