@@ -44,7 +44,8 @@ async def add_template_from_xml_id(db, erp, xml_id):
 
 def parse_body_by_language(full_text):
     #python_reg = "(<%)(.)*[^%>]*(%>)|([^\\S\n]*[^\\S]%[^>][\\S ]*)"
-    python_reg = "(<%)[.\\s]*[^%>]*(%>)|(^[\\s]*%[^>][\\S ]*)"
+    #python_reg = "(<%)[.\\s]*[^%>]*(%>)|(^[\\s]*%[^>][\\S ]*)"
+    python_reg = "((<%)[\s\S]*?(%>))|((^[\s]*%[^>][\S ]*))"
     rex = re.compile(python_reg, re.MULTILINE)
     parts = []
     current_pos = 0
