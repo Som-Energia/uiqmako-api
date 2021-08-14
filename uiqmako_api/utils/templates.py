@@ -43,6 +43,12 @@ async def add_template_from_xml_id(db, erp, xml_id):
 
 
 def parse_body_by_language(full_text):
+    """
+    Function to split mako template text by language
+    :param full_text: mako template text
+    :return: a list of tuples, where the first element is 'python' or 'html' and the second element is a fragment of
+    full_text written in said language
+    """
     #python_reg = "(<%)(.)*[^%>]*(%>)|([^\\S\n]*[^\\S]%[^>][\\S ]*)"
     #python_reg = "(<%)[.\\s]*[^%>]*(%>)|(^[\\s]*%[^>][\\S ]*)"
     python_reg = "((<%)[\s\S]*?(%>))|((^[\s]*%[^>][\S ]*))"
@@ -54,7 +60,7 @@ def parse_body_by_language(full_text):
         if start != current_pos:
             html_text = full_text[current_pos:match.start()].strip()
             if html_text:
-                parts.append(('html', html_text.replace('\n','').replace("<b>",'<strong>').replace('</b>', '</strong>')))
+                parts.append(('html', html_text.replace('\n','')))
         parts.append(('python', match.group()))
         current_pos = match.end()
     if current_pos != len(full_text) or not parts:

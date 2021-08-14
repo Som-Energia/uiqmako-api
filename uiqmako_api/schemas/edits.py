@@ -41,6 +41,8 @@ class RawEdit(BaseModel):
             full_text = ''
             for type, text in self.by_type:
                 if type == 'html':
-                    text = BeautifulSoup(text, "html.parser").prettify(formatter=None)
+                    text = BeautifulSoup(
+                        text, "html.parser"
+                    ).prettify(formatter=None)
                 full_text += text + '\n'
             self.def_body_text = full_text

@@ -21,11 +21,11 @@ class User(BaseModel):
         orm_mode = True
 
     def get_allowed_fields(self):
-        basic_fields = ['content', 'def_subject', 'def_bcc']
-        if self.category == UserCategory.HTML_USER:
-            basic_fields += ['html']
-        if self.category == UserCategory.PYTHON_USER or UserCategory.ADMIN:
-            basic_fields += ['html', 'python', 'lang', 'def_body_text', 'def_to', 'def_cc']
+        if self.disabled:
+            return []
+        basic_fields = ['content', 'def_subject', 'def_bcc', 'html']
+        if self.category in [UserCategory.PYTHON_USER, UserCategory.ADMIN]:
+            basic_fields += ['python', 'lang', 'def_body_text', 'def_to', 'def_cc']
         return basic_fields
 
 
