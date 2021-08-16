@@ -55,7 +55,6 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @app.get("/sources")
 async def get_sources(current_user: User = Depends(get_current_active_user)):
     from .api import app
-    import pudb; pu.db
     sources = [
         SourceInfo(name=source._name, uri=source._uri)
         for k, source in app.ERP_DICT.items()

@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 
-@router.get("")
+@router.get("", dependencies=[Depends(get_current_active_user)])
 async def templates_list(db: Manager = Depends(get_db)):
     templates = await get_all_templates(db)
     templates.sort(key=lambda x: x.name)
@@ -35,7 +35,7 @@ async def get_template(
         return template_data
 
 
-@router.post("", dependencies=[Depends(check_erp_conn)])
+@router.post("", dependencies=[Depends(check_erp_conn), Depends(get_current_active_user)])
 async def add_new_template(xml_id: str = Form(..., regex=".+\..+"), db: Manager = Depends(get_db)):
     from .api import app
     created, template_info = await add_template_from_xml_id(db, app.ERP, xml_id)
