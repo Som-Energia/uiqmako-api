@@ -30,7 +30,6 @@ class RawEdit(BaseModel):
 
     def __init__(self, by_type, def_body_text, headers):
         super(RawEdit, self).__init__()
-
         self.by_type = json.loads(by_type)
         self.headers = headers
         self.def_body_text = def_body_text

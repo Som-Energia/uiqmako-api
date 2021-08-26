@@ -1,9 +1,11 @@
 from datetime import datetime
 import peewee
-from . import database
+from . import database, get_db_manager
 from .users import UserModel
 from .templates import TemplateInfoModel
 from uiqmako_api.schemas.edits import TemplateEditInfo
+
+db = get_db_manager()
 
 
 class TemplateEditModel(peewee.Model):
@@ -21,7 +23,7 @@ class TemplateEditModel(peewee.Model):
         table_name = "template_edit"
 
 
-async def get_or_create_template_edit_orm(db, template_id, user_id, last_updated):
+async def get_or_create_template_edit_orm(template_id, user_id, last_updated):
     try:
         edit = await db.get(
             TemplateEditModel, template=template_id, user=user_id
@@ -35,7 +37,7 @@ async def get_or_create_template_edit_orm(db, template_id, user_id, last_updated
     return edit, created
 
 
-async def get_user_edits_info_orm(db, template_id, exclude_user):
+async def get_user_edits_info_orm(template_id, exclude_user):
     try:
         edits = await db.execute(
             TemplateEditModel.select(TemplateEditModel, UserModel).where(
@@ -49,7 +51,7 @@ async def get_user_edits_info_orm(db, template_id, exclude_user):
         return []
 
 
-async def update_user_edit_orm(db, template_id, user_id, text, headers):
+async def update_user_edit_orm(template_id, user_id, text, headers):
     edit = await db.get(TemplateEditModel, template=template_id, user=user_id)
     edit.body_text = text
     edit.headers = headers
@@ -58,12 +60,12 @@ async def update_user_edit_orm(db, template_id, user_id, text, headers):
     return True
 
 
-async def delete_user_edit_orm(db, template_id, user_id):
+async def delete_user_edit_orm(template_id, user_id):
     edit = await db.get(TemplateEditModel, template=template_id, user=user_id)
-    return await delete_edit_orm(db, edit.id)
+    return await delete_edit_orm(edit.id)
 
 
-async def get_edit_orm(db, edit_id):
+async def get_edit_orm(edit_id):
     edit = await db.execute(
         TemplateEditModel.select(TemplateEditModel, TemplateInfoModel).where(
             TemplateEditModel.id == edit_id
@@ -72,6 +74,6 @@ async def get_edit_orm(db, edit_id):
     return instances[0] if instances else False
 
 
-async def delete_edit_orm(db, edit_id):
-    edit = await get_edit_orm(db, edit_id)
+async def delete_edit_orm(edit_id):
+    edit = await get_edit_orm(edit_id)
     return await db.delete(edit)

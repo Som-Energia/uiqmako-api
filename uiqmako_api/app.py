@@ -33,7 +33,7 @@ def build_app():
         app.ERP = ERP_PROD()
         app.ERP_DICT[app.ERP._name] = app.ERP
     except:
-        app.ERP = None
+        #app.ERP = None
         print("Cannot connect to Prod ERP") #TODO: use logging
     try:
         app.ERP_DICT['TESTING'] = ERP_TESTING()

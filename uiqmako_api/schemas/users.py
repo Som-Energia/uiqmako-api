@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 from fastapi import Form
 
@@ -51,3 +51,11 @@ class TokenInPost(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+
+class UserInfo(User):
+    allowed_fields: List[str] = []
+
+    def __init__(self, user: User):
+        super().__init__(**user.__dict__)
+        self.allowed_fields = user.get_allowed_fields()

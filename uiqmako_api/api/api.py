@@ -1,17 +1,13 @@
 from fastapi import Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from peewee_async import Manager
-
 from . import app
 from . import users, edits, templates
-from .dependencies import get_db, get_current_active_user
-from .templates import router
-from .users import router
+from .dependencies import get_current_active_user
 from ..errors.exceptions import UsernameExists, UIQMakoBaseException, XmlIdNotFound
 from ..errors.http_exceptions import LoginException
 from ..schemas.templates import SourceInfo
-from ..schemas.users import TokenInPost, User
+from ..schemas.users import TokenInPost
 from ..utils.users import authenticate_user, return_access_token
 
 app.include_router(users.router)
@@ -45,15 +41,15 @@ async def root():
 
 
 @app.post("/token", response_model=TokenInPost)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Manager = Depends(get_db)):
-    user = await authenticate_user(username=form_data.username, password=form_data.password, db=db)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await authenticate_user(username=form_data.username, password=form_data.password)
     if not user:
         raise LoginException()
     return await return_access_token(user)
 
 
-@app.get("/sources")
-async def get_sources(current_user: User = Depends(get_current_active_user)):
+@app.get("/sources", dependencies=[Depends(get_current_active_user)])
+async def get_sources():
     from .api import app
     sources = [
         SourceInfo(name=source._name, uri=source._uri)

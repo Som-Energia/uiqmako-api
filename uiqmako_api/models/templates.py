@@ -1,7 +1,9 @@
 import peewee
 from datetime import datetime
-from . import database
+from . import database, get_db_manager
 from uiqmako_api.schemas.templates import TemplateInfoBase, CaseBase
+
+db = get_db_manager()
 
 
 class TemplateInfoModel(peewee.Model):
@@ -29,13 +31,13 @@ class CaseModel(peewee.Model):
         table_name = "case_info"
 
 
-async def get_all_templates_orm(db):
+async def get_all_templates_orm():
     templates = await db.execute(TemplateInfoModel.select())
     result = [TemplateInfoBase.from_orm(t) for t in templates]
     return templates
 
 
-async def get_template_orm(db, template_id=None, erp_id=None, xml_id=None, name=None):
+async def get_template_orm(template_id=None, erp_id=None, xml_id=None, name=None):
     search_fields = {}
     if template_id:
         search_fields.update({'id': template_id})
@@ -52,13 +54,13 @@ async def get_template_orm(db, template_id=None, erp_id=None, xml_id=None, name=
         return None
 
 
-async def add_or_get_template_orm(db, name, xml_id, model, erp_id=None):
+async def add_or_get_template_orm(name, xml_id, model, erp_id=None):
     created = False
-    template_info = await get_template_orm(db, xml_id=xml_id)
+    template_info = await get_template_orm(xml_id=xml_id)
     if not template_info and erp_id:
-        template_info = await get_template_orm(db, erp_id=erp_id)
+        template_info = await get_template_orm(erp_id=erp_id)
     if not template_info and name:
-        template_info = await get_template_orm(db, name=name)
+        template_info = await get_template_orm(name=name)
     if not template_info:
         template_info, created = await db.create_or_get(
             TemplateInfoModel,
@@ -68,14 +70,14 @@ async def add_or_get_template_orm(db, name, xml_id, model, erp_id=None):
     return created, template_info
 
 
-async def set_last_updated(db, template_id):
+async def set_last_updated(template_id):
     template_obj = await db.get(TemplateInfoModel, id=template_id)
     template_obj.last_updated = datetime.now()
     await db.update(template_obj, only=['last_updated'])
     return True
 
 
-async def get_template_cases_orm(db, template_id):
+async def get_template_cases_orm(template_id):
     try:
         cases = await db.execute(CaseModel.select().where(CaseModel.template == template_id))
         result = [CaseBase.from_orm(c) for c in cases]
@@ -84,7 +86,7 @@ async def get_template_cases_orm(db, template_id):
         return []
 
 
-async def get_case_orm(db, case_id=None, case_erp_id=None, name=None, template_id=None):
+async def get_case_orm(case_id=None, case_erp_id=None, name=None, template_id=None):
     search_fields = {}
     if case_id:
         search_fields.update({'id': case_id})
@@ -101,7 +103,7 @@ async def get_case_orm(db, case_id=None, case_erp_id=None, name=None, template_i
         return False
 
 
-async def get_or_create_template_case_orm(db, template_id, case_name, case_id):
+async def get_or_create_template_case_orm(template_id, case_name, case_id):
     case, created = await db.create_or_get(
         CaseModel,
         name=case_name, case_erp_id=int(case_id), template=template_id

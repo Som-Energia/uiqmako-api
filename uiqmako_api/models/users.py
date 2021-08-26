@@ -1,8 +1,9 @@
-from . import database
+from . import database, get_db_manager
 import peewee
-from peewee_async import Manager
 from peewee import DoesNotExist
 from uiqmako_api.schemas.users import UserCategory, User
+
+db = get_db_manager()
 
 
 class UserModel(peewee.Model):
@@ -17,7 +18,7 @@ class UserModel(peewee.Model):
         table_name = "users"
 
 
-async def get_user(db: Manager, username: str):
+async def get_user(username: str):
     try:
         user = await db.get(UserModel, username=username)
     except DoesNotExist as ex:
@@ -25,7 +26,7 @@ async def get_user(db: Manager, username: str):
     return user
 
 
-async def create_user(db: Manager, username: str, password_hash):
+async def create_user(username: str, password_hash):
     user, created = await db.create_or_get(
         UserModel,
         username=username, hashed_pwd=password_hash, category=UserCategory.BASIC_USER,
@@ -34,14 +35,14 @@ async def create_user(db: Manager, username: str, password_hash):
     return user
 
 
-async def get_users_list(db: Manager):
+async def get_users_list():
     users = await db.execute(UserModel.select())
     result = [User.from_orm(t) for t in users]
     return result
 
 
-async def update_user_orm(db: Manager, userdata):
-    user_exists = await get_user(db, userdata.username)
+async def update_user_orm(userdata):
+    user_exists = await get_user(userdata.username)
     if user_exists:
         user_exists.category = userdata.category
         user_exists.disabled = userdata.disabled

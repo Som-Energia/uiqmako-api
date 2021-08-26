@@ -102,7 +102,7 @@ class ERP:
     async def upload_edit(self, body_text, headers, template_xml_id):
 
         pem_template = PoweremailTemplates(self, xml_id=template_xml_id)
-        return pem_template.upload_edit(body_text, headers)
+        return pem_template.upload_edit(body_text=body_text, headers=headers)
 
 
 class ERP_PROD(ERP):

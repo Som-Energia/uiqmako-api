@@ -19,8 +19,8 @@ router = APIRouter(
 
 @router.post("/{template_id}", dependencies=[Depends(check_erp_conn)])
 async def start_edit(template_id: int, current_user: User = Depends(get_current_active_user)):
-    edit, created = await get_or_create_template_edit(app.db_manager, template_id, current_user)
-    template = await get_single_template(app.db_manager, app.ERP, app.template_repo, template_id)
+    edit, created = await get_or_create_template_edit(template_id, current_user)
+    template = await get_single_template(app.ERP, app.template_repo, template_id)
     allowed_fields_modify = current_user.get_allowed_fields()
     edit_data = {'meta_data': template.meta_data(), 'allowed_fields': allowed_fields_modify, 'edit_id': edit.id, 'created': created}
     if created or not edit.last_modified:
@@ -40,7 +40,7 @@ async def update_edit(
         template_id: int,
         body: RawEdit,
         current_user: User = Depends(get_current_active_user)):
-    response = await save_user_edit(app.db_manager, template_id, current_user.id, body)
+    response = await save_user_edit(template_id, current_user.id, body)
     return {'result': response}
 
 
@@ -48,28 +48,25 @@ async def update_edit(
 async def delete_edit(
         template_id: int,
         current_user: User = Depends(get_current_active_user)):
-    response = await delete_user_edit(app.db_manager, template_id, current_user.id)
+    response = await delete_user_edit(template_id, current_user.id)
     return {'result': response}
 
 
-@router.get("/{edit_id}/render", dependencies=[Depends(check_erp_conn)])
-async def render_template(
-        edit_id: int, case_id: int,
-        current_user: User = Depends(get_current_active_user)
-):
-    result = await render_edit(app.db_manager, app.ERP, edit_id, case_id)
+@router.get("/{edit_id}/render", dependencies=[Depends(check_erp_conn), Depends(get_current_active_user)])
+async def render_template(edit_id: int, case_id: int,):
+    result = await render_edit(app.ERP, edit_id, case_id)
     return result
 
 
-@router.post("/{edit_id}/upload", dependencies=[Depends(check_erp_conn)])
-async def upload_to_erp(edit_id: int, source: str, current_user: User = Depends(get_current_active_user)):
-
+@router.post("/{edit_id}/upload", dependencies=[Depends(check_erp_conn), Depends(get_current_active_user)])
+async def upload_to_erp(edit_id: int, source: str):
+    import pudb; pu.db
     delete_current_edit = False
     if source == app.ERP._name:
         delete_current_edit = True
-    updated_template_id = await upload_edit(app.db_manager, app.ERP, edit_id, delete_current_edit)
+    updated_template_id = await upload_edit(app.ERP_DICT[source], edit_id, delete_current_edit)
     if updated_template_id:
         if source == app.ERP._name:
-            updated_template = await get_single_template(app.db_manager, app.ERP, app.template_repo, updated_template_id)
+            updated_template = await get_single_template(app.ERP, app.template_repo, updated_template_id)
         return updated_template_id
     raise UnexpectedError
