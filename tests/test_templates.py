@@ -1,12 +1,12 @@
 import pytest
-from .erp_test import PoweremailTemplatesTest
-from uiqmako_api.utils.templates import add_template_from_xml_id, parse_body_by_language
+from .erp_test import PoweremailTemplatesTest, ERPTest
+from uiqmako_api.utils.templates import *
 from uiqmako_api.models.templates import TemplateInfoModel
-
-
+from uiqmako_api.models import get_db_manager
+from uiqmako_api.utils.git import setup_template_repository
 ONLY_HTML = """
 <!doctype html>
-    <p>Som Energia, SCCL</p>
+    <p>Som Energia, SCCL %</p>
     <p><a href=\"http://es.support.somenergia.coop\">Ayuda</a>
 </html>
 """
@@ -19,6 +19,10 @@ text_legal = render(
 )[0]['def_body_text'],object)
 %>"""
 
+DB_MANAGER = get_db_manager()
+ERP = ERPTest()
+GIT = setup_template_repository()
+
 
 @pytest.mark.asyncio
 class TestTemplates:
@@ -27,7 +31,7 @@ class TestTemplates:
         db_m = test_app.db_manager
         number_templates_pre = await db_m.count(TemplateInfoModel.select())
 
-        created, template = await add_template_from_xml_id(db_m, test_app.ERP, 'som_test.id_test')
+        created, template = await add_template_from_xml_id(test_app.ERP, 'som_test.id_test')
 
         template_info = await db_m.get(TemplateInfoModel, xml_id='som_test.id_test')
         number_templates_post = await db_m.count(TemplateInfoModel.select())
@@ -43,7 +47,7 @@ class TestTemplates:
         mocker.patch('uiqmako_api.models.erp_models.PoweremailTemplates')
         mocker.spec = PoweremailTemplatesTest
 
-        created, template = await add_template_from_xml_id(db_m, test_app.ERP, 'som_test.id_test')
+        created, template = await add_template_from_xml_id(test_app.ERP, 'som_test.id_test')
 
         template_info = await db_m.get(TemplateInfoModel, xml_id='som_test.id_test')
         number_templates_post = await db_m.count(TemplateInfoModel.select())
@@ -87,4 +91,20 @@ class TestTemplates:
     def test_parse_body_by_language(self, body_text, split):
         assert parse_body_by_language(body_text) == split
 
+    async def test_create_template_case_ok(self):
+        template_id = 1
+        pre = await get_template_cases(template_id)
+        result = await create_template_case(DB_MANAGER, template_id, 'test_case', 3)
+        post = await get_template_cases(template_id)
+        assert len(pre) + 1 == len(post)
+        assert result
+
+    async def test_create_template_case_repeated_name(self):
+        template_id = 1
+        pre = await get_template_cases(template_id)
+        await create_template_case(DB_MANAGER, template_id, 'repeat_case', 3)
+        with pytest.raises(UIQMakoBaseException):
+            result = await create_template_case(DB_MANAGER, template_id, 'repeat_case', 3)
+        post = await get_template_cases(template_id)
+        assert len(pre) + 1 == len(post)
 

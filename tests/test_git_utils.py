@@ -1,5 +1,9 @@
 import pytest, os
-from uiqmako_api.utils.git import diff_content
+from uiqmako_api.utils.git import *
+from .erp_test import PoweremailTemplatesTest, ERPTest
+from uiqmako_api.schemas.templates import Template
+
+GIT = setup_template_repository()
 
 
 class TestGitUtils:
@@ -32,3 +36,16 @@ class TestGitUtils:
         result = diff_content(test_app.template_repo)
         assert result == {'new_files': [], 'changed_files': ['existing_file.mako']}
         self._write_in_file(file_path, "Existing file")
+
+    @pytest.mark.asyncio
+    async def test_create_or_update_template(self):
+        file_name_mako = os.path.join(self.repo_path, 'correu-xml_id_test.mako')
+        file_name_yaml = os.path.join(self.repo_path, 'correu-xml_id_test.mako.yaml')
+        assert not os.path.exists(file_name_mako)
+        assert not os.path.exists(file_name_yaml)
+        template = Template.from_orm(PoweremailTemplatesTest(ERP=ERPTest(), xml_id='module.id'))
+        a = await create_or_update_template('xml_id_test', template, GIT)
+        assert a
+        assert os.path.exists(file_name_mako)
+        assert os.path.exists(file_name_yaml)
+

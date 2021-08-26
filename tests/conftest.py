@@ -7,6 +7,7 @@
 #         raise RuntimeError("Network access not allowed during testing!")
 #     monkeypatch.setattr(requests, "get", lambda *args, **kwargs: stunted_get())
 import pytest
+from datetime import datetime
 from starlette.testclient import TestClient
 from uiqmako_api.app import build_app
 
@@ -15,13 +16,29 @@ import shutil, os
 
 from uiqmako_api.schemas.users import UserCategory
 
+""""
+@pytest.fixture
+def template_infos():
 
+    templates = await get_all_templates_orm(db_manager)
+@pytest.fixture
+def template_info_2(db_manager):
+    pass
+"""
 def create_demo_data(db_manager):
     db_manager.database.set_allow_sync(True)
-    from uiqmako_api.models import templates, users
-    templates.TemplateInfoModel.create(name="Template test", model="poweremail.templates", xml_id="template_module.template_01")
-    templates.TemplateInfoModel.create(name="Template2 test", model="poweremail.templates", xml_id="template_module.template_02")
-    users.UserModel.create(username="UserAll", hashed_pwd="hashed_pwd", disabled=False, category=UserCategory.ADMIN)
+    from uiqmako_api.models import templates, users, edits
+    tim_1 = templates.TemplateInfoModel.create(
+        name="Template test", model="poweremail.templates",
+        xml_id="template_module.template_01", last_updated=datetime(2021, 1, 1)
+    )
+    tim_2 = templates.TemplateInfoModel.create(
+        name="Template2 test", model="poweremail.templates",
+        xml_id="template_module.template_02", last_updated=datetime(2021, 1, 1)
+    )
+    u_1 = users.UserModel.create(username="UserAll", hashed_pwd="hashed_pwd", disabled=False, category=UserCategory.ADMIN)
+    u_2 = users.UserModel.create(username="UserBasic", hashed_pwd="hashed_pwd", disabled=False, category=UserCategory.BASIC_USER)
+    e_1 = edits.TemplateEditModel.create(template_id=tim_1.id, user_id=u_1.id, original_update_date=datetime.now(), date_start=datetime.now())
     db_manager.database.set_allow_sync(False)
 
 
@@ -51,6 +68,7 @@ def test_app():
     app.ERP = ERPTest()
     yield app
     drop_database()
+    remove_git_repo()
 
 
 
@@ -58,5 +76,26 @@ def test_app():
 async def override_get_current_active_user():
     from uiqmako_api.schemas.users import User
     return User(id=1, username='admin', category=UserCategory.ADMIN, disabled=False)
+
+@pytest.fixture()
+async def override_get_current_active_user_basic():
+    from uiqmako_api.schemas.users import User
+    return User(id=2, username='basic', category=UserCategory.BASIC_USER, disabled=False)
+
+
+@pytest.fixture()
+async def override_get_current_disabled_user():
+    from uiqmako_api.schemas.users import User
+    from uiqmako_api.api.dependencies import get_current_active_user
+    return await get_current_active_user(User(id=1, username='admin', category=UserCategory.ADMIN, disabled=True))
+
+
+def remove_git_repo():
+    import shutil
+    from config import settings
+    shutil.rmtree(settings.TEMPLATE_REPO_PATH, ignore_errors=True)
+
+
+
 
 
