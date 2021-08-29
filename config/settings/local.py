@@ -1,24 +1,18 @@
 # -*- coding: utf-8 -*-
-from pydantic import BaseSettings, BaseModel
+from pydantic import BaseModel
 from .base import APIBaseSettings
-from typing import Dict, Any
-import dotenv
+from typing import Dict
 
-class CONNECTION_DATA(BaseModel):
+class ConnectionData(BaseModel):
     DB_NAME: str
     URI: str
     PORT: int
     USER: str
     PWD: str
 
-class LocalSettings(APIBaseSettings):
 
-    ERP_DB_NAME: str
-    ERP_URI: str
-    ERP_PORT: int
-    ERP_USER: str
-    ERP_PWD: str
-    ERP_CONNECTIONS: Dict[str, CONNECTION_DATA] = None
+class LocalSettings(APIBaseSettings):
+    ERP_CONNECTIONS: Dict[str, ConnectionData] = None
 
     class Config:
         env_file = '.env'

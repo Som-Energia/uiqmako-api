@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from pydantic import BaseSettings
 from .base import APIBaseSettings
-import dotenv
+
 
 class TestingSettings(APIBaseSettings):
     class Config:
@@ -10,5 +9,6 @@ class TestingSettings(APIBaseSettings):
 
     def __init__(self):
         super(TestingSettings, self).__init__()
+
 
 settings = TestingSettings()
