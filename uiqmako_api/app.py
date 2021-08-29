@@ -29,14 +29,15 @@ def build_app():
         allow_headers=["*"]
     )
     app.ERP_DICT = {}
+
     try:
         app.ERP = ERP_PROD()
         app.ERP_DICT[app.ERP._name] = app.ERP
     except:
         #app.ERP = None
-        print("Cannot connect to Prod ERP") #TODO: use logging
+        print("Cannot connect to Prod ERP")
     try:
         app.ERP_DICT['TESTING'] = ERP_TESTING()
     except CantConnectERP:
-        print("Cannot connect to Test ERP") #TODO: use logging
+        print("Cannot connect to Test ERP")
     return app

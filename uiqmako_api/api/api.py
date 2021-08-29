@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from . import app
 from . import users, edits, templates
 from .dependencies import get_current_active_user
-from ..errors.exceptions import UsernameExists, UIQMakoBaseException, XmlIdNotFound
+from ..errors.exceptions import UsernameExists, UIQMakoBaseException, XmlIdNotFound, OutdatedEdit
 from ..errors.http_exceptions import LoginException
 from ..schemas.templates import SourceInfo
 from ..schemas.users import TokenInPost
@@ -20,6 +20,7 @@ async def username_exists_handler(request: Request, exc: UIQMakoBaseException):
     _status_codes = {
         UsernameExists: 409,
         XmlIdNotFound: 404,
+        OutdatedEdit: 409
     }
     return JSONResponse(
         status_code=_status_codes.get(type(exc), 500),

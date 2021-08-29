@@ -60,7 +60,6 @@ async def render_template(edit_id: int, case_id: int,):
 
 @router.post("/{edit_id}/upload", dependencies=[Depends(check_erp_conn), Depends(get_current_active_user)])
 async def upload_to_erp(edit_id: int, source: str):
-    import pudb; pu.db
     delete_current_edit = False
     if source == app.ERP._name:
         delete_current_edit = True

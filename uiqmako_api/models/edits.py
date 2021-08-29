@@ -44,7 +44,7 @@ async def get_user_edits_info_orm(template_id, exclude_user):
                 TemplateEditModel.user_id != exclude_user,
                 TemplateEditModel.template_id == template_id
             ).join(UserModel, on=(UserModel.id == TemplateEditModel.user))
-        ) #TODO: check date start not empty
+        )
         result = [TemplateEditInfo.from_orm(e) for e in edits]
         return result
     except peewee.DoesNotExist as e:

@@ -35,7 +35,7 @@ async def add_template_from_xml_id(erp, xml_id):
         created, template_info = await add_or_get_template_orm(name=erp_template.name, xml_id=xml_id,
                                                                model=erp_template.model_int_name,
                                                                erp_id=erp_template.id)
-    return created, TemplateInfoBase.from_orm(template_info) #TODO: if different template
+    return created, TemplateInfoBase.from_orm(template_info)
 
 
 def parse_body_by_language(full_text):
@@ -72,7 +72,6 @@ async def get_template_cases(template_id):
 
 
 async def create_template_case(db, template_id, case_name, case_id):
-    #TODO: Check id semàntic
     case_same_name = await get_case_orm(name=case_name, template_id=template_id)
     if case_same_name:
         raise UIQMakoBaseException("Existing name case for template")

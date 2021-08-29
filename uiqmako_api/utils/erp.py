@@ -38,7 +38,8 @@ class ERP:
             )
             self._uri = settings.erp_conn(self._name)['server']
         except:
-            raise CantConnectERP("Unable to connect to {} ERP".format(self._name))
+            pass
+            #raise CantConnectERP("Unable to connect to {} ERP".format(self._name))
 
     def __getitem__(self, model_name):
         model = self._models.get(model_name)

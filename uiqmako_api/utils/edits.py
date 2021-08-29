@@ -1,4 +1,4 @@
-from uiqmako_api.errors.exceptions import InvalidId
+from uiqmako_api.errors.exceptions import InvalidId, OutdatedEdit
 from uiqmako_api.models.edits import (
     delete_edit_orm,
     delete_user_edit_orm,
@@ -58,6 +58,9 @@ async def delete_edit(edit_id):
 
 async def upload_edit(erp, edit_id, delete_current_edit=True):
     edit = await get_edit_orm(edit_id)
+    template_info = await get_template_orm(template_id=edit.template.id)
+    if template_info.last_updated != edit.original_update_date:
+        raise OutdatedEdit("Edit from an outdated template version")
     upload_result = await erp.upload_edit(headers=edit.headers, body_text=edit.body_text, template_xml_id=edit.template.xml_id)
     if upload_result:
         if delete_current_edit:
