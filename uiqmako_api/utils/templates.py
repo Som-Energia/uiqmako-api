@@ -18,7 +18,8 @@ async def get_single_template(erp, git_repo, template_id):
     template = await get_template_orm(template_id=template_id)
     t = PoweremailTemplates(erp, erp_id=template.erp_id, xml_id=template.xml_id)
     has_changes = await create_or_update_template(template.xml_id, Template.from_orm(t), git_repo)
-    if has_changes:
+
+    if has_changes or not template.last_updated:
         await set_last_updated(template_id=template_id)
     return Template.from_orm(t)
 
