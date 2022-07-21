@@ -48,7 +48,7 @@ def parse_body_by_language(full_text):
     """
     #python_reg = "(<%)(.)*[^%>]*(%>)|([^\\S\n]*[^\\S]%[^>][\\S ]*)"
     #python_reg = "(<%)[.\\s]*[^%>]*(%>)|(^[\\s]*%[^>][\\S ]*)"
-    python_reg = "((<%)[\s\S]*?(%>))|((^[\s]*%[^>][\S ]*))"
+    python_reg = "((<%(?!def))[\s\S]*?(%>))|((^[\s]*%[^>][\S ]*))|((<%def)[\S ]*?(>))|</%def>"
     rex = re.compile(python_reg, re.MULTILINE)
     parts = []
     current_pos = 0
