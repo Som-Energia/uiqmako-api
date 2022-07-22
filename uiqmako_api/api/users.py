@@ -38,3 +38,8 @@ async def update_users(userdata: UserInPost):
 @router.get("/me")
 async def current_user_info(current_user: User = Depends(get_current_active_user)):
     return UserInfo(current_user)
+
+
+@router.get("/{user_id}/edits")
+async def get_user_edits(template_id: int, current_user: User = Depends(get_current_active_user)):
+    return UserInfo(current_user)
