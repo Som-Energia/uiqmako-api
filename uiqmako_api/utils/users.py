@@ -5,7 +5,13 @@ from passlib.context import CryptContext
 from config import settings
 from uiqmako_api.errors.exceptions import UsernameExists
 from uiqmako_api.schemas.users import User, TokenInPost
-from uiqmako_api.models.users import get_user, create_user, update_user_orm
+from uiqmako_api.schemas.templates import TemplateInfoBase
+from uiqmako_api.models.users import (
+    get_user,
+    create_user,
+    update_user_orm,
+    get_user_edited_templates_orm
+)
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -52,3 +58,7 @@ async def add_user(username: str, password: str):
 async def update_user(userdata: User):
     result = await update_user_orm(userdata)
     return result
+
+async def get_user_edited_templates(user_id: int):
+    templates = await get_user_edited_templates_orm(user_id)
+    return [TemplateInfoBase.from_orm(t) for t in templates]
