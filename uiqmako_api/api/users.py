@@ -4,7 +4,8 @@ from .dependencies import check_current_active_user_is_admin, get_current_active
 from uiqmako_api.utils.users import (
     add_user,
     return_access_token,
-    update_user
+    update_user,
+    get_user_edited_templates
 )
 from uiqmako_api.models.users import get_users_list
 
@@ -38,3 +39,9 @@ async def update_users(userdata: UserInPost):
 @router.get("/me")
 async def current_user_info(current_user: User = Depends(get_current_active_user)):
     return UserInfo(current_user)
+
+
+@router.get("/{user_id}/edits")
+async def get_user_edits(user_id: int, current_user: User = Depends(get_current_active_user)):
+    result = await get_user_edited_templates(user_id)
+    return result

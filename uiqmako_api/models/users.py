@@ -1,6 +1,7 @@
 from . import database, get_db_manager
 import peewee
 from peewee import DoesNotExist
+from .templates import TemplateInfoModel
 from uiqmako_api.schemas.users import UserCategory, User
 
 db = get_db_manager()
@@ -47,3 +48,13 @@ async def update_user_orm(userdata):
         user_exists.category = userdata.category
         user_exists.disabled = userdata.disabled
     await db.update(user_exists, only=['category', 'disabled'])
+
+async def get_user_edited_templates_orm(user_id):
+    from .edits import TemplateEditModel
+    templates = await db.execute(
+        TemplateInfoModel.select()
+            .join(TemplateEditModel, on=(TemplateInfoModel.id == TemplateEditModel.template)).where(
+            TemplateEditModel.user_id == user_id
+        ))
+
+    return templates
