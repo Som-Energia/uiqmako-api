@@ -12,7 +12,7 @@ peewee-async = "^0.7.1"
 aiopg = "^1.1.0"
 python-dotenv = "^0.15.0"
 ERPpeek = "^1.7.1"
-pool-transport = {git = "git@github.com:Som-Energia/pool_transport.git"}
+pool-transport = {git = "https://github.com/Som-Energia/pool_transport.git"}
 python-jose = {extras = ["cryptography"], version = "^3.2.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-multipart = "^0.0.5"
