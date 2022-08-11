@@ -2,7 +2,11 @@ import peewee_async
 from config import settings
 
 database = peewee_async.PostgresqlDatabase(
-    database=settings.DB_NAME,
+    database=settings.DB_CONFIG.NAME,
+    host=settings.DB_CONFIG.HOST,
+    port=settings.DB_CONFIG.PORT,
+    user=settings.DB_CONFIG.USER,
+    password=settings.DB_CONFIG.PWD,
 )
 
 
