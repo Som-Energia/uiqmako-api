@@ -1,0 +1,54 @@
+
+name: UI-QMAKO API
+
+on:
+  pull_request:
+    branches: [ main ]
+
+env:
+  POSTGRES_USER: user
+  POSTGRES_PASSWORD: pwd
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      # You can use PyPy versions in python-version.
+      # For example, pypy2 and pypy3
+      fail-fast: false
+      matrix:
+        python-version: [ "3.8" ]
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: pwd
+          POSTGRES_DB: test_uiqmako
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - name: Install dependencies
+        run: |
+          poetry install
+      - name: Run Tests
+        run: poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=uiqmako_api tests/ | tee pytest-coverage.txt
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml
