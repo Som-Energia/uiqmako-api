@@ -22,19 +22,20 @@ def setup_template_repository():
         return Repo(repo_path)
 
 
-async def create_or_update_template(xml_id, template, git_repo):
+async def create_or_update_template(xml_id, template, git_repo, user_name=""):
     body_filename = 'correu-'+xml_id + '.mako'
     headers_filename = body_filename + '.yaml'
     repo_working_dir = git_repo.working_dir
     text_modified = False
     headers_modified = False
+    usr_msg = "{}: ".format(user_name) if user_name else ""
     with open(os.path.join(repo_working_dir, body_filename), 'w') as f:
         f.write(template.def_body_text)
     git_repo.index.add(body_filename)
     if git_repo.is_dirty():
         git_repo.index.add(body_filename)
         text_modified = True
-        git_repo.index.commit("update body_text for {}".format(template.name))
+        git_repo.index.commit("{}update body_text for {}".format(usr_msg, template.name))
     headers_keys = 'cc,to,subject,bcc'.split(',')
     with open(os.path.join(repo_working_dir, headers_filename), 'w') as f:
         for key in headers_keys:
@@ -44,5 +45,5 @@ async def create_or_update_template(xml_id, template, git_repo):
     if git_repo.is_dirty():
         git_repo.index.add(body_filename)
         headers_modified = True
-        git_repo.index.commit("update headers for {}".format(template.name))
+        git_repo.index.commit("{}update headers for {}".format(usr_msg, template.name))
     return text_modified or headers_modified

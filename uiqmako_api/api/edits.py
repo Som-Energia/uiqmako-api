@@ -58,14 +58,14 @@ async def render_template(edit_id: int, case_id: int,):
     return result
 
 
-@router.post("/{edit_id}/upload", dependencies=[Depends(check_erp_conn), Depends(get_current_active_user)])
-async def upload_to_erp(edit_id: int, source: str):
+@router.post("/{edit_id}/upload", dependencies=[Depends(check_erp_conn)])
+async def upload_to_erp(edit_id: int, source: str,  current_user: User = Depends(get_current_active_user)):
     delete_current_edit = False
     if source == app.ERP._name:
         delete_current_edit = True
     updated_template_id = await upload_edit(app.ERP_DICT[source], edit_id, delete_current_edit)
     if updated_template_id:
         if source == app.ERP._name:
-            updated_template = await get_single_template(app.ERP, app.template_repo, updated_template_id)
+            updated_template = await get_single_template(app.ERP, app.template_repo, updated_template_id, current_user.username)
         return updated_template_id
     raise UnexpectedError

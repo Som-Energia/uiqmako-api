@@ -14,10 +14,10 @@ from uiqmako_api.schemas.templates import Template, TemplateInfoBase
 from uiqmako_api.utils.git import create_or_update_template
 
 
-async def get_single_template(erp, git_repo, template_id):
+async def get_single_template(erp, git_repo, template_id, user_name=""):
     template = await get_template_orm(template_id=template_id)
     t = PoweremailTemplates(erp, erp_id=template.erp_id, xml_id=template.xml_id)
-    has_changes = await create_or_update_template(template.xml_id, Template.from_orm(t), git_repo)
+    has_changes = await create_or_update_template(template.xml_id, Template.from_orm(t), git_repo, user_name)
 
     if has_changes or not template.last_updated:
         await set_last_updated(template_id=template_id)
