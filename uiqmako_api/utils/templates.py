@@ -33,9 +33,12 @@ async def add_template_from_xml_id(erp, xml_id):
     erp_template = PoweremailTemplates(erp, xml_id=xml_id)
     template_info = None
     if erp_template:
-        created, template_info = await add_or_get_template_orm(name=erp_template.name, xml_id=xml_id,
-                                                               model=erp_template.model_int_name,
-                                                               erp_id=erp_template.id)
+        created, template_info = await add_or_get_template_orm(
+            xml_id=xml_id,
+            erp_id=erp_template.id,
+            name=erp_template.name,
+            model=erp_template.model_int_name,
+        )
     return created, TemplateInfoBase.from_orm(template_info)
 
 
