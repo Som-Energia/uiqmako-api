@@ -17,6 +17,9 @@ def validate_xml_id(value: str):
 
 
 class TemplateInfoBase(BaseModel):
+    """
+    Local database stored information to refer a ERP template
+    """
     id: int
     name: str
     model: str
@@ -33,6 +36,9 @@ class TemplateInfoBase(BaseModel):
 
 
 class CaseBase(BaseModel):
+    """
+    Test Case for a template
+    """
     id: int
     name: str
     case_xml_id: Optional[str] = None
@@ -48,6 +54,9 @@ class CaseBase(BaseModel):
 
 
 class Template(BaseModel):
+    """
+    Editable ERP Template content
+    """
     id: int
     def_subject: str
     def_subject_es_ES: str
@@ -88,13 +97,18 @@ class Template(BaseModel):
     def body_text(self):
         from uiqmako_api.utils.templates import parse_body_by_language
 
-        return {'def_body_text': self.def_body_text,
-                'by_type': parse_body_by_language(self.def_body_text)}
+        return {
+            'def_body_text': self.def_body_text,
+            'by_type': parse_body_by_language(self.def_body_text,
+        )}
 
     def __getitem__(self, key):
         return getattr(self, key)
 
 
 class SourceInfo(BaseModel):
+    """
+    ERP server instance to fetch and push data
+    """
     name: str
     uri: str = None
