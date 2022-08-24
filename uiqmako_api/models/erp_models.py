@@ -24,8 +24,8 @@ class PoweremailTemplates:
             setattr(self, field, value)
 
         subject_translations = IrTranslation(self._erp).download_template_subject_translations(erp_id)
-        for lang, subject in subject_translations.items():
-            setattr(self, 'def_subject_'+lang, subject)
+        for field, subject in subject_translations.items():
+            setattr(self, field, subject)
 
     def upload_edit(self, body_text, headers):
         template_fields = json.loads(headers)
@@ -60,11 +60,11 @@ class IrTranslation:
         print(ns(self._IrTranslation.fields()).dump())
         if not translation_ids: return {}
         result = {
-            translation.lang: translation.value
+            'def_subject_'+translation.lang: translation.value
             for translation in self._IrTranslation.browse(translation_ids)
         }
         for language in self._supportedLanguages:
-            result.setdefault(language, '')
+            result.setdefault('def_subject_'+language, '')
         print(result)
         return result
 
