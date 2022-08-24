@@ -23,7 +23,7 @@ class User(BaseModel):
     def get_allowed_fields(self):
         if self.disabled:
             return []
-        basic_fields = ['content', 'def_subject', 'def_bcc', 'html']
+        basic_fields = ['content', 'def_subject', 'def_subject_es_ES', 'def_subject_ca_ES', 'def_bcc', 'html']
         if self.category in [UserCategory.PYTHON_USER, UserCategory.ADMIN]:
             basic_fields += ['python', 'lang', 'def_body_text', 'def_to', 'def_cc']
         return basic_fields

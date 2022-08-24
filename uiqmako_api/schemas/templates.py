@@ -50,6 +50,8 @@ class CaseBase(BaseModel):
 class Template(BaseModel):
     id: int
     def_subject: str
+    def_subject_es_ES: str
+    def_subject_ca_ES: str
     def_body_text: str
     def_to: str
     def_cc: str
@@ -66,13 +68,22 @@ class Template(BaseModel):
         self.def_body_text.strip()
 
     def headers(self):
-        return {'def_subject': self.def_subject, 'def_to': self.def_to,
-                'def_bcc': self.def_bcc, 'def_cc': self.def_cc,
-                'lang': self.lang
-                }
+        return {
+            'def_subject': self.def_subject,
+            'def_to': self.def_to,
+            'def_bcc': self.def_bcc,
+            'def_cc': self.def_cc,
+            'lang': self.lang,
+            'def_subject_es_ES': self.def_subject_es_ES,
+            'def_subject_ca_ES': self.def_subject_ca_ES,
+        }
 
     def meta_data(self):
-        return {'name': self.name, 'model_int_name': self.model_int_name, 'id': self.id}
+        return {
+            'id': self.id,
+            'name': self.name,
+            'model_int_name': self.model_int_name,
+        }
 
     def body_text(self):
         from uiqmako_api.utils.templates import parse_body_by_language
