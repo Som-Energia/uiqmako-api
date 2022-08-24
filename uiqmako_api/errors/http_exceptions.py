@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 class ERPConnectionException(HTTPException):
     def __init__(self):
         super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             detail="Can't connect to ERP",
         )
 
