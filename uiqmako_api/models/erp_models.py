@@ -11,11 +11,17 @@ class PoweremailTemplates:
 
         self._PoweremailTemplates = ERP['poweremail.templates']
         self._erp = ERP
+        if not xml_id and not erp_id:
+            raise Exception("Either a numeric or a semantic id is required")
         if xml_id:
             erp_id = ERP.get_erp_id(xml_id=xml_id, expected_model='poweremail.templates')
-        elif not erp_id:
-            raise Exception("Can't create Template without info")
-        for field, value in self._PoweremailTemplates.read(erp_id, self._fields).items():
+            if not erp_id:
+                raise Exception(f"No template found for such a semantic id '{xml_id}'")
+        template = self._PoweremailTemplates.read(erp_id, self._fields)
+        if not template:
+            raise Exception(f"No template with id {erp_id} found")
+
+        for field, value in template.items():
             setattr(self, field, value)
 
     def upload_edit(self, body_text, headers):
