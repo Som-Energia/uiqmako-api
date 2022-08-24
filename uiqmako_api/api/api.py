@@ -9,6 +9,7 @@ from ..errors.http_exceptions import LoginException
 from ..schemas.templates import SourceInfo
 from ..schemas.users import TokenInPost
 from ..utils.users import authenticate_user, return_access_token
+from ..utils.logger import log
 
 app.include_router(users.router)
 app.include_router(edits.router)
@@ -16,7 +17,8 @@ app.include_router(templates.router)
 
 
 @app.exception_handler(UIQMakoBaseException)
-async def username_exists_handler(request: Request, exc: UIQMakoBaseException):
+async def expected_exception_handler(request: Request, exc: UIQMakoBaseException):
+    log.exception(exc)
     _status_codes = {
         UsernameExists: 409,
         XmlIdNotFound: 404,
@@ -27,9 +29,9 @@ async def username_exists_handler(request: Request, exc: UIQMakoBaseException):
         content={"detail": exc.msg},
     )
 
-
 @app.exception_handler(Exception)
-async def username_exists_handler(request: Request, exc: Exception):
+async def unexpected_exception_handler(request: Request, exc: Exception):
+    log.exception(exc)
     return JSONResponse(
         status_code=500,
         content={"detail": "Unexpected error"},
