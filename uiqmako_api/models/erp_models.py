@@ -61,7 +61,8 @@ class IrTranslation:
         if not translation_ids: return {}
         result = {
             'def_subject_'+translation.lang: translation.value
-            for translation in self._IrTranslation.browse(translation_ids)
+            for translation in self._IrTranslation.browse(translation_ids) # TODO: use read, for eficiency
+            if translation.lang in self._supportedLanguages
         }
         for language in self._supportedLanguages:
             result.setdefault('def_subject_'+language, '')
