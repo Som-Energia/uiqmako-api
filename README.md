@@ -36,6 +36,13 @@ Python 3.8.8
 ```
 4. Create database
 ```
+    # If you didn't do that before for your user, here 'myuser'
+    sudo su postgres
+    createuser myuser
+    echo "ALTER USER myuser CREATEDB" > psql
+    exit
+
+    # and then
     createdb uiqmako_db
 ```
 5. Run local server
