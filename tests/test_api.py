@@ -118,6 +118,6 @@ class TestApi:
             )
         user_info = override_get_current_active_user.__dict__
         user_info.update({
-            'allowed_fields': ["content","def_subject","def_bcc","html","python","lang","def_body_text","def_to","def_cc"]
+            'allowed_fields': ["content","def_subject","def_subject_es_ES", "def_subject_ca_ES", "def_bcc","html","python","lang","def_body_text","def_to","def_cc"]
         })
         assert response.text == json.dumps(user_info).replace(' ','')

@@ -45,13 +45,16 @@ def test_compose_text_types(input, expected):
 def test_template_schema():
     template = Template.from_orm(PoweremailTemplatesTest(ERP=ERPTest(), xml_id='module.id'))
     assert template.def_body_text == 'def_body_text_module.id'
-    assert sorted(list(template.headers().keys())) == sorted(['def_subject', 'def_to', 'def_cc', 'def_bcc', 'lang'])
-    assert sorted(list(template.meta_data().keys())) == sorted(['name', 'model_int_name', 'id'])
+    assert set(template.headers().keys()) == set([
+        'def_subject', 'def_subject_es_ES', 'def_subject_ca_ES',
+        'def_to', 'def_cc', 'def_bcc', 'lang',
+    ])
+    assert set(template.meta_data().keys()) == set(['name', 'model_int_name', 'id'])
     assert template.body_text() == {'def_body_text': 'def_body_text_module.id',
                                     'by_type': [('html', 'def_body_text_module.id')]}
 
 
-BASIC_ALLOWED = ['content', 'def_subject', 'def_bcc', 'html']
+BASIC_ALLOWED = ['content', 'def_subject', 'def_subject_es_ES', 'def_subject_ca_ES', 'def_bcc', 'html']
 PYTHON_ALLOWED = BASIC_ALLOWED + ['python', 'lang', 'def_body_text', 'def_to', 'def_cc']
 @pytest.mark.parametrize("category,expected", [
     (UserCategory.ADMIN, PYTHON_ALLOWED),

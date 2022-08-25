@@ -1,6 +1,6 @@
 INDEX_PM_T = 0
 class PoweremailTemplatesTest:
-    _fields = ['id', 'def_subject', 'def_body_text', 'def_to', 'def_cc', 'def_bcc', 'name', 'model_int_name', 'lang']
+    _fields = ['id', 'def_subject', 'def_subject_es_ES', 'def_subject_ca_ES', 'def_body_text', 'def_to', 'def_cc', 'def_bcc', 'name', 'model_int_name', 'lang']
     _index = 0
 
     def __init__(self, ERP, xml_id):
