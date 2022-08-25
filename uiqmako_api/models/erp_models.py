@@ -27,6 +27,7 @@ class PoweremailTemplates:
         for field, subject in subject_translations.items():
             setattr(self, field, subject)
 
+    # TODO: no regression test!
     def upload_edit(self, body_text, headers):
         template_fields = json.loads(headers)
         template_fields['def_body_text'] = body_text
@@ -35,7 +36,12 @@ class PoweremailTemplates:
             for key in self._editable_fields
         }
         self._PoweremailTemplates.write(self.id, fields_to_write)
-        return IrTranslation(self._erp).upload_translation_all(fieldname='def_body_text', model='poweremail.templates', res_id=self.id, value=body_text)
+        translation = IrTranslation(self._erp)
+        translation.upload_template_subject_translation(
+            template_id=self.id,
+            template_fields=template_fields,
+        )
+        return translation.upload_translation_all(fieldname='def_body_text', model='poweremail.templates', res_id=self.id, value=body_text)
 
 class IrTranslation:
     _IrTranslation = None
@@ -71,4 +77,50 @@ class IrTranslation:
         for language in self._supportedLanguages:
             result.setdefault('def_subject_'+language, '')
         return result
+
+    def upload_template_subject_translation(self, template_id, template_fields):
+        # TODO: cover test cases:
+        # - Edited field existing in the ERP are updated
+        # - Edited field not in the ERP are created
+        # - Unsupported translations in erp are left as is
+        # - Unsupported translations in edited fields are ignored
+        # - No translations in erp handled ok
+        # - (Not implemented yet) Edited empty fields, not existing in ERP, are ignored
+        # - (Not implemented yet) Edited empty fields, existing in ERP, are deleted
+
+        language_to_create = self._supportedLanguages[:] # copy, it will be edited
+        edited_languages = [
+            field[len('def_subject_'):]
+            for field in template_fields
+            if field.startswith('def_subject_')
+        ]
+
+        erp_translations = self._IrTranslation.read([
+            ('name','=','poweremail.templates,def_subject'),
+            ('res_id','=',template_id),
+        ],[])
+
+        # Update existing
+        for translation in erp_translations:
+            if translation['lang'] not in edited_languages:
+                continue
+            id = translation['id']
+            lang = translation['lang']
+            value = translation['value']
+            self._IrTranslation.write(id, dict(
+                src=template_fields['def_subject'],
+                value=template_fields['def_subject_'+lang],
+            ))
+            language_to_create.remove(lang)
+
+        # Create new translations
+        for language in language_to_create:
+            self._IrTranslation.create(dict(
+                type='field',
+                name='poweremail.templates,def_subject',
+                res_id=template_id,
+                lang=language,
+                src=template_fields['def_subject'],
+                value=template_fields['def_subject_'+language],
+            ))
 
