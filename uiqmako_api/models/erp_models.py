@@ -87,17 +87,18 @@ class IrTranslation:
         )
 
     def upload_translation(self, modelname, object_id, translated_field, fields):
-        # TODO: cover test cases:
-        # - Edited field existing in the ERP are updated
-        # - Edited field not in the ERP are created
+        # TODO: test cases checked by hand (for coverage):
+        # - Edited field translation existing in the ERP are updated
+        # - Edited field translation not in the ERP are created
         # - Unsupported translations in erp are left as is
         # - Unsupported translations in edited fields are ignored
         # - No translations in erp handled ok
-        # - (Not implemented yet) Edited empty fields, not existing in ERP, are ignored
-        # - (Not implemented yet) Edited empty fields, existing in ERP, are deleted
+        # - Edited empty fields, existing in ERP, are deleted
+        # - Edited empty fields, not existing in ERP, are ignored
 
         qualified_field = modelname + ',' + translated_field
         prefix = translated_field + '_'
+        untranslated_value = fields[translated_field]
 
         language_to_create = self._supportedLanguages[:] # copy, it will be edited
         edited_languages = [
@@ -113,26 +114,33 @@ class IrTranslation:
 
         # Update existing
         for translation in erp_translations:
-            if translation['lang'] not in edited_languages:
-                continue
-            id = translation['id']
+            translation_id = translation['id']
             lang = translation['lang']
-            value = translation['value']
 
-            self._IrTranslation.write(id, dict(
-                src=fields[translated_field],
-                value=fields[prefix+lang],
-            ))
+            if lang not in edited_languages:
+                continue
+
             language_to_create.remove(lang)
 
+            if not fields[prefix + lang]:
+                self._IrTranslation.unlink(translation_id)
+                continue
+
+            self._IrTranslation.write(translation_id, dict(
+                src=untranslated_value,
+                value=fields[prefix+lang],
+            ))
+
         # Create new translations
-        for language in language_to_create:
+        for lang in language_to_create:
+            if not fields[prefix + lang]:
+                continue
             self._IrTranslation.create(dict(
                 type='field',
                 name=qualified_field,
                 res_id=object_id,
-                lang=language,
-                src=fields[translated_field],
-                value=fields[prefix+language],
+                lang=lang,
+                src=untranslated_value,
+                value=fields[prefix + lang],
             ))
 
