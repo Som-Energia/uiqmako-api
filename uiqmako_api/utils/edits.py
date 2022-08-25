@@ -58,6 +58,8 @@ async def delete_edit(edit_id):
 
 async def upload_edit(erp, edit_id, delete_current_edit=True):
     edit = await get_edit_orm(edit_id)
+    if not edit:
+        raise Exception(f"Not such edition {edit_id}")
     template_info = await get_template_orm(template_id=edit.template.id)
     if template_info.last_updated != edit.original_update_date:
         raise OutdatedEdit("Edit from an outdated template version")
