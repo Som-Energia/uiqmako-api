@@ -41,7 +41,7 @@ async def get_user_edits_info_orm(template_id, exclude_user):
     try:
         edits = await db.execute(
             TemplateEditModel.select(TemplateEditModel, UserModel).where(
-                TemplateEditModel.user_id != exclude_user,
+                TemplateEditModel.user != exclude_user,
                 TemplateEditModel.template_id == template_id
             ).join(UserModel, on=(UserModel.id == TemplateEditModel.user))
         )
