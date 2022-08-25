@@ -58,24 +58,33 @@ class IrTranslation:
         return self._IrTranslation.write(tr_ids, {'value': value})
 
     def download_template_subject_translations(self, template_id):
+        self.download_translations(
+            modelname = 'poweremail.templates',
+            object_id = template_id,
+            translated_field = 'def_subject',
+        )
+
+    def download_translations(self, modelname, object_id, translated_field):
         # Criteria:
         # - ignore not supported languages present in the ERP (schema would reject them)
         # - initialize to '' translations missing in erp
         #   Should be initialized to the def_subject?
+        prefix = translated_field + '_'
+        qualified_field = modelname + ',' + translated_field
 
         domain =[
-            ('name','=','poweremail.templates,def_subject'),
-            ('res_id','=',template_id),
+            ('name', '=', qualified_field),
+            ('res_id', '=', object_id),
         ]
         fields = ['lang', 'value']
 
         result = {
-            'def_subject_'+translation['lang']: translation['value']
+            prefix + translation['lang']: translation['value']
             for translation in self._IrTranslation.read(domain, fields) or []
             if translation['lang'] in self._supportedLanguages
         }
         for language in self._supportedLanguages:
-            result.setdefault('def_subject_'+language, '')
+            result.setdefault(prefix + language, '')
         return result
 
     def upload_template_subject_translation(self, template_id, template_fields):
