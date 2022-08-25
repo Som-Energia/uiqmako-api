@@ -52,20 +52,23 @@ class IrTranslation:
         return self._IrTranslation.write(tr_ids, {'value': value})
 
     def download_template_subject_translations(self, template_id):
-        translation_ids = self._IrTranslation.search([
+        # Criteria:
+        # - ignore not supported languages present in the ERP (schema would reject them)
+        # - initialize to '' translations missing in erp
+        #   Should be initialized to the def_subject?
+
+        domain =[
             ('name','=','poweremail.templates,def_subject'),
             ('res_id','=',template_id),
-        ])
-        from yamlns import ns
-        print(ns(self._IrTranslation.fields()).dump())
-        if not translation_ids: return {}
+        ]
+        fields = ['lang', 'value']
+
         result = {
-            'def_subject_'+translation.lang: translation.value
-            for translation in self._IrTranslation.browse(translation_ids) # TODO: use read, for eficiency
-            if translation.lang in self._supportedLanguages
+            'def_subject_'+translation['lang']: translation['value']
+            for translation in self._IrTranslation.read(domain, fields) or []
+            if translation['lang'] in self._supportedLanguages
         }
         for language in self._supportedLanguages:
             result.setdefault('def_subject_'+language, '')
-        print(result)
         return result
 
