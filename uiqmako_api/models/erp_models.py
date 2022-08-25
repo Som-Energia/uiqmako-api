@@ -54,6 +54,12 @@ class IrTranslation:
         self._erp
 
     def upload_translation_all(self, fieldname, model, res_id, value):
+        """
+        Sets to the same value all existing translations of the field
+        of the model for the given object with res_id.
+        This is done this way because the body translations didn't work
+        due to a bug in our openerp version.
+        """
         tr_ids = self._IrTranslation.search([('res_id', '=', res_id), ('name', '=', '{},{}'.format(model,fieldname))])
         return self._IrTranslation.write(tr_ids, {'value': value})
 
