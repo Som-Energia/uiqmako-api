@@ -88,8 +88,12 @@ class IrTranslation:
         # - (Not implemented yet) Edited empty fields, not existing in ERP, are ignored
         # - (Not implemented yet) Edited empty fields, existing in ERP, are deleted
 
+        translated_field = 'def_subject'
+        modelname = 'poweremail.templates'
+        qualified_field = modelname + ',' + translated_field
+        prefix = translated_field + '_'
+
         language_to_create = self._supportedLanguages[:] # copy, it will be edited
-        prefix='def_subject_'
         edited_languages = [
             field[len(prefix):]
             for field in template_fields
@@ -97,8 +101,8 @@ class IrTranslation:
         ]
 
         erp_translations = self._IrTranslation.read([
-            ('name','=','poweremail.templates,def_subject'),
-            ('res_id','=',template_id),
+            ('name', '=', qualified_field),
+            ('res_id', '=', template_id),
         ],[])
 
         # Update existing
@@ -109,7 +113,7 @@ class IrTranslation:
             lang = translation['lang']
             value = translation['value']
             self._IrTranslation.write(id, dict(
-                src=template_fields['def_subject'],
+                src=template_fields[translated_field],
                 value=template_fields[prefix+lang],
             ))
             language_to_create.remove(lang)
@@ -118,10 +122,10 @@ class IrTranslation:
         for language in language_to_create:
             self._IrTranslation.create(dict(
                 type='field',
-                name='poweremail.templates,def_subject',
+                name=qualified_field,
                 res_id=template_id,
                 lang=language,
-                src=template_fields['def_subject'],
+                src=template_fields[translated_field],
                 value=template_fields[prefix+language],
             ))
 
