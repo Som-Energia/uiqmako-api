@@ -47,7 +47,7 @@ class IrTranslation:
     _IrTranslation = None
     _fields = ['id', 'name', 'lang', 'value', 'res_id', 'src']
     _erp = None
-    _supportedLanguages = ['es_ES', 'ca_ES']
+    _supported_languages = ['es_ES', 'ca_ES']
 
     def __init__(self, ERP):
         self._IrTranslation = ERP['ir.translation']
@@ -87,9 +87,9 @@ class IrTranslation:
         result = {
             prefix + translation['lang']: translation['value']
             for translation in self._IrTranslation.read(domain, fields) or []
-            if translation['lang'] in self._supportedLanguages
+            if translation['lang'] in self._supported_languages
         }
-        for language in self._supportedLanguages:
+        for language in self._supported_languages:
             result.setdefault(prefix + language, '')
         return result
 
@@ -115,7 +115,7 @@ class IrTranslation:
         prefix = translated_field + '_'
         untranslated_value = fields[translated_field]
 
-        language_to_create = self._supportedLanguages[:] # copy, it will be edited
+        language_to_create = self._supported_languages[:] # copy, it will be edited
         edited_languages = [
             field[len(prefix):]
             for field in fields
