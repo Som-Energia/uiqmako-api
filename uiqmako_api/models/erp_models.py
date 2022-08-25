@@ -89,10 +89,11 @@ class IrTranslation:
         # - (Not implemented yet) Edited empty fields, existing in ERP, are deleted
 
         language_to_create = self._supportedLanguages[:] # copy, it will be edited
+        prefix='def_subject_'
         edited_languages = [
-            field[len('def_subject_'):]
+            field[len(prefix):]
             for field in template_fields
-            if field.startswith('def_subject_')
+            if field.startswith(prefix)
         ]
 
         erp_translations = self._IrTranslation.read([
@@ -109,7 +110,7 @@ class IrTranslation:
             value = translation['value']
             self._IrTranslation.write(id, dict(
                 src=template_fields['def_subject'],
-                value=template_fields['def_subject_'+lang],
+                value=template_fields[prefix+lang],
             ))
             language_to_create.remove(lang)
 
@@ -121,6 +122,6 @@ class IrTranslation:
                 res_id=template_id,
                 lang=language,
                 src=template_fields['def_subject'],
-                value=template_fields['def_subject_'+language],
+                value=template_fields[prefix+language],
             ))
 
