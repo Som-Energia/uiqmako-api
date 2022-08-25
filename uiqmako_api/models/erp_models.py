@@ -79,6 +79,14 @@ class IrTranslation:
         return result
 
     def upload_template_subject_translation(self, template_id, template_fields):
+        self.upload_translation(
+            modelname = 'poweremail.templates',
+            object_id = template_id,
+            translated_field = 'def_subject',
+            fields = template_fields,
+        )
+
+    def upload_translation(self, modelname, object_id, translated_field, fields):
         # TODO: cover test cases:
         # - Edited field existing in the ERP are updated
         # - Edited field not in the ERP are created
@@ -88,21 +96,19 @@ class IrTranslation:
         # - (Not implemented yet) Edited empty fields, not existing in ERP, are ignored
         # - (Not implemented yet) Edited empty fields, existing in ERP, are deleted
 
-        translated_field = 'def_subject'
-        modelname = 'poweremail.templates'
         qualified_field = modelname + ',' + translated_field
         prefix = translated_field + '_'
 
         language_to_create = self._supportedLanguages[:] # copy, it will be edited
         edited_languages = [
             field[len(prefix):]
-            for field in template_fields
+            for field in fields
             if field.startswith(prefix)
         ]
 
         erp_translations = self._IrTranslation.read([
             ('name', '=', qualified_field),
-            ('res_id', '=', template_id),
+            ('res_id', '=', object_id),
         ],[])
 
         # Update existing
@@ -112,9 +118,10 @@ class IrTranslation:
             id = translation['id']
             lang = translation['lang']
             value = translation['value']
+
             self._IrTranslation.write(id, dict(
-                src=template_fields[translated_field],
-                value=template_fields[prefix+lang],
+                src=fields[translated_field],
+                value=fields[prefix+lang],
             ))
             language_to_create.remove(lang)
 
@@ -123,9 +130,9 @@ class IrTranslation:
             self._IrTranslation.create(dict(
                 type='field',
                 name=qualified_field,
-                res_id=template_id,
+                res_id=object_id,
                 lang=language,
-                src=template_fields[translated_field],
-                value=template_fields[prefix+language],
+                src=fields[translated_field],
+                value=fields[prefix+language],
             ))
 
