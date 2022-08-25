@@ -64,8 +64,8 @@ async def upload_edit(erp, edit_id, delete_current_edit=True):
     if template_info.last_updated != edit.original_update_date:
         raise OutdatedEdit("Edit from an outdated template version")
     upload_result = await erp.upload_edit(headers=edit.headers, body_text=edit.body_text, template_xml_id=edit.template.xml_id)
-    if upload_result:
-        if delete_current_edit:
-            _ = await delete_edit_orm(edit_id)
-        return edit.template.id
-    return False
+    if not upload_result:
+        return Exception(f"Failed to upload edition to the ERP")
+    if delete_current_edit:
+        await delete_edit_orm(edit_id)
+    return edit.template.id
