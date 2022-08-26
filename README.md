@@ -45,14 +45,19 @@ Python 3.8.8
     # and then
     createdb uiqmako_db
 ```
-5. Run local server
+5. Run development server
 ```
-    poetry run uvicorn uiqmako_api.api.api:app
+    poetry run uvicorn uiqmako_api.api.api:app --debug
 ```
+
 The API will run on: [http://localhost:8000](http://localhost:8000)
+
 Open [http://localhost:8000/docs](http://localhost:8000/docs) or [http://localhost:8000/redoc](http://localhost:8000/redoc) to see the API docs.
 
 6. Run tests  and coverage
+
 ```
+    createdb test_uiqmako
+    vim `test/.env.test`
     poetry run pytest --cov=uiqmako_api
 ```
