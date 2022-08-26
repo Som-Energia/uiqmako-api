@@ -8,11 +8,14 @@ from uiqmako_api.schemas.templates import Template
 from uiqmako_api.errors.exceptions import InvalidId, XmlIdNotFound
 import os
 
-pytestmark = pytest.mark.skipif(not os.environ.get('UIQMAKO_TEST_ERP',False),
-    reason="Define UIQMAKO_TEST_ERP environt to run ERP dependant tests"
-)
+pytestmark = [
+    pytest.mark.asyncio,
+    pytest.mark.skipif(not os.environ.get('UIQMAKO_TEST_ERP',False),
+        reason="Define UIQMAKO_TEST_ERP environt to run ERP dependant tests"
+    ),
+]
 
-# Patch to avoid deletion of cursors wile erppeek_wst 3.0.1 is not released
+# Kludge to avoid deletion of cursors wile erppeek_wst 3.0.1 is not released
 # See: https://github.com/gisce/erppeek_wst/commit/2b9236b86aa16ab6b675c38f1151757260fc9d0d
 from erppeek import Service
 Service.__del__ = lambda self: None
@@ -120,7 +123,6 @@ def erp_translations(rollback_erp):
     """
     return TranslationsHelper(rollback_erp)
 
-@pytest.mark.asyncio
 async def test__fixture__existing_template(rollback_erp, erp_translations):
     """
     This test ensures fragile data has the required properties.
@@ -172,7 +174,6 @@ async def test__fixture__existing_template(rollback_erp, erp_translations):
 
 # ErpService.template_list
 
-@pytest.mark.asyncio
 async def test__template_list(erp_services):
     items = await erp_services.template_list()
     template = [
@@ -186,17 +187,14 @@ async def test__template_list(erp_services):
 
 # ErpService.erp_id
 
-@pytest.mark.asyncio
 async def test__erp_id__byId(erp_services):
     id = await erp_services.erp_id('poweremail.templates', 1)
     assert id == 1
 
-@pytest.mark.asyncio
 async def test__erp_id__byStringNumeric(erp_services):
     id = await erp_services.erp_id('poweremail.templates', '1')
     assert id == 1
 
-@pytest.mark.asyncio
 async def test__erp_id__bySemanticId(erp_services):
     id = await erp_services.erp_id(
         'poweremail.templates',
@@ -205,7 +203,6 @@ async def test__erp_id__bySemanticId(erp_services):
     assert type(id) == int
     assert id == existing_template.erp_id
 
-@pytest.mark.asyncio
 async def test__erp_id__badId(erp_services):
     with pytest.raises(InvalidId) as ctx:
         id = await erp_services.erp_id(
@@ -218,7 +215,6 @@ async def test__erp_id__badId(erp_services):
         "does not have the expected format 'module.name'"
     )
 
-@pytest.mark.asyncio
 async def test__erp_id__missingId(erp_services):
     with pytest.raises(XmlIdNotFound) as ctx:
         id = await erp_services.erp_id(
@@ -232,28 +228,24 @@ async def test__erp_id__missingId(erp_services):
 
 # ErpService.load_template
 
-@pytest.mark.asyncio
 async def test__load_template__byId(erp_services):
     template = await erp_services.load_template(existing_template.erp_id)
 
     assert type(template) == Template
     assert template.name == existing_template.name
 
-@pytest.mark.asyncio
 async def test__load_template__bySemanticId(erp_services):
     template = await erp_services.load_template(existing_template.xml_id)
 
     assert type(template) == Template
     assert template.name == existing_template.name
 
-@pytest.mark.asyncio
 async def test__load_template__missingId(erp_services):
     with pytest.raises(Exception) as ctx:
         await erp_services.load_template(9999999) # guessing it wont exist
 
     assert str(ctx.value) == "No template found with id 9999999"
 
-@pytest.mark.asyncio
 async def test__load_template__includesSubjectTranslations(erp_services):
     template = await erp_services.load_template(existing_template.xml_id)
 
@@ -265,7 +257,6 @@ async def test__load_template__includesSubjectTranslations(erp_services):
         def_subject_ca_ES=existing_template.subject_ca_ES,
     )
 
-@pytest.mark.asyncio
 async def test__load_template__missingTranslationAsEmpty(erp_services, erp_translations):
     # When we remove the spanish translation
     erp_translations.remove('def_subject', 'es_ES')
@@ -280,7 +271,6 @@ async def test__load_template__missingTranslationAsEmpty(erp_services, erp_trans
         def_subject_ca_ES=existing_template.subject_ca_ES,
     )
 
-@pytest.mark.asyncio
 async def test__load_template__unsupportedLanguages_ignored(erp_services, erp_translations):
     # We change the language of the translation
     erp_translations.edit('def_subject', 'es_ES', values=dict(
@@ -303,7 +293,6 @@ async def test__load_template__unsupportedLanguages_ignored(erp_services, erp_tr
 
 # ErpService.save_template
 
-@pytest.mark.asyncio
 async def test__save_template__changingEditableFields(erp_services):
     edited = edited_values()
     await erp_services.save_template(
@@ -320,9 +309,7 @@ async def test__save_template__changingEditableFields(erp_services):
         model_int_name = existing_template.model, # Unchanged!
     )
 
-@pytest.mark.asyncio
 async def test__save_template__emptySubjectTranslation_removesIt(erp_services, erp_translations):
-    """This tests implementation details, which matters to ERP"""
     edited = edited_values(
         def_subject_ca_ES = "", # <- This changes
     )
@@ -336,7 +323,6 @@ async def test__save_template__emptySubjectTranslation_removesIt(erp_services, e
         # And the ca_ES is missing
     }
 
-@pytest.mark.asyncio
 async def test__save_template__missingSubjectTranslations_recreated(erp_services, erp_translations):
     # Given that the template is missing a subject translation
     erp_translations.remove('def_subject', 'es_ES')
@@ -352,7 +338,6 @@ async def test__save_template__missingSubjectTranslations_recreated(erp_services
         'ca_ES': edited.def_subject_ca_ES,
     }
 
-@pytest.mark.asyncio
 async def test__save_template__clonesBodyToItsTranslations(erp_services, erp_translations):
     edited = edited_values()
     await erp_services.save_template(
