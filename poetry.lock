@@ -241,6 +241,18 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "erppeek-wst"
+version = "0.3.0"
+description = "Erppeek extension for using web services transactions with ws_transactions module"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+erppeek = ">=1.7"
+six = "*"
+
+[[package]]
 name = "fastapi"
 version = "0.63.0"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
@@ -995,7 +1007,7 @@ PyYAML = ">=5.3.1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.8"
-content-hash = "e7588c60babc0fc9ac7a58806a4261f6647e0df9273352687648c5c4380fcb01"
+content-hash = "801741caa254d7518b4439c56a2a71abcc06bf934aaa38d90593284943777573"
 
 [metadata.files]
 aiopg = [
@@ -1219,6 +1231,9 @@ ecdsa = [
 erppeek = [
     {file = "ERPpeek-1.7.1-py2.py3-none-any.whl", hash = "sha256:5db9f4c758cac025c5c1b96418ef4ec1db604a2f9365ed6f1f893af38ce83ee1"},
     {file = "ERPpeek-1.7.1.tar.gz", hash = "sha256:0c30bdea453fd5daff1f40e508b919035e51004588dc56dc4c17349477d7e65f"},
+]
+erppeek-wst = [
+    {file = "ERPPeek-WST-0.3.0.tar.gz", hash = "sha256:5c9ee048ede333a32a2292a67417f1a1c7f6d60f555674adf28347d1d69186e5"},
 ]
 fastapi = [
     {file = "fastapi-0.63.0-py3-none-any.whl", hash = "sha256:98d8ea9591d8512fdadf255d2a8fa56515cdd8624dca4af369da73727409508e"},
