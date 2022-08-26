@@ -161,7 +161,8 @@ async def test__fixture__existing_template(rollback_erp, erp_translations):
     translations = erp_translations.list('def_subject')
 
     assert set(translations.keys()) == set(('ca_ES', 'es_ES')), (
-        f"The fixture is expecte to have all and just the supported languages"
+        f"The template {existing_template.xml_id} is expected to have 'def_subject' "
+        f"translated to all and just the supported languages."
     )
     assert translations == {
         'ca_ES': existing_template.subject_ca_ES,
@@ -169,6 +170,13 @@ async def test__fixture__existing_template(rollback_erp, erp_translations):
     }, (
         f"Subject translations changed in the ERP template {existing_template.xml_id} "
         f"\nPlease, update existing_template.subject_*"
+    )
+    assert erp_translations.list('def_body_text').keys() == {
+        'es_ES',
+        'ca_ES',
+    }, (
+        f"The template {existing_template.xml_id} is expected to have 'def_body_text' "
+        f"translated to all and just the supported languages."
     )
 
 
