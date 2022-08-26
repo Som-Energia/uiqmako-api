@@ -6,12 +6,6 @@ from pool_transport import PoolTransport
 
 from uiqmako_api.schemas.templates import Template
 from uiqmako_api.errors.exceptions import UIQMakoBaseException, XmlIdNotFound, InvalidId, CantConnectERP
-from uiqmako_api.models.erp_models import (
-    PoweremailTemplates,
-    IrTranslation,
-)
-
-from uiqmako_api.schemas.templates import Template
 
 # TODO: Relocate and derive
 class NoSuchExternalId(Exception):
