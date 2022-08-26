@@ -53,19 +53,19 @@ class ERP:
 
         return model
 
-    def get_object_reference(self, module, name):
-        try:
-            model, _id = self.get_erp_conn().IrModelData.get_object_reference(module, name)
-        except Fault as e:
-            raise XmlIdNotFound(msg=e.faultCode)
-        return model, _id
-
     def test_connection(self):
         try:
             self.get_erp_conn().ResUsers.read(1, ['name'])
         except Exception:
             return False
         return True
+
+    def get_object_reference(self, module, name):
+        try:
+            model, _id = self.get_erp_conn().IrModelData.get_object_reference(module, name)
+        except Fault as e:
+            raise XmlIdNotFound(msg=e.faultCode)
+        return model, _id
 
     def get_model_id(self, xml_id):
         module, name = xml_id.split('.')
