@@ -42,7 +42,7 @@ def rollback_erp(erp_client):
         t.close()
 
 @pytest.fixture()
-def erp(rollback_erp):
+def erp_services(rollback_erp):
     return ErpService(rollback_erp)
 
 
