@@ -76,37 +76,52 @@ def edited_values(**kwds):
 
 # Helpers
 
-def erp_translations(rollback_erp, model, field, erp_id):
-    translations = rollback_erp.IrTranslation.read([
-        ('name', '=', model+','+field),
-        ('res_id', '=', erp_id),
-    ],['lang', 'value'])
-    return {
-        x['lang']: x['value']
-        for x in translations or []
-    }
+class TranslationsHelper():
+    """
+    Helper to manage the backend
+    """
+    def __init__(self, erp):
+        self.erp = erp
+        self.model = 'poweremail.templates'
 
-def remove_erp_translation(rollback_erp, model, field, erp_id, lang):
-    translation_id = rollback_erp.IrTranslation.search([
-        ('name', '=', model+','+field),
-        ('res_id', '=', erp_id),
-        ('lang', '=', lang),
-    ])
-    if not translation_id: return
-    rollback_erp.IrTranslation.unlink(translation_id)
+    def list(self, field):
+        translations = self.erp.IrTranslation.read([
+            ('name', '=', self.model+','+field),
+            ('res_id', '=', existing_template.erp_id),
+        ],['lang', 'value'])
+        return {
+            x['lang']: x['value']
+            for x in translations or []
+        }
 
-def change_erp_translation(rollback_erp, model, field, erp_id, lang, values):
-    translation_id = rollback_erp.IrTranslation.search([
-        ('name', '=', model+','+field),
-        ('res_id', '=', erp_id),
-        ('lang', '=', lang),
-    ])
-    if not translation_id: return
-    rollback_erp.IrTranslation.write(translation_id, values)
+    def remove(self, field, lang):
+        translation_id = self.erp.IrTranslation.search([
+            ('name', '=', self.model+','+field),
+            ('res_id', '=', existing_template.erp_id),
+            ('lang', '=', lang),
+        ])
+        if not translation_id: return
+        self.erp.IrTranslation.unlink(translation_id)
 
+    def edit(self, field, lang, values):
+        translation_id = self.erp.IrTranslation.search([
+            ('name', '=', self.model+','+field),
+            ('res_id', '=', existing_template.erp_id),
+            ('lang', '=', lang),
+        ])
+        if not translation_id: return
+        self.erp.IrTranslation.write(translation_id, values)
+
+@pytest.fixture
+def erp_translations(rollback_erp):
+    """
+    Fixture that provides a helper to manage translations
+    directly on the backend.
+    """
+    return TranslationsHelper(rollback_erp)
 
 @pytest.mark.asyncio
-async def test__fixture__existing_template(rollback_erp):
+async def test__fixture__existing_template(rollback_erp, erp_translations):
     """
     This test ensures fragile data has the required properties.
     If it fails, please update the refered fixtures
@@ -141,12 +156,8 @@ async def test__fixture__existing_template(rollback_erp):
         f"\nPlease correct existing_template.name."
     )
 
-    translations = erp_translations(
-        rollback_erp,
-        'poweremail.templates',
-        'def_subject',
-        existing_template.erp_id,
-    )
+    translations = erp_translations.list('def_subject')
+
     assert set(translations.keys()) == set(('ca_ES', 'es_ES')), (
         f"The fixture is expecte to have all and just the supported languages"
     )
@@ -162,8 +173,8 @@ async def test__fixture__existing_template(rollback_erp):
 # ErpService.template_list
 
 @pytest.mark.asyncio
-async def test__template_list(erp):
-    items = await erp.template_list()
+async def test__template_list(erp_services):
+    items = await erp_services.template_list()
     template = [
         item for item in items
         if item['xml_id'] == existing_template.xml_id
@@ -176,18 +187,18 @@ async def test__template_list(erp):
 # ErpService.erp_id
 
 @pytest.mark.asyncio
-async def test__erp_id__byId(erp):
-    id = await erp.erp_id('poweremail.templates', 1)
+async def test__erp_id__byId(erp_services):
+    id = await erp_services.erp_id('poweremail.templates', 1)
     assert id == 1
 
 @pytest.mark.asyncio
-async def test__erp_id__byStringNumeric(erp):
-    id = await erp.erp_id('poweremail.templates', '1')
+async def test__erp_id__byStringNumeric(erp_services):
+    id = await erp_services.erp_id('poweremail.templates', '1')
     assert id == 1
 
 @pytest.mark.asyncio
-async def test__erp_id__bySemanticId(erp):
-    id = await erp.erp_id(
+async def test__erp_id__bySemanticId(erp_services):
+    id = await erp_services.erp_id(
         'poweremail.templates',
         existing_template.xml_id,
     )
@@ -195,9 +206,9 @@ async def test__erp_id__bySemanticId(erp):
     assert id == existing_template.erp_id
 
 @pytest.mark.asyncio
-async def test__erp_id__badId(erp):
+async def test__erp_id__badId(erp_services):
     with pytest.raises(InvalidId) as ctx:
-        id = await erp.erp_id(
+        id = await erp_services.erp_id(
             'poweremail.templates',
             'badformattedid',
         )
@@ -208,9 +219,9 @@ async def test__erp_id__badId(erp):
     )
 
 @pytest.mark.asyncio
-async def test__erp_id__missingId(erp):
+async def test__erp_id__missingId(erp_services):
     with pytest.raises(XmlIdNotFound) as ctx:
-        id = await erp.erp_id(
+        id = await erp_services.erp_id(
             'poweremail.templates',
             'properlyformated.butmissing',
         )
@@ -222,37 +233,29 @@ async def test__erp_id__missingId(erp):
 # ErpService.load_template
 
 @pytest.mark.asyncio
-async def test__load_template__byId(rollback_erp):
-    erp = ErpService(rollback_erp)
-
-    template = await erp.load_template(existing_template.erp_id)
+async def test__load_template__byId(erp_services):
+    template = await erp_services.load_template(existing_template.erp_id)
 
     assert type(template) == Template
     assert template.name == existing_template.name
 
 @pytest.mark.asyncio
-async def test__load_template__bySemanticId(rollback_erp):
-    erp = ErpService(rollback_erp)
-
-    template = await erp.load_template(existing_template.xml_id)
+async def test__load_template__bySemanticId(erp_services):
+    template = await erp_services.load_template(existing_template.xml_id)
 
     assert type(template) == Template
     assert template.name == existing_template.name
 
 @pytest.mark.asyncio
-async def test__load_template__missingId(rollback_erp):
-    erp = ErpService(rollback_erp)
-
+async def test__load_template__missingId(erp_services):
     with pytest.raises(Exception) as ctx:
-        await erp.load_template(9999999) # guessing it wont exist
+        await erp_services.load_template(9999999) # guessing it wont exist
 
     assert str(ctx.value) == "No template found with id 9999999"
 
 @pytest.mark.asyncio
-async def test__load_template__includesSubjectTranslations(rollback_erp):
-    erp = ErpService(rollback_erp)
-
-    template = await erp.load_template(existing_template.xml_id)
+async def test__load_template__includesSubjectTranslations(erp_services):
+    template = await erp_services.load_template(existing_template.xml_id)
 
     assert template.dict(include={
         'def_subject_ca_ES',
@@ -263,18 +266,11 @@ async def test__load_template__includesSubjectTranslations(rollback_erp):
     )
 
 @pytest.mark.asyncio
-async def test__load_template__missingTranslationAsEmpty(rollback_erp):
-    erp = ErpService(rollback_erp)
-
+async def test__load_template__missingTranslationAsEmpty(erp_services, erp_translations):
     # When we remove the spanish translation
-    translation_id = rollback_erp.IrTranslation.search([
-        ('name', '=', 'poweremail.templates,def_subject'),
-        ('res_id', '=', existing_template.erp_id),
-        ('lang', '=', 'es_ES'),
-    ])
-    rollback_erp.IrTranslation.unlink(translation_id)
+    erp_translations.remove('def_subject', 'es_ES')
 
-    template = await erp.load_template(existing_template.xml_id)
+    template = await erp_services.load_template(existing_template.xml_id)
 
     assert template.dict(include={
         'def_subject_ca_ES',
@@ -285,30 +281,18 @@ async def test__load_template__missingTranslationAsEmpty(rollback_erp):
     )
 
 @pytest.mark.asyncio
-async def test__load_template__unsupportedLanguages_ignored(rollback_erp):
-    erp = ErpService(rollback_erp)
-
+async def test__load_template__unsupportedLanguages_ignored(erp_services, erp_translations):
     # We change the language of the translation
-    change_erp_translation(
-        rollback_erp,
-        'poweremail.templates',
-        'def_subject',
-        existing_template.erp_id,
-        'es_ES',
-        values = dict(lang = 'pt_PT')
-    )
+    erp_translations.edit('def_subject', 'es_ES', values=dict(
+        lang = 'pt_PT',
+    ))
 
-    assert erp_translations(
-        rollback_erp,
-        'poweremail.templates',
-        'def_subject',
-        existing_template.erp_id,
-    ) == dict(
+    assert erp_translations.list('def_subject') == dict(
         pt_PT = existing_template.subject_es_ES, # Whe changed the language here
         ca_ES = existing_template.subject_ca_ES,
     )
 
-    template = await erp.load_template(existing_template.xml_id)
+    template = await erp_services.load_template(existing_template.xml_id)
 
     # Then the edited translation is ignored
     # There is no es_ES, so empty
@@ -320,92 +304,65 @@ async def test__load_template__unsupportedLanguages_ignored(rollback_erp):
 # ErpService.save_template
 
 @pytest.mark.asyncio
-async def test__save_template__changingEditableFields(rollback_erp):
-    erp = ErpService(rollback_erp)
-    new_values = edited_values()
-    await erp.save_template(
+async def test__save_template__changingEditableFields(erp_services):
+    edited = edited_values()
+    await erp_services.save_template(
         id = existing_template.erp_id,
-        **new_values,
+        **edited,
     )
 
-    retrieved = await erp.load_template(existing_template.xml_id)
+    retrieved = await erp_services.load_template(existing_template.xml_id)
 
     assert retrieved.dict() == dict(
-        new_values,
+        edited,
         id = existing_template.erp_id,
         name = existing_template.name, # Unchanged!
         model_int_name = existing_template.model, # Unchanged!
     )
 
 @pytest.mark.asyncio
-async def test__save_template__emptySubjectTranslation_removesIt(rollback_erp):
-    erp = ErpService(rollback_erp)
-    new_values = edited_values(
+async def test__save_template__emptySubjectTranslation_removesIt(erp_services, erp_translations):
+    """This tests implementation details, which matters to ERP"""
+    edited = edited_values(
         def_subject_ca_ES = "", # <- This changes
     )
-    await erp.save_template(
+    await erp_services.save_template(
         id = existing_template.erp_id,
-        **new_values,
+        **edited,
     )
 
-    translations = erp_translations(
-        rollback_erp,
-        'poweremail.templates',
-        'def_subject',
-        existing_template.erp_id
-    )
-    assert translations == {
-        'es_ES': new_values.def_subject_es_ES,
+    erp_translations.list('def_subject') == {
+        'es_ES': edited.def_subject_es_ES,
         # And the ca_ES is missing
     }
 
 @pytest.mark.asyncio
-async def test__save_template__missingSubjectTranslations_recreated(rollback_erp):
+async def test__save_template__missingSubjectTranslations_recreated(erp_services, erp_translations):
     # Given that the template is missing a subject translation
-    remove_erp_translation(
-        rollback_erp,
-        'poweremail.templates',
-        'def_subject',
-        existing_template.erp_id,
-        'es_ES',
-    )
+    erp_translations.remove('def_subject', 'es_ES')
 
-    erp = ErpService(rollback_erp)
-
-    new_values = edited_values()
-    await erp.save_template(
+    edited = edited_values()
+    await erp_services.save_template(
         id = existing_template.erp_id,
-        **new_values,
+        **edited,
     )
 
-    assert erp_translations(
-        rollback_erp,
-        'poweremail.templates',
-        'def_subject',
-        existing_template.erp_id
-    ) == {
-        'es_ES': new_values.def_subject_es_ES,
-        'ca_ES': new_values.def_subject_ca_ES,
+    assert erp_translations.list('def_subject') == {
+        'es_ES': edited.def_subject_es_ES,
+        'ca_ES': edited.def_subject_ca_ES,
     }
 
 @pytest.mark.asyncio
-async def test__save_template__clonesBodyToItsTranslations(rollback_erp):
-    erp = ErpService(rollback_erp)
-
-    new_values = edited_values()
-    await erp.save_template(
+async def test__save_template__clonesBodyToItsTranslations(erp_services, erp_translations):
+    edited = edited_values()
+    await erp_services.save_template(
         id = existing_template.erp_id,
-        **new_values,
+        **edited,
     )
 
-    assert erp_translations(
-        rollback_erp,
-        'poweremail.templates',
-        'def_body_text',
-        existing_template.erp_id
-    ) == {
-        'es_ES': new_values.def_body_text,
-        'ca_ES': new_values.def_body_text,
+    assert erp_translations.list('def_body_text') == {
+        'es_ES': edited.def_body_text,
+        'ca_ES': edited.def_body_text,
     }
 
 
