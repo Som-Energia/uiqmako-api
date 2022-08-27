@@ -1,7 +1,8 @@
 from uiqmako_api.schemas.templates import TemplateInfoBase, Template
 from uiqmako_api.schemas.edits import RawEdit
 from uiqmako_api.schemas.users import User, UserCategory
-from .erp_test import PoweremailTemplatesTest, ERPTest
+from uiqmako_api.models.erp_models import PoweremailTemplates
+from .erp_test import ERPTest
 from pydantic import ValidationError
 import pytest, json
 
@@ -42,16 +43,20 @@ def test_compose_text_types(input, expected):
     assert re.headers == '{"def_to:""}'
 
 
-def test_template_schema():
-    template = Template.from_orm(PoweremailTemplatesTest(ERP=ERPTest(), xml_id='module.id'))
+@pytest.mark.asyncio
+async def test_template_schema():
+    pem_template = await PoweremailTemplates.load(ERP=ERPTest(), xml_id='module.id')
+    template = Template.from_orm(pem_template)
     assert template.def_body_text == 'def_body_text_module.id'
     assert set(template.headers().keys()) == set([
         'def_subject', 'def_subject_es_ES', 'def_subject_ca_ES',
         'def_to', 'def_cc', 'def_bcc', 'lang',
     ])
     assert set(template.meta_data().keys()) == set(['name', 'model_int_name', 'id'])
-    assert template.body_text() == {'def_body_text': 'def_body_text_module.id',
-                                    'by_type': [('html', 'def_body_text_module.id')]}
+    assert template.body_text() == {
+        'def_body_text': 'def_body_text_module.id',
+        'by_type': [('html', 'def_body_text_module.id')],
+    }
 
 
 BASIC_ALLOWED = ['content', 'def_subject', 'def_subject_es_ES', 'def_subject_ca_ES', 'def_bcc', 'html']

@@ -1,5 +1,5 @@
 import pytest
-from .erp_test import PoweremailTemplatesTest, ERPTest
+from .erp_test import ERPTest
 from uiqmako_api.utils.templates import *
 from uiqmako_api.models.templates import TemplateInfoModel
 from uiqmako_api.models import get_db_manager

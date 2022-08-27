@@ -7,6 +7,7 @@ from uiqmako_api.models.edits import (
     get_user_edits_info_orm,
     update_user_edit_orm,
 )
+from uiqmako_api.utils.erp_service import ErpService
 from uiqmako_api.models.templates import (
     get_case_orm,
     get_template_orm,
@@ -64,9 +65,11 @@ async def upload_edit(erp, edit_id, delete_current_edit=True):
     template_info = await get_template_orm(template_id=edit.template.id)
     if template_info.last_updated != edit.original_update_date:
         raise OutdatedEdit("Edit from an outdated template version")
-    upload_result = await erp.upload_edit(headers=edit.headers, body_text=edit.body_text, template_xml_id=edit.template.xml_id)
-    if not upload_result:
-        return Exception(f"Failed to upload edition to the ERP")
+    await erp.upload_edit(
+        headers=edit.headers,
+        body_text=edit.body_text,
+        template_xml_id=edit.template.xml_id,
+    )
     if delete_current_edit:
         await delete_edit_orm(edit_id)
     return edit.template.id

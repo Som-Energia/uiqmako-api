@@ -16,7 +16,7 @@ from uiqmako_api.utils.git import create_or_update_template
 
 async def get_single_template(erp, git_repo, template_id, user_name=""):
     template = await get_template_orm(template_id=template_id)
-    t = PoweremailTemplates(erp, erp_id=template.erp_id, xml_id=template.xml_id)
+    t = await PoweremailTemplates.load(erp, erp_id=template.erp_id, xml_id=template.xml_id)
     has_changes = await create_or_update_template(template.xml_id, Template.from_orm(t), git_repo, user_name)
 
     if has_changes or not template.last_updated:
@@ -30,7 +30,7 @@ async def get_all_templates():
 
 
 async def add_template_from_xml_id(erp, xml_id):
-    erp_template = PoweremailTemplates(erp, xml_id=xml_id)
+    erp_template = await PoweremailTemplates.load(erp, xml_id=xml_id)
     template_info = None
     if erp_template:
         created, template_info = await add_or_get_template_orm(

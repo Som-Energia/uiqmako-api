@@ -6,6 +6,7 @@ from pool_transport import PoolTransport
 
 from uiqmako_api.errors.exceptions import UIQMakoBaseException, XmlIdNotFound, InvalidId, CantConnectERP
 from uiqmako_api.models.erp_models import PoweremailTemplates
+from uiqmako_api.utils.erp_service import ErpService
 
 
 class ERP:
@@ -86,7 +87,7 @@ class ERP:
             erp_id = self.get_erp_id(xml_id=xml_id)
         else:
             erp_id = id
-        pem_template = PoweremailTemplates(self, erp_id=erp_id)
+        pem_template = await PoweremailTemplates.load(self, erp_id=erp_id)
         return pem_template
 
     async def get_object(self, model, id):
@@ -101,10 +102,10 @@ class ERP:
         return result
 
     async def upload_edit(self, body_text, headers, template_xml_id):
+        return await PoweremailTemplates.upload_edit(self, xml_id=template_xml_id, body_text=body_text, headers=headers)
 
-        pem_template = PoweremailTemplates(self, xml_id=template_xml_id)
-        return pem_template.upload_edit(body_text=body_text, headers=headers)
-
+    def service(self):
+        return ErpService(self._erp_client)
 
 class ERP_PROD(ERP):
     _name = 'PROD'
