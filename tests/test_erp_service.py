@@ -47,7 +47,7 @@ def rollback_erp(erp_client):
         t.close()
 
 @pytest.fixture()
-def erp_services(rollback_erp):
+def erp_service(rollback_erp):
     return ErpService(rollback_erp)
 
 
@@ -209,8 +209,8 @@ class Test_ErpService():
 
     # ErpService.template_list
 
-    async def test__template_list(self, erp_services):
-        items = await erp_services.template_list()
+    async def test__template_list(self, erp_service):
+        items = await erp_service.template_list()
         template = [
             item for item in items
             if item['xml_id'] == existing_template.xml_id
@@ -222,25 +222,25 @@ class Test_ErpService():
 
     # ErpService.erp_id
 
-    async def test__erp_id__byId(self, erp_services):
-        id = await erp_services.erp_id('poweremail.templates', 1)
+    async def test__erp_id__byId(self, erp_service):
+        id = await erp_service.erp_id('poweremail.templates', 1)
         assert id == 1
 
-    async def test__erp_id__byStringNumeric(self, erp_services):
-        id = await erp_services.erp_id('poweremail.templates', '1')
+    async def test__erp_id__byStringNumeric(self, erp_service):
+        id = await erp_service.erp_id('poweremail.templates', '1')
         assert id == 1
 
-    async def test__erp_id__bySemanticId(self, erp_services):
-        id = await erp_services.erp_id(
+    async def test__erp_id__bySemanticId(self, erp_service):
+        id = await erp_service.erp_id(
             'poweremail.templates',
             existing_template.xml_id,
         )
         assert type(id) == int
         assert id == existing_template.erp_id
 
-    async def test__erp_id__badId(self, erp_services):
+    async def test__erp_id__badId(self, erp_service):
         with pytest.raises(InvalidId) as ctx:
-            id = await erp_services.erp_id(
+            id = await erp_service.erp_id(
                 'poweremail.templates',
                 'badformattedid',
             )
@@ -250,9 +250,9 @@ class Test_ErpService():
             "does not have the expected format 'module.name'"
         )
 
-    async def test__erp_id__missingId(self, erp_services):
+    async def test__erp_id__missingId(self, erp_service):
         with pytest.raises(XmlIdNotFound) as ctx:
-            id = await erp_services.erp_id(
+            id = await erp_service.erp_id(
                 'poweremail.templates',
                 'properlyformated.butmissing',
             )
@@ -263,26 +263,26 @@ class Test_ErpService():
 
     # ErpService.load_template
 
-    async def test__load_template__byId(self, erp_services):
-        template = await erp_services.load_template(existing_template.erp_id)
+    async def test__load_template__byId(self, erp_service):
+        template = await erp_service.load_template(existing_template.erp_id)
 
         assert type(template) == Template
         assert template.name == existing_template.name
 
-    async def test__load_template__bySemanticId(self, erp_services):
-        template = await erp_services.load_template(existing_template.xml_id)
+    async def test__load_template__bySemanticId(self, erp_service):
+        template = await erp_service.load_template(existing_template.xml_id)
 
         assert type(template) == Template
         assert template.name == existing_template.name
 
-    async def test__load_template__missingId(self, erp_services):
+    async def test__load_template__missingId(self, erp_service):
         with pytest.raises(Exception) as ctx:
-            await erp_services.load_template(9999999) # guessing it wont exist
+            await erp_service.load_template(9999999) # guessing it wont exist
 
         assert str(ctx.value) == "No template found with id 9999999"
 
-    async def test__load_template__includesSubjectTranslations(self, erp_services):
-        template = await erp_services.load_template(existing_template.xml_id)
+    async def test__load_template__includesSubjectTranslations(self, erp_service):
+        template = await erp_service.load_template(existing_template.xml_id)
 
         assert template.dict(include={
             'def_subject_ca_ES',
@@ -292,11 +292,11 @@ class Test_ErpService():
             def_subject_es_ES=existing_template.subject_es_ES,
         )
 
-    async def test__load_template__missingTranslationAsEmpty(self, erp_services, erp_translations):
+    async def test__load_template__missingTranslationAsEmpty(self, erp_service, erp_translations):
         # When we remove the spanish translation
         erp_translations.remove('def_subject', 'es_ES')
 
-        template = await erp_services.load_template(existing_template.xml_id)
+        template = await erp_service.load_template(existing_template.xml_id)
 
         assert template.dict(include={
             'def_subject_ca_ES',
@@ -306,12 +306,12 @@ class Test_ErpService():
             def_subject_es_ES='', # this changes
         )
 
-    async def test__load_template__noTranslation(self, erp_services, erp_translations):
+    async def test__load_template__noTranslation(self, erp_service, erp_translations):
         # When we remove all the translations
         erp_translations.remove('def_subject', 'es_ES')
         erp_translations.remove('def_subject', 'ca_ES')
 
-        template = await erp_services.load_template(existing_template.xml_id)
+        template = await erp_service.load_template(existing_template.xml_id)
 
         assert template.dict(include={
             'def_subject_ca_ES',
@@ -321,7 +321,7 @@ class Test_ErpService():
             def_subject_es_ES='', # this changes
         )
 
-    async def test__load_template__unsupportedLanguages_ignored(self, erp_services, erp_translations):
+    async def test__load_template__unsupportedLanguages_ignored(self, erp_service, erp_translations):
         # We change the language of the translation
         erp_translations.edit('def_subject', 'es_ES', values=dict(
             lang = 'pt_PT',
@@ -333,7 +333,7 @@ class Test_ErpService():
             ca_ES = existing_template.subject_ca_ES,
         )
         """
-        template = await erp_services.load_template(existing_template.xml_id)
+        template = await erp_service.load_template(existing_template.xml_id)
 
         # Then the edited translation is ignored
         # There is no es_ES, so empty
@@ -344,14 +344,14 @@ class Test_ErpService():
 
     # ErpService.save_template
 
-    async def test__save_template__changingEditableFields(self, erp_services):
+    async def test__save_template__changingEditableFields(self, erp_service):
         edited = edited_values()
-        await erp_services.save_template(
+        await erp_service.save_template(
             id = existing_template.erp_id,
             **edited,
         )
 
-        retrieved = await erp_services.load_template(existing_template.xml_id)
+        retrieved = await erp_service.load_template(existing_template.xml_id)
 
         assert retrieved.dict() == dict(
             edited,
@@ -360,14 +360,14 @@ class Test_ErpService():
             model_int_name = existing_template.model, # Unchanged!
         )
 
-    async def test__save_template__usingSemanticId(self, erp_services):
+    async def test__save_template__usingSemanticId(self, erp_service):
         edited = edited_values()
-        await erp_services.save_template(
+        await erp_service.save_template(
             id = existing_template.xml_id,
             **edited,
         )
 
-        retrieved = await erp_services.load_template(existing_template.xml_id)
+        retrieved = await erp_service.load_template(existing_template.xml_id)
 
         assert retrieved.dict() == dict(
             edited,
@@ -376,11 +376,11 @@ class Test_ErpService():
             model_int_name = existing_template.model, # Unchanged!
         )
 
-    async def test__save_template__emptySubjectTranslation_removesIt(self, erp_services, erp_translations):
+    async def test__save_template__emptySubjectTranslation_removesIt(self, erp_service, erp_translations):
         edited = edited_values(
             def_subject_ca_ES = "", # <- This changes
         )
-        await erp_services.save_template(
+        await erp_service.save_template(
             id = existing_template.erp_id,
             **edited,
         )
@@ -390,12 +390,12 @@ class Test_ErpService():
             # And the ca_ES is missing
         }
 
-    async def test__save_template__missingSubjectTranslations_recreated(self, erp_services, erp_translations):
+    async def test__save_template__missingSubjectTranslations_recreated(self, erp_service, erp_translations):
         # Given that the template is missing a subject translation
         erp_translations.remove('def_subject', 'es_ES')
 
         edited = edited_values()
-        await erp_services.save_template(
+        await erp_service.save_template(
             id = existing_template.erp_id,
             **edited,
         )
@@ -405,9 +405,9 @@ class Test_ErpService():
             'ca_ES': edited.def_subject_ca_ES,
         }
 
-    async def test__save_template__clonesBodyToItsTranslations(self, erp_services, erp_translations):
+    async def test__save_template__clonesBodyToItsTranslations(self, erp_service, erp_translations):
         edited = edited_values()
-        await erp_services.save_template(
+        await erp_service.save_template(
             id = existing_template.erp_id,
             **edited,
         )
@@ -424,7 +424,7 @@ class Test_ErpServiceDouble(Test_ErpService):
         pass
 
     @pytest.fixture
-    def erp_services(self):
+    def erp_service(self):
         service = ErpServiceDouble()
         service.add_dummy_template(
             xml_id = existing_template.xml_id,
@@ -438,7 +438,7 @@ class Test_ErpServiceDouble(Test_ErpService):
         return service
 
     @pytest.fixture
-    def erp_translations(self, erp_services):
+    def erp_translations(self, erp_service):
         class Translations:
             def __init__(self, service):
                 self.service = service
@@ -471,10 +471,10 @@ class Test_ErpServiceDouble(Test_ErpService):
                 if 'lang' in values and values['lang'] != lang:
                     template[translated_field] = ''
 
-        return Translations(erp_services)
+        return Translations(erp_service)
 
     @pytest.fixture
-    def erp_backdoor(self, erp_services):
+    def erp_backdoor(self, erp_service):
         """
         Just a way of accessing directly the ERP that can be
         substituted for the ErpServiceDouble.
@@ -496,6 +496,6 @@ class Test_ErpServiceDouble(Test_ErpService):
                     return null
                 return self.service.data.templates[existing_template.xml_id]['id']
 
-        return BackendBackdoor(erp_services)
+        return BackendBackdoor(erp_service)
 
 
