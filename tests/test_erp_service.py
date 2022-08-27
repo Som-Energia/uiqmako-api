@@ -80,48 +80,48 @@ def edited_values(**kwds):
     return ns(result, **kwds)
 
 
-class TranslationsHelper():
-    """
-    Helper to manage the backend
-    """
-    def __init__(self, erp):
-        self.erp = erp
-        self.model = 'poweremail.templates'
-
-    def list(self, field):
-        translations = self.erp.IrTranslation.read([
-            ('name', '=', self.model+','+field),
-            ('res_id', '=', existing_template.erp_id),
-        ],['lang', 'value'])
-        return {
-            x['lang']: x['value']
-            for x in translations or []
-        }
-
-    def remove(self, field, lang):
-        translation_id = self.erp.IrTranslation.search([
-            ('name', '=', self.model+','+field),
-            ('res_id', '=', existing_template.erp_id),
-            ('lang', '=', lang),
-        ])
-        if not translation_id: return
-        self.erp.IrTranslation.unlink(translation_id)
-
-    def edit(self, field, lang, values):
-        translation_id = self.erp.IrTranslation.search([
-            ('name', '=', self.model+','+field),
-            ('res_id', '=', existing_template.erp_id),
-            ('lang', '=', lang),
-        ])
-        if not translation_id: return
-        self.erp.IrTranslation.write(translation_id, values)
-
 @pytest.fixture
 def erp_translations(rollback_erp):
     """
     Fixture that provides a helper to manage translations
     directly on the backend.
     """
+    class TranslationsHelper():
+        """
+        Helper to manage the backend
+        """
+        def __init__(self, erp):
+            self.erp = erp
+            self.model = 'poweremail.templates'
+
+        def list(self, field):
+            translations = self.erp.IrTranslation.read([
+                ('name', '=', self.model+','+field),
+                ('res_id', '=', existing_template.erp_id),
+            ],['lang', 'value'])
+            return {
+                x['lang']: x['value']
+                for x in translations or []
+            }
+
+        def remove(self, field, lang):
+            translation_id = self.erp.IrTranslation.search([
+                ('name', '=', self.model+','+field),
+                ('res_id', '=', existing_template.erp_id),
+                ('lang', '=', lang),
+            ])
+            if not translation_id: return
+            self.erp.IrTranslation.unlink(translation_id)
+
+        def edit(self, field, lang, values):
+            translation_id = self.erp.IrTranslation.search([
+                ('name', '=', self.model+','+field),
+                ('res_id', '=', existing_template.erp_id),
+                ('lang', '=', lang),
+            ])
+            if not translation_id: return
+            self.erp.IrTranslation.write(translation_id, values)
+
     return TranslationsHelper(rollback_erp)
 
 @pytest.fixture
@@ -432,41 +432,41 @@ class Test_ErpServiceDouble(Test_ErpService):
         )
         return service
 
-    class Translations:
-        def __init__(self, service):
-            self.service = service
-
-        def list(self, field):
-            if field == 'def_body_text':
-                return {
-                    'ca_ES': '',
-                    'es_ES': '',
-                }
-            template = self.service.data.templates[existing_template.xml_id]
-            prefix = field+'_'
-            return {
-                key[len(prefix):] : value
-                for key, value in template.items()
-                if key.startswith(prefix)
-            }
-
-        def remove(self, field, language):
-            translated_field = f'{field}_{language}'
-            template = self.service.data.templates[existing_template.xml_id]
-            if translated_field in template:
-                template[translated_field]=''
-
-        def edit(self, field, lang, values):
-            translated_field = f'{field}_{lang}'
-            template = self.service.data.templates[existing_template.xml_id]
-            if 'value' in values:
-                template[translated_field]=values['value']
-            if 'lang' in values and values['lang'] != lang:
-                template[translated_field] = ''
-
     @pytest.fixture
     def erp_translations(self, erp_services):
-        return Test_ErpServiceDouble.Translations(erp_services)
+        class Translations:
+            def __init__(self, service):
+                self.service = service
+
+            def list(self, field):
+                if field == 'def_body_text':
+                    return {
+                        'ca_ES': '',
+                        'es_ES': '',
+                    }
+                template = self.service.data.templates[existing_template.xml_id]
+                prefix = field+'_'
+                return {
+                    key[len(prefix):] : value
+                    for key, value in template.items()
+                    if key.startswith(prefix)
+                }
+
+            def remove(self, field, language):
+                translated_field = f'{field}_{language}'
+                template = self.service.data.templates[existing_template.xml_id]
+                if translated_field in template:
+                    template[translated_field]=''
+
+            def edit(self, field, lang, values):
+                translated_field = f'{field}_{lang}'
+                template = self.service.data.templates[existing_template.xml_id]
+                if 'value' in values:
+                    template[translated_field]=values['value']
+                if 'lang' in values and values['lang'] != lang:
+                    template[translated_field] = ''
+
+        return Translations(erp_services)
 
     """Body traslations are still a implementation detaiil"""
     def test__save_template__clonesBodyToItsTranslations(self):
