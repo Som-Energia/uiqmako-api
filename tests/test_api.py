@@ -18,10 +18,10 @@ class TestApi:
             response = await ac.get("/templates")
         assert response.status_code == 200
         assert response.json() == [
-            {'id': 1, 'model': "poweremail.templates",
+            {'id': 1, 'model': "res.partner",
              'name': 'Template test', 'erp_id': None,
              'xml_id': 'template_module.template_01', 'last_updated': '2021-01-01T00:00:00'},
-            {'id': 2, 'model': "poweremail.templates",
+            {'id': 2, 'model': "res.partner",
              'name': 'Template2 test', 'erp_id': None,
              'xml_id': 'template_module.template_02', 'last_updated': '2021-01-01T00:00:00'}
         ]

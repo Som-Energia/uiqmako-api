@@ -38,7 +38,7 @@ class TestTemplates:
         assert created
         assert template_info.xml_id == 'som_test.id_test'
         assert template_info.name == template.name
-        assert template_info.model == 'poweremail.templates'
+        assert template_info.model == 'res.partner'
         assert number_templates_post == number_templates_pre + 1
 
     async def test_add_template_from_xml_id_already_exist(self, test_app, mocker):
@@ -54,7 +54,7 @@ class TestTemplates:
         assert not created
         assert template_info.xml_id == 'som_test.id_test'
         assert template_info.name == template.name
-        assert template_info.model == 'poweremail.templates'
+        assert template_info.model == 'res.partner'
         assert number_templates_post == number_templates_pre
 
     @pytest.mark.parametrize(

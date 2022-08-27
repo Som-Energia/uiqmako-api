@@ -17,7 +17,7 @@ class PoweremailTemplatesTest:
             field: "{}_{}".format(field, PoweremailTemplatesTest._index) #PoweremailTemplatesTest._index if field == 'id' else "{}_{}".format(field, PoweremailTemplatesTest._index)
             for field in fields
         }
-        auto_fields['model_int_name'] = 'poweremail.templates'
+        auto_fields['model_int_name'] = 'res.partners'
         auto_fields['id'] = PoweremailTemplatesTest._index
         return auto_fields
 
