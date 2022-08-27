@@ -1,5 +1,4 @@
 import json
-from uiqmako_api.utils.erp_service import ErpService
 
 class PoweremailTemplates:
     _erp = None
