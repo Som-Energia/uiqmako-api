@@ -125,7 +125,7 @@ def erp_translations(rollback_erp):
     return TranslationsHelper(rollback_erp)
 
 @pytest.fixture
-def backend_backdoor(rollback_erp):
+def erp_backdoor(rollback_erp):
     """
     Just a way of accessing directly the ERP that can be
     substituted for the ErpServiceDouble.
@@ -155,12 +155,12 @@ class Test_ErpService():
 
     # Fixture testing
 
-    async def test__fixture__existing_template(self, backend_backdoor, erp_translations):
+    async def test__fixture__existing_template(self, erp_backdoor, erp_translations):
         """
         This test ensures fragile data has the required properties.
         If it fails, please update the referred fixtures
         """
-        erp_id = backend_backdoor.resolve_template_fixture_semantic_id()
+        erp_id = erp_backdoor.resolve_template_fixture_semantic_id()
         assert erp_id, (
             f"ERP has no {existing_template.xml_id} defined for a {model}, "
             f"\nupdate existing_template.xml_id."
@@ -171,7 +171,7 @@ class Test_ErpService():
             f"{existing_template.erp_id}. "
             f"\nPlease correct existing_template.erp_id."
         )
-        template = backend_backdoor.template_fixture_constant_data()
+        template = erp_backdoor.template_fixture_constant_data()
         assert template == dict(
             id = existing_template.erp_id,
             name = existing_template.name,
@@ -474,7 +474,7 @@ class Test_ErpServiceDouble(Test_ErpService):
         return Translations(erp_services)
 
     @pytest.fixture
-    def backend_backdoor(self, erp_services):
+    def erp_backdoor(self, erp_services):
         """
         Just a way of accessing directly the ERP that can be
         substituted for the ErpServiceDouble.
