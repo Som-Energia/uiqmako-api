@@ -72,8 +72,8 @@ class Template(BaseModel):
     class Config:
         orm_mode = True
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, **kwds)
         self.def_body_text.strip()
 
     def headers(self):
