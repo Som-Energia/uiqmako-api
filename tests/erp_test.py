@@ -24,13 +24,13 @@ class ErpServiceDouble():
         self.data = data or ns(
             templates=ns()
         )
-        self.dummyTemplate('som_test.id_test', 100) # test_templates.py
-        self.dummyTemplate('module_test.xml_id', 102) # test_api.py
-        self.dummyTemplate('template_module.template_01', 103) # db data
-        self.dummyTemplate('template_module.template_02', 104) # db data
-        self.dummyTemplate('module.id', 105) # test_git_utils.py, test_schemas.py
+        self.add_dummy_template('som_test.id_test', 100) # test_templates.py
+        self.add_dummy_template('module_test.xml_id', 102) # test_api.py
+        self.add_dummy_template('template_module.template_01', 103) # db data
+        self.add_dummy_template('template_module.template_02', 104) # db data
+        self.add_dummy_template('module.id', 105) # test_git_utils.py, test_schemas.py
 
-    def dummyTemplate(self, xml_id, id, **overrides):
+    def add_dummy_template(self, xml_id, id, **overrides):
         dummy = dict(
             {
                 field: f'{field}_{xml_id}'

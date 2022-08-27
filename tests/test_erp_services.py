@@ -399,7 +399,7 @@ class Test_ErpServiceDouble(Test_ErpService):
     @pytest.fixture
     def erp_services(self):
         service = ErpServiceDouble()
-        service.dummyTemplate(
+        service.add_dummy_template(
             xml_id = existing_template.xml_id,
             id = existing_template.erp_id,
             def_subject = "Untranslated subject",
