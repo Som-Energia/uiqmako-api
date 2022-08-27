@@ -36,23 +36,28 @@ class TestApi:
         assert response.text == '{"detail":"Can\'t connect to ERP"}'
 
     async def test_add_new_template(self, test_app, override_get_current_active_user):
+        xml_id = 'module_test.xml_id'
         from uiqmako_api.api.dependencies import get_current_active_user
         test_app.dependency_overrides[get_current_active_user] = lambda: override_get_current_active_user
         async with AsyncClient(app=test_app, base_url="http://test") as ac:
             response = await ac.post("/templates", data={"xml_id": "module_test.xml_id"})
+
         assert response.status_code == 200
-        assert response.json()['template']['xml_id'] == "module_test.xml_id"
+        assert response.json()['template']['xml_id'] == xml_id
         assert response.json()['created']
         test_app.dependency_overrides = {}
 
     async def test_add_new_template_existing(self, test_app, override_get_current_active_user):
+        xml_id = "module_test.xml_id"
         from uiqmako_api.api.dependencies import get_current_active_user
         test_app.dependency_overrides[get_current_active_user] = lambda: override_get_current_active_user
         async with AsyncClient(app=test_app, base_url="http://test") as ac:
-            await ac.post("/templates", data={"xml_id": "module_test.xml_id"})
-            response = await ac.post("/templates", data={"xml_id": "module_test.xml_id"})
+            await ac.post("/templates", data={"xml_id": xml_id})
+            # Importing twice
+            response = await ac.post("/templates", data={"xml_id": xml_id})
+
         assert response.status_code == 200
-        assert response.json()['template']['xml_id'] == "module_test.xml_id"
+        assert response.json()['template']['xml_id'] == xml_id
         assert not response.json()['created']
         test_app.dependency_overrides = {}
 

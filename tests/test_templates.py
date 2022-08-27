@@ -4,6 +4,7 @@ from uiqmako_api.utils.templates import *
 from uiqmako_api.models.templates import TemplateInfoModel
 from uiqmako_api.models import get_db_manager
 from uiqmako_api.utils.git import setup_template_repository
+
 ONLY_HTML = """
 <!doctype html>
     <p>Som Energia, SCCL %</p>
@@ -28,34 +29,43 @@ GIT = setup_template_repository()
 class TestTemplates:
 
     async def test_add_template_from_xml_id(self, test_app):
+        # Given an id that we have not imported yet
+        xml_id = 'som_test.id_test'
         db_m = test_app.db_manager
         number_templates_pre = await db_m.count(TemplateInfoModel.select())
 
-        created, template = await add_template_from_xml_id(test_app.ERP, 'som_test.id_test')
+        # When we import it
+        created, template = await add_template_from_xml_id(test_app.ERP, xml_id)
 
-        template_info = await db_m.get(TemplateInfoModel, xml_id='som_test.id_test')
+        # Then the number of registers is increased
         number_templates_post = await db_m.count(TemplateInfoModel.select())
         assert created
-        assert template_info.xml_id == 'som_test.id_test'
+        assert number_templates_post == number_templates_pre + 1
+        # And the information is saved
+        template_info = await db_m.get(TemplateInfoModel, xml_id=xml_id)
+        assert template_info.xml_id == xml_id
         assert template_info.name == template.name
         assert template_info.model == 'res.partner'
-        assert number_templates_post == number_templates_pre + 1
 
     async def test_add_template_from_xml_id_already_exist(self, test_app, mocker):
         db_m = test_app.db_manager
+        # Given that we already imported an id
+        xml_id = 'som_test.id_test'
+        created, template = await add_template_from_xml_id(test_app.ERP, xml_id)
         number_templates_pre = await db_m.count(TemplateInfoModel.select())
-        mocker.patch('uiqmako_api.models.erp_models.PoweremailTemplates')
-        mocker.spec = PoweremailTemplatesTest
 
-        created, template = await add_template_from_xml_id(test_app.ERP, 'som_test.id_test')
+        # When we import it twice
+        template_info = await db_m.get(TemplateInfoModel, xml_id=xml_id)
 
-        template_info = await db_m.get(TemplateInfoModel, xml_id='som_test.id_test')
+        # Then no register is added
         number_templates_post = await db_m.count(TemplateInfoModel.select())
+        assert number_templates_post == number_templates_pre
         assert not created
-        assert template_info.xml_id == 'som_test.id_test'
+        # And the info is updated
+        template_info = await db_m.get(TemplateInfoModel, xml_id=xml_id)
+        assert template_info.xml_id == xml_id
         assert template_info.name == template.name
         assert template_info.model == 'res.partner'
-        assert number_templates_post == number_templates_pre
 
     @pytest.mark.parametrize(
         "body_text,split", [
