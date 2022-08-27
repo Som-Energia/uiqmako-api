@@ -29,16 +29,35 @@ def create_demo_data(db_manager):
     db_manager.database.set_allow_sync(True)
     from uiqmako_api.models import templates, users, edits
     tim_1 = templates.TemplateInfoModel.create(
-        name="Template test", model="poweremail.templates",
-        xml_id="template_module.template_01", last_updated=datetime(2021, 1, 1)
+        name="Template test",
+        model="res.partner",
+        xml_id="template_module.template_01",
+        last_updated=datetime(2021, 1, 1),
     )
     tim_2 = templates.TemplateInfoModel.create(
-        name="Template2 test", model="poweremail.templates",
-        xml_id="template_module.template_02", last_updated=datetime(2021, 1, 1)
+        name="Template2 test",
+        model="res.partner",
+        xml_id="template_module.template_02",
+        last_updated=datetime(2021, 1, 1),
     )
-    u_1 = users.UserModel.create(username="UserAll", hashed_pwd="hashed_pwd", disabled=False, category=UserCategory.ADMIN)
-    u_2 = users.UserModel.create(username="UserBasic", hashed_pwd="hashed_pwd", disabled=False, category=UserCategory.BASIC_USER)
-    e_1 = edits.TemplateEditModel.create(template_id=tim_1.id, user_id=u_1.id, original_update_date=datetime.now(), date_start=datetime.now())
+    u_1 = users.UserModel.create(
+        username="UserAll",
+        hashed_pwd="hashed_pwd",
+        disabled=False,
+        category=UserCategory.ADMIN,
+    )
+    u_2 = users.UserModel.create(
+        username="UserBasic",
+        hashed_pwd="hashed_pwd",
+        disabled=False,
+        category=UserCategory.BASIC_USER,
+    )
+    e_1 = edits.TemplateEditModel.create(
+        template_id=tim_1.id,
+        user_id=u_1.id,
+        original_update_date=datetime.now(),
+        date_start=datetime.now(),
+    )
     db_manager.database.set_allow_sync(False)
 
 
