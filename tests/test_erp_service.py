@@ -124,33 +124,54 @@ def erp_translations(rollback_erp):
     """
     return TranslationsHelper(rollback_erp)
 
+@pytest.fixture
+def backend_backdoor(rollback_erp):
+    """
+    Just a way of accessing directly the ERP that can be
+    substituted for the ErpServiceDouble.
+    """
+    class BackendBackdoor:
+        def __init__(self, erp):
+            self.erp = erp
+
+        def template_fixture_constant_data(self):
+            return self.erp.PoweremailTemplates.read(
+                [existing_template.erp_id],
+                ['name','model_int_name']
+            )[0]
+
+        def resolve_template_fixture_semantic_id(self):
+            module, shortname = existing_template.xml_id.split('.')
+            external_id = rollback_erp.IrModelData.read([
+                ('module', '=', module),
+                ('name', '=', shortname),
+                ('model', '=', 'poweremail.templates'),
+            ], ['res_id'])
+            return external_id[0]['res_id'] if external_id else None
+
+    return BackendBackdoor(rollback_erp)
 
 class Test_ErpService():
 
     # Fixture testing
 
-    async def test__fixture__existing_template(self, rollback_erp, erp_translations):
+    async def test__fixture__existing_template(self, backend_backdoor, erp_translations):
         """
         This test ensures fragile data has the required properties.
         If it fails, please update the referred fixtures
         """
-        module, shortname = existing_template.xml_id.split('.')
-        externalid = rollback_erp.IrModelData.read([
-            ('module', '=', module),
-            ('name', '=', shortname),
-            ('model', '=', 'poweremail.templates'),
-        ], ['res_id'])
-        assert externalid, (
+        erp_id = backend_backdoor.resolve_template_fixture_semantic_id()
+        assert erp_id, (
             f"ERP has no {existing_template.xml_id} defined for a {model}, "
             f"\nupdate existing_template.xml_id."
         )
-        assert externalid[0]['res_id']==existing_template.erp_id, (
+        assert erp_id==existing_template.erp_id, (
             f"This ERP has template '{existing_template.xml_id}' "
-            f"pointing to {externalid[0]['res_id']} instead of "
+            f"pointing to {erp_id} instead of "
             f"{existing_template.erp_id}. "
             f"\nPlease correct existing_template.erp_id."
         )
-        template = rollback_erp.PoweremailTemplates.read([existing_template.erp_id], ['name','model_int_name'])[0]
+        template = backend_backdoor.template_fixture_constant_data()
         assert template == dict(
             id = existing_template.erp_id,
             name = existing_template.name,
