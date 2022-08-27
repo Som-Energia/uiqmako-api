@@ -9,6 +9,29 @@ from pool_transport import PoolTransport
 from uiqmako_api.utils.erp_service import ErpService
 import os
 
+"""
+ERP tests use a rolling-back transaction fixture,
+that undoes any ERP changes after the test.
+The connection `erp_client` is shared by the module (could be wider).
+The transaction `rollback_erp`is per test function/method.
+
+ERP tests are slow and require access to SomEnergia intranet, so,
+any test using the erp_client fixture, is skiped by default
+unless UIQMAKO_TEST_ERP environ is defined.
+
+All ERP related functionality has been encapsulated inside
+the facade ErpService. Its users can be tested without
+touching the ERP by using the blackbox equivalent ErpServiceDouble.
+
+In order to preserve blackbox parity both classes pass
+the ErpService_TestSuite.
+
+When the suite needs to access the ERP, or the underlying
+implementation for the double, such access is encasulated
+in fixtures, like erp_translations or erp_backdoor,
+that can be redefined by the concrete tests of each Facade.
+"""
+
 pytestmark = [
     pytest.mark.asyncio,
 ]
