@@ -125,7 +125,7 @@ class ErpService(object):
 
     # TODO: Should receive a full object or dict not edition fields body and header
     async def save_template(self, id, **fields):
-        erp_id = await self.erp_id('poweremail.template', id)
+        erp_id = await self.erp_id('poweremail.templates', id)
 
         self._PoweremailTemplates.write(erp_id, {
             key: fields[key]

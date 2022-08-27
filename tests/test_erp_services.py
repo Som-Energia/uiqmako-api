@@ -77,8 +77,6 @@ def edited_values(**kwds):
     )
     return ns(result, **kwds)
 
-# Helpers
-
 class TranslationsHelper():
     """
     Helper to manage the backend
@@ -123,10 +121,13 @@ def erp_translations(rollback_erp):
     """
     return TranslationsHelper(rollback_erp)
 
+
+# Fixture testing
+
 async def test__fixture__existing_template(rollback_erp, erp_translations):
     """
     This test ensures fragile data has the required properties.
-    If it fails, please update the refered fixtures
+    If it fails, please update the referred fixtures
     """
     module, shortname = existing_template.xml_id.split('.')
     externalid = rollback_erp.IrModelData.read([
@@ -261,8 +262,8 @@ async def test__load_template__includesSubjectTranslations(erp_services):
         'def_subject_ca_ES',
         'def_subject_es_ES',
     }) == dict(
-        def_subject_es_ES=existing_template.subject_es_ES,
         def_subject_ca_ES=existing_template.subject_ca_ES,
+        def_subject_es_ES=existing_template.subject_es_ES,
     )
 
 async def test__load_template__missingTranslationAsEmpty(erp_services, erp_translations):
@@ -275,8 +276,23 @@ async def test__load_template__missingTranslationAsEmpty(erp_services, erp_trans
         'def_subject_ca_ES',
         'def_subject_es_ES',
     }) == dict(
-        def_subject_es_ES='', # this changes
         def_subject_ca_ES=existing_template.subject_ca_ES,
+        def_subject_es_ES='', # this changes
+    )
+
+async def test__load_template__noTranslation(erp_services, erp_translations):
+    # When we remove all the translations
+    erp_translations.remove('def_subject', 'es_ES')
+    erp_translations.remove('def_subject', 'ca_ES')
+
+    template = await erp_services.load_template(existing_template.xml_id)
+
+    assert template.dict(include={
+        'def_subject_ca_ES',
+        'def_subject_es_ES',
+    }) == dict(
+        def_subject_ca_ES='', # this changes
+        def_subject_es_ES='', # this changes
     )
 
 async def test__load_template__unsupportedLanguages_ignored(erp_services, erp_translations):
@@ -305,6 +321,22 @@ async def test__save_template__changingEditableFields(erp_services):
     edited = edited_values()
     await erp_services.save_template(
         id = existing_template.erp_id,
+        **edited,
+    )
+
+    retrieved = await erp_services.load_template(existing_template.xml_id)
+
+    assert retrieved.dict() == dict(
+        edited,
+        id = existing_template.erp_id,
+        name = existing_template.name, # Unchanged!
+        model_int_name = existing_template.model, # Unchanged!
+    )
+
+async def test__save_template__usingSemanticId(erp_services):
+    edited = edited_values()
+    await erp_services.save_template(
+        id = existing_template.xml_id,
         **edited,
     )
 
