@@ -11,9 +11,6 @@ import os
 
 pytestmark = [
     pytest.mark.asyncio,
-    pytest.mark.skipif(not os.environ.get('UIQMAKO_TEST_ERP',False),
-        reason="Define UIQMAKO_TEST_ERP environt to run ERP dependant tests"
-    ),
 ]
 
 # Kludge to avoid deletion of cursors wile erppeek_wst 3.0.1 is not released
@@ -25,6 +22,10 @@ Service.__del__ = lambda self: None
 
 @pytest.fixture(scope='module')
 def erp_client():
+    if not os.environ.get('UIQMAKO_TEST_ERP',False):
+        pytest.skip(
+            reason="Define UIQMAKO_TEST_ERP environt to run ERP dependant tests"
+        )
     client = Client(
         # TODO: take secure from url method
         transport=PoolTransport(secure=False),
