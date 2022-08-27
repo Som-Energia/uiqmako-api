@@ -2,8 +2,6 @@ import json
 from uiqmako_api.utils.erp_service import ErpService
 
 class PoweremailTemplates:
-    _editable_fields = ['def_subject', 'def_body_text', 'def_to', 'def_cc', 'def_bcc', 'lang']
-    _fields = _editable_fields + ['id', 'name', 'model_int_name']
     _erp = None
 
     def __init__(self, ERP):
