@@ -58,6 +58,6 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs) or [http://localho
 
 ```
     createdb test_uiqmako
-    vim `test/.env.test`
-    poetry run pytest --cov=uiqmako_api
+    # Review and edit test/.env.test
+    poetry run pytest -v --cov=uiqmako_api
 ```

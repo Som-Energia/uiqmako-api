@@ -120,8 +120,8 @@ def erp_translations(rollback_erp):
 @pytest.fixture
 def erp_backdoor(rollback_erp):
     """
-    Just a way of accessing directly the ERP that can be
-    substituted for the ErpServiceDouble.
+    Just a way of accessing directly the ERP so that it can be
+    replaced for ErpServiceDouble.
     """
     class BackendBackdoor:
         def __init__(self, erp):
