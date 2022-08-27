@@ -122,272 +122,274 @@ def erp_translations(rollback_erp):
     return TranslationsHelper(rollback_erp)
 
 
-# Fixture testing
+class Test_Base():
 
-async def test__fixture__existing_template(rollback_erp, erp_translations):
-    """
-    This test ensures fragile data has the required properties.
-    If it fails, please update the referred fixtures
-    """
-    module, shortname = existing_template.xml_id.split('.')
-    externalid = rollback_erp.IrModelData.read([
-        ('module', '=', module),
-        ('name', '=', shortname),
-        ('model', '=', 'poweremail.templates'),
-    ], ['res_id'])
-    assert externalid, (
-        f"ERP has no {existing_template.xml_id} defined for a {model}, "
-        f"\nupdate existing_template.xml_id."
-    )
-    assert externalid[0]['res_id']==existing_template.erp_id, (
-        f"This ERP has template '{existing_template.xml_id}' "
-        f"pointing to {externalid[0]['res_id']} instead of "
-        f"{existing_template.erp_id}. "
-        f"\nPlease correct existing_template.erp_id."
-    )
-    template = rollback_erp.PoweremailTemplates.read([existing_template.erp_id], ['name','model_int_name'])[0]
-    assert template == dict(
-        id = existing_template.erp_id,
-        name = existing_template.name,
-        model_int_name = existing_template.model,
-    ), (
-        f"This ERP has different name for the template {existing_template.xml_id}.\n"
-        f"Expected:\n"
-        f"{existing_template.name}\n"
-        f"But was:\n"
-        f"{template['name']}\n"
-        f"\nPlease correct existing_template.name."
-    )
+    # Fixture testing
 
-    translations = erp_translations.list('def_subject')
-
-    assert set(translations.keys()) == set(('ca_ES', 'es_ES')), (
-        f"The template {existing_template.xml_id} is expected to have 'def_subject' "
-        f"translated to all and just the supported languages."
-    )
-    assert translations == {
-        'ca_ES': existing_template.subject_ca_ES,
-        'es_ES': existing_template.subject_es_ES,
-    }, (
-        f"Subject translations changed in the ERP template {existing_template.xml_id} "
-        f"\nPlease, update existing_template.subject_*"
-    )
-    assert erp_translations.list('def_body_text').keys() == {
-        'es_ES',
-        'ca_ES',
-    }, (
-        f"The template {existing_template.xml_id} is expected to have 'def_body_text' "
-        f"translated to all and just the supported languages."
-    )
-
-
-# ErpService.template_list
-
-async def test__template_list(erp_services):
-    items = await erp_services.template_list()
-    template = [
-        item for item in items
-        if item['xml_id'] == existing_template.xml_id
-    ]
-    assert template, (
-        f"Expected template with semantic id {existing_template.xml_id} not found"
-    )
-    assert template[0]['name'] == existing_template.name
-
-# ErpService.erp_id
-
-async def test__erp_id__byId(erp_services):
-    id = await erp_services.erp_id('poweremail.templates', 1)
-    assert id == 1
-
-async def test__erp_id__byStringNumeric(erp_services):
-    id = await erp_services.erp_id('poweremail.templates', '1')
-    assert id == 1
-
-async def test__erp_id__bySemanticId(erp_services):
-    id = await erp_services.erp_id(
-        'poweremail.templates',
-        existing_template.xml_id,
-    )
-    assert type(id) == int
-    assert id == existing_template.erp_id
-
-async def test__erp_id__badId(erp_services):
-    with pytest.raises(InvalidId) as ctx:
-        id = await erp_services.erp_id(
-            'poweremail.templates',
-            'badformattedid',
+    async def test__fixture__existing_template(self, rollback_erp, erp_translations):
+        """
+        This test ensures fragile data has the required properties.
+        If it fails, please update the referred fixtures
+        """
+        module, shortname = existing_template.xml_id.split('.')
+        externalid = rollback_erp.IrModelData.read([
+            ('module', '=', module),
+            ('name', '=', shortname),
+            ('model', '=', 'poweremail.templates'),
+        ], ['res_id'])
+        assert externalid, (
+            f"ERP has no {existing_template.xml_id} defined for a {model}, "
+            f"\nupdate existing_template.xml_id."
+        )
+        assert externalid[0]['res_id']==existing_template.erp_id, (
+            f"This ERP has template '{existing_template.xml_id}' "
+            f"pointing to {externalid[0]['res_id']} instead of "
+            f"{existing_template.erp_id}. "
+            f"\nPlease correct existing_template.erp_id."
+        )
+        template = rollback_erp.PoweremailTemplates.read([existing_template.erp_id], ['name','model_int_name'])[0]
+        assert template == dict(
+            id = existing_template.erp_id,
+            name = existing_template.name,
+            model_int_name = existing_template.model,
+        ), (
+            f"This ERP has different name for the template {existing_template.xml_id}.\n"
+            f"Expected:\n"
+            f"{existing_template.name}\n"
+            f"But was:\n"
+            f"{template['name']}\n"
+            f"\nPlease correct existing_template.name."
         )
 
-    assert str(ctx.value) == (
-        "Semantic id 'badformattedid' "
-        "does not have the expected format 'module.name'"
-    )
+        translations = erp_translations.list('def_subject')
 
-async def test__erp_id__missingId(erp_services):
-    with pytest.raises(XmlIdNotFound) as ctx:
-        id = await erp_services.erp_id(
-            'poweremail.templates',
-            'properlyformated.butmissing',
+        assert set(translations.keys()) == set(('ca_ES', 'es_ES')), (
+            f"The template {existing_template.xml_id} is expected to have 'def_subject' "
+            f"translated to all and just the supported languages."
+        )
+        assert translations == {
+            'ca_ES': existing_template.subject_ca_ES,
+            'es_ES': existing_template.subject_es_ES,
+        }, (
+            f"Subject translations changed in the ERP template {existing_template.xml_id} "
+            f"\nPlease, update existing_template.subject_*"
+        )
+        assert erp_translations.list('def_body_text').keys() == {
+            'es_ES',
+            'ca_ES',
+        }, (
+            f"The template {existing_template.xml_id} is expected to have 'def_body_text' "
+            f"translated to all and just the supported languages."
         )
 
-    assert str(ctx.value) == (
-        "properlyformated.butmissing"
-    )
 
-# ErpService.load_template
+    # ErpService.template_list
 
-async def test__load_template__byId(erp_services):
-    template = await erp_services.load_template(existing_template.erp_id)
+    async def test__template_list(self, erp_services):
+        items = await erp_services.template_list()
+        template = [
+            item for item in items
+            if item['xml_id'] == existing_template.xml_id
+        ]
+        assert template, (
+            f"Expected template with semantic id {existing_template.xml_id} not found"
+        )
+        assert template[0]['name'] == existing_template.name
 
-    assert type(template) == Template
-    assert template.name == existing_template.name
+    # ErpService.erp_id
 
-async def test__load_template__bySemanticId(erp_services):
-    template = await erp_services.load_template(existing_template.xml_id)
+    async def test__erp_id__byId(self, erp_services):
+        id = await erp_services.erp_id('poweremail.templates', 1)
+        assert id == 1
 
-    assert type(template) == Template
-    assert template.name == existing_template.name
+    async def test__erp_id__byStringNumeric(self, erp_services):
+        id = await erp_services.erp_id('poweremail.templates', '1')
+        assert id == 1
 
-async def test__load_template__missingId(erp_services):
-    with pytest.raises(Exception) as ctx:
-        await erp_services.load_template(9999999) # guessing it wont exist
+    async def test__erp_id__bySemanticId(self, erp_services):
+        id = await erp_services.erp_id(
+            'poweremail.templates',
+            existing_template.xml_id,
+        )
+        assert type(id) == int
+        assert id == existing_template.erp_id
 
-    assert str(ctx.value) == "No template found with id 9999999"
+    async def test__erp_id__badId(self, erp_services):
+        with pytest.raises(InvalidId) as ctx:
+            id = await erp_services.erp_id(
+                'poweremail.templates',
+                'badformattedid',
+            )
 
-async def test__load_template__includesSubjectTranslations(erp_services):
-    template = await erp_services.load_template(existing_template.xml_id)
+        assert str(ctx.value) == (
+            "Semantic id 'badformattedid' "
+            "does not have the expected format 'module.name'"
+        )
 
-    assert template.dict(include={
-        'def_subject_ca_ES',
-        'def_subject_es_ES',
-    }) == dict(
-        def_subject_ca_ES=existing_template.subject_ca_ES,
-        def_subject_es_ES=existing_template.subject_es_ES,
-    )
+    async def test__erp_id__missingId(self, erp_services):
+        with pytest.raises(XmlIdNotFound) as ctx:
+            id = await erp_services.erp_id(
+                'poweremail.templates',
+                'properlyformated.butmissing',
+            )
 
-async def test__load_template__missingTranslationAsEmpty(erp_services, erp_translations):
-    # When we remove the spanish translation
-    erp_translations.remove('def_subject', 'es_ES')
+        assert str(ctx.value) == (
+            "properlyformated.butmissing"
+        )
 
-    template = await erp_services.load_template(existing_template.xml_id)
+    # ErpService.load_template
 
-    assert template.dict(include={
-        'def_subject_ca_ES',
-        'def_subject_es_ES',
-    }) == dict(
-        def_subject_ca_ES=existing_template.subject_ca_ES,
-        def_subject_es_ES='', # this changes
-    )
+    async def test__load_template__byId(self, erp_services):
+        template = await erp_services.load_template(existing_template.erp_id)
 
-async def test__load_template__noTranslation(erp_services, erp_translations):
-    # When we remove all the translations
-    erp_translations.remove('def_subject', 'es_ES')
-    erp_translations.remove('def_subject', 'ca_ES')
+        assert type(template) == Template
+        assert template.name == existing_template.name
 
-    template = await erp_services.load_template(existing_template.xml_id)
+    async def test__load_template__bySemanticId(self, erp_services):
+        template = await erp_services.load_template(existing_template.xml_id)
 
-    assert template.dict(include={
-        'def_subject_ca_ES',
-        'def_subject_es_ES',
-    }) == dict(
-        def_subject_ca_ES='', # this changes
-        def_subject_es_ES='', # this changes
-    )
+        assert type(template) == Template
+        assert template.name == existing_template.name
 
-async def test__load_template__unsupportedLanguages_ignored(erp_services, erp_translations):
-    # We change the language of the translation
-    erp_translations.edit('def_subject', 'es_ES', values=dict(
-        lang = 'pt_PT',
-    ))
+    async def test__load_template__missingId(self, erp_services):
+        with pytest.raises(Exception) as ctx:
+            await erp_services.load_template(9999999) # guessing it wont exist
 
-    assert erp_translations.list('def_subject') == dict(
-        pt_PT = existing_template.subject_es_ES, # Whe changed the language here
-        ca_ES = existing_template.subject_ca_ES,
-    )
+        assert str(ctx.value) == "No template found with id 9999999"
 
-    template = await erp_services.load_template(existing_template.xml_id)
+    async def test__load_template__includesSubjectTranslations(self, erp_services):
+        template = await erp_services.load_template(existing_template.xml_id)
 
-    # Then the edited translation is ignored
-    # There is no es_ES, so empty
-    assert 'def_subject_es_ES' in template.dict()
-    assert template.def_subject_es_ES == ''
-    # pt_PT not supported, so, not included
-    assert 'def_subject_pt_PT' not in template.dict()
+        assert template.dict(include={
+            'def_subject_ca_ES',
+            'def_subject_es_ES',
+        }) == dict(
+            def_subject_ca_ES=existing_template.subject_ca_ES,
+            def_subject_es_ES=existing_template.subject_es_ES,
+        )
 
-# ErpService.save_template
+    async def test__load_template__missingTranslationAsEmpty(self, erp_services, erp_translations):
+        # When we remove the spanish translation
+        erp_translations.remove('def_subject', 'es_ES')
 
-async def test__save_template__changingEditableFields(erp_services):
-    edited = edited_values()
-    await erp_services.save_template(
-        id = existing_template.erp_id,
-        **edited,
-    )
+        template = await erp_services.load_template(existing_template.xml_id)
 
-    retrieved = await erp_services.load_template(existing_template.xml_id)
+        assert template.dict(include={
+            'def_subject_ca_ES',
+            'def_subject_es_ES',
+        }) == dict(
+            def_subject_ca_ES=existing_template.subject_ca_ES,
+            def_subject_es_ES='', # this changes
+        )
 
-    assert retrieved.dict() == dict(
-        edited,
-        id = existing_template.erp_id,
-        name = existing_template.name, # Unchanged!
-        model_int_name = existing_template.model, # Unchanged!
-    )
+    async def test__load_template__noTranslation(self, erp_services, erp_translations):
+        # When we remove all the translations
+        erp_translations.remove('def_subject', 'es_ES')
+        erp_translations.remove('def_subject', 'ca_ES')
 
-async def test__save_template__usingSemanticId(erp_services):
-    edited = edited_values()
-    await erp_services.save_template(
-        id = existing_template.xml_id,
-        **edited,
-    )
+        template = await erp_services.load_template(existing_template.xml_id)
 
-    retrieved = await erp_services.load_template(existing_template.xml_id)
+        assert template.dict(include={
+            'def_subject_ca_ES',
+            'def_subject_es_ES',
+        }) == dict(
+            def_subject_ca_ES='', # this changes
+            def_subject_es_ES='', # this changes
+        )
 
-    assert retrieved.dict() == dict(
-        edited,
-        id = existing_template.erp_id,
-        name = existing_template.name, # Unchanged!
-        model_int_name = existing_template.model, # Unchanged!
-    )
+    async def test__load_template__unsupportedLanguages_ignored(self, erp_services, erp_translations):
+        # We change the language of the translation
+        erp_translations.edit('def_subject', 'es_ES', values=dict(
+            lang = 'pt_PT',
+        ))
 
-async def test__save_template__emptySubjectTranslation_removesIt(erp_services, erp_translations):
-    edited = edited_values(
-        def_subject_ca_ES = "", # <- This changes
-    )
-    await erp_services.save_template(
-        id = existing_template.erp_id,
-        **edited,
-    )
+        assert erp_translations.list('def_subject') == dict(
+            pt_PT = existing_template.subject_es_ES, # Whe changed the language here
+            ca_ES = existing_template.subject_ca_ES,
+        )
 
-    erp_translations.list('def_subject') == {
-        'es_ES': edited.def_subject_es_ES,
-        # And the ca_ES is missing
-    }
+        template = await erp_services.load_template(existing_template.xml_id)
 
-async def test__save_template__missingSubjectTranslations_recreated(erp_services, erp_translations):
-    # Given that the template is missing a subject translation
-    erp_translations.remove('def_subject', 'es_ES')
+        # Then the edited translation is ignored
+        # There is no es_ES, so empty
+        assert 'def_subject_es_ES' in template.dict()
+        assert template.def_subject_es_ES == ''
+        # pt_PT not supported, so, not included
+        assert 'def_subject_pt_PT' not in template.dict()
 
-    edited = edited_values()
-    await erp_services.save_template(
-        id = existing_template.erp_id,
-        **edited,
-    )
+    # ErpService.save_template
 
-    assert erp_translations.list('def_subject') == {
-        'es_ES': edited.def_subject_es_ES,
-        'ca_ES': edited.def_subject_ca_ES,
-    }
+    async def test__save_template__changingEditableFields(self, erp_services):
+        edited = edited_values()
+        await erp_services.save_template(
+            id = existing_template.erp_id,
+            **edited,
+        )
 
-async def test__save_template__clonesBodyToItsTranslations(erp_services, erp_translations):
-    edited = edited_values()
-    await erp_services.save_template(
-        id = existing_template.erp_id,
-        **edited,
-    )
+        retrieved = await erp_services.load_template(existing_template.xml_id)
 
-    assert erp_translations.list('def_body_text') == {
-        'es_ES': edited.def_body_text,
-        'ca_ES': edited.def_body_text,
-    }
+        assert retrieved.dict() == dict(
+            edited,
+            id = existing_template.erp_id,
+            name = existing_template.name, # Unchanged!
+            model_int_name = existing_template.model, # Unchanged!
+        )
+
+    async def test__save_template__usingSemanticId(self, erp_services):
+        edited = edited_values()
+        await erp_services.save_template(
+            id = existing_template.xml_id,
+            **edited,
+        )
+
+        retrieved = await erp_services.load_template(existing_template.xml_id)
+
+        assert retrieved.dict() == dict(
+            edited,
+            id = existing_template.erp_id,
+            name = existing_template.name, # Unchanged!
+            model_int_name = existing_template.model, # Unchanged!
+        )
+
+    async def test__save_template__emptySubjectTranslation_removesIt(self, erp_services, erp_translations):
+        edited = edited_values(
+            def_subject_ca_ES = "", # <- This changes
+        )
+        await erp_services.save_template(
+            id = existing_template.erp_id,
+            **edited,
+        )
+
+        erp_translations.list('def_subject') == {
+            'es_ES': edited.def_subject_es_ES,
+            # And the ca_ES is missing
+        }
+
+    async def test__save_template__missingSubjectTranslations_recreated(self, erp_services, erp_translations):
+        # Given that the template is missing a subject translation
+        erp_translations.remove('def_subject', 'es_ES')
+
+        edited = edited_values()
+        await erp_services.save_template(
+            id = existing_template.erp_id,
+            **edited,
+        )
+
+        assert erp_translations.list('def_subject') == {
+            'es_ES': edited.def_subject_es_ES,
+            'ca_ES': edited.def_subject_ca_ES,
+        }
+
+    async def test__save_template__clonesBodyToItsTranslations(self, erp_services, erp_translations):
+        edited = edited_values()
+        await erp_services.save_template(
+            id = existing_template.erp_id,
+            **edited,
+        )
+
+        assert erp_translations.list('def_body_text') == {
+            'es_ES': edited.def_body_text,
+            'ca_ES': edited.def_body_text,
+        }
 
 

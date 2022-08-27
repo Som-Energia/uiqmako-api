@@ -26,5 +26,3 @@ class PoweremailTemplates:
             id=xml_id,
             def_body_text=body_text,
         ))
-
-
