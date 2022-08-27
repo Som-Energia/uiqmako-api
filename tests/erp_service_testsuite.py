@@ -120,6 +120,7 @@ class ErpService_TestSuite:
         )
         assert template[0]['name'] == existing_template.name
 
+
     # ErpService.erp_id
 
     async def test__erp_id__byId(self, erp_service):
@@ -160,6 +161,7 @@ class ErpService_TestSuite:
         assert str(ctx.value) == (
             "properlyformated.butmissing"
         )
+
 
     # ErpService.load_template
 
@@ -241,6 +243,7 @@ class ErpService_TestSuite:
         assert template.def_subject_es_ES == ''
         # pt_PT not supported, so, not included
         assert 'def_subject_pt_PT' not in template.dict()
+
 
     # ErpService.save_template
 
