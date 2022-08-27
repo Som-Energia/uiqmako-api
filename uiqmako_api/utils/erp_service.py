@@ -154,7 +154,10 @@ class ErpService(object):
             translated_field = 'def_body_text',
             fields = body_translations,
         )
-        #translation.upload_translation_all(fieldname='def_body_text', model='poweremail.templates', res_id=self.id, value=body_text)
+        # DGG: Alternative old behaviour:
+        # Just set all existing, even non supported, do not create new ones
+        # Maybe faster but not sure than correct
+        #self.set_all_field_translations(fieldname='def_body_text', model='poweremail.templates', res_id=self.id, value=body_text)
 
     async def load_translations(self, modelname, object_id, translated_field):
         # Criteria:
@@ -236,4 +239,14 @@ class ErpService(object):
                 src=untranslated_value,
                 value=fields[prefix + lang],
             ))
+
+    def set_all_field_translations(self, model, fieldname, res_id, value):
+        """
+        Sets to the same value all existing translations of the field
+        of the model for the given object with res_id.
+        This is done this way because the body translations didn't work
+        due to a bug in our openerp version.
+        """
+        tr_ids = self.erp.IrTranslation.search([('res_id', '=', res_id), ('name', '=', '{},{}'.format(model,fieldname))])
+        return self.erp.IrTranslation.write(tr_ids, {'value': value})
 
