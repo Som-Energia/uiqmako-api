@@ -418,6 +418,11 @@ class Test_ErpService():
         }
 
 class Test_ErpServiceDouble(Test_ErpService):
+
+    """Body traslations are still a implementation detaiil"""
+    def test__save_template__clonesBodyToItsTranslations(self):
+        pass
+
     @pytest.fixture
     def erp_services(self):
         service = ErpServiceDouble()
@@ -468,7 +473,29 @@ class Test_ErpServiceDouble(Test_ErpService):
 
         return Translations(erp_services)
 
-    """Body traslations are still a implementation detaiil"""
-    def test__save_template__clonesBodyToItsTranslations(self):
-        pass
+    @pytest.fixture
+    def backend_backdoor(self, erp_services):
+        """
+        Just a way of accessing directly the ERP that can be
+        substituted for the ErpServiceDouble.
+        """
+        class BackendBackdoor:
+            def __init__(self, service):
+                self.service = service
+
+            def template_fixture_constant_data(self):
+                data = self.service.data.templates[existing_template.erp_id]
+                return dict(
+                    id = data['id'],
+                    name = data['name'],
+                    model_int_name = data['model_int_name'],
+                )
+
+            def resolve_template_fixture_semantic_id(self):
+                if existing_template.xml_id not in self.service.data.templates:
+                    return null
+                return self.service.data.templates[existing_template.xml_id]['id']
+
+        return BackendBackdoor(erp_services)
+
 
