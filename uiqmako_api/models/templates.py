@@ -48,8 +48,8 @@ async def get_template_orm(template_id=None, erp_id=None, xml_id=None, name=None
     if name:
         search_fields.update({'name': name})
     try:
-        template_info = await db.get(TemplateInfoModel, **search_fields)
-        return TemplateInfoBase.from_orm(template_info)
+        template_id = await db.get(TemplateInfoModel, **search_fields)
+        return TemplateInfoBase.from_orm(template_id)
     except peewee.DoesNotExist as ex:
         return None
 
