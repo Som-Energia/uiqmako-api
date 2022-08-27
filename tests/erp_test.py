@@ -1,4 +1,5 @@
 from uiqmako_api.schemas.templates import Template
+from uiqmako_api.errors.exceptions import XmlIdNotFound, InvalidId
 from yamlns import ns
 
 class ERPTest:
@@ -43,15 +44,6 @@ class ErpServiceDouble():
         self.dummyTemplate('template_module.template_01', 103) # db data
         self.dummyTemplate('template_module.template_02', 104) # db data
         self.dummyTemplate('module.id', 105) # test_git_utils.py, test_schemas.py
-        self.dummyTemplate(
-            xml_id = existing_template.xml_id,
-            id = existing_template.erp_id,
-            def_subject = "Untranslated subject",
-            def_subject_es_ES = existing_template.subject_es_ES,
-            def_subject_ca_ES = existing_template.subject_ca_ES,
-            name = existing_template.name,
-            model_int_name = existing_template.model,
-        ) # TODO: b2b case with the real one
 
     def dummyTemplate(self, xml_id, id, **overrides):
         dummy = dict(
@@ -74,17 +66,51 @@ class ErpServiceDouble():
         )
         dummy.update(overrides)
         self.data.templates[xml_id] = dummy
+        self.data.templates[int(dummy['id'])] = dummy # intended shared object
+        self.data.templates[str(dummy['id'])] = dummy # intended shared object
+
+    async def erp_id(self, model, id):
+        if str(id).isdecimal(): return int(id)
+        try:
+            module, shortname = id.split('.')
+        except ValueError:
+            raise InvalidId(
+                f"Semantic id '{id}' does not have the expected format 'module.name'"
+            )
+        try:
+            return self.data.templates[id]['id']
+        except KeyError:
+            raise XmlIdNotFound(id)
+            raise XmlIdNotFound(f"No template found with id {id}")
+
 
     async def load_template(self, id):
+        self.erp_id('poweremail.templates', id)
         try:
             return Template(**self.data.templates[id])
         except KeyError:
-            raise
+            raise XmlIdNotFound(f"No template found with id {id}")
 
     async def save_template(self, id, **kwds):
+        self.erp_id('poweremail.templates', id)
         try:
-            template = self.data[id]
+            template = self.data.templates[id]
         except KeyError:
-            raise
+            raise XmlIdNotFound(str(id))
+        if 'name' in kwds: del kwds['name']
+        if 'id' in kwds: del kwds['id']
+        if 'model_int_name' in kwds: del kwds['model_int_name']
         template.update(kwds)
+
+    async def template_list(self):
+        return [
+            dict(
+                xml_id = key,
+                erp_id=value['id'],
+                name = value['name']
+            )
+            for key, value in self.data.templates.items()
+            if not str(key).isdecimal()
+        ]
+
 

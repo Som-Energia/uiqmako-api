@@ -4,6 +4,7 @@ from config import settings
 from erppeek_wst import ClientWST as Client
 from pool_transport import PoolTransport
 from uiqmako_api.utils.erp_service import ErpService
+from .erp_test import ErpServiceDouble
 from uiqmako_api.schemas.templates import Template
 from uiqmako_api.errors.exceptions import InvalidId, XmlIdNotFound
 import os
@@ -77,6 +78,7 @@ def edited_values(**kwds):
     )
     return ns(result, **kwds)
 
+
 class TranslationsHelper():
     """
     Helper to manage the backend
@@ -122,7 +124,7 @@ def erp_translations(rollback_erp):
     return TranslationsHelper(rollback_erp)
 
 
-class Test_Base():
+class Test_ErpService():
 
     # Fixture testing
 
@@ -302,12 +304,13 @@ class Test_Base():
         erp_translations.edit('def_subject', 'es_ES', values=dict(
             lang = 'pt_PT',
         ))
-
+        # No Double compatible
+        """
         assert erp_translations.list('def_subject') == dict(
             pt_PT = existing_template.subject_es_ES, # Whe changed the language here
             ca_ES = existing_template.subject_ca_ES,
         )
-
+        """
         template = await erp_services.load_template(existing_template.xml_id)
 
         # Then the edited translation is ignored
@@ -392,4 +395,58 @@ class Test_Base():
             'ca_ES': edited.def_body_text,
         }
 
+class Test_ErpServiceDouble(Test_ErpService):
+    @pytest.fixture
+    def erp_services(self):
+        service = ErpServiceDouble()
+        service.dummyTemplate(
+            xml_id = existing_template.xml_id,
+            id = existing_template.erp_id,
+            def_subject = "Untranslated subject",
+            def_subject_es_ES = existing_template.subject_es_ES,
+            def_subject_ca_ES = existing_template.subject_ca_ES,
+            name = existing_template.name,
+            model_int_name = existing_template.model,
+        )
+        return service
+
+    class Translations:
+        def __init__(self, service):
+            self.service = service
+
+        def list(self, field):
+            if field == 'def_body_text':
+                return {
+                    'ca_ES': '',
+                    'es_ES': '',
+                }
+            template = self.service.data.templates[existing_template.xml_id]
+            prefix = field+'_'
+            return {
+                key[len(prefix):] : value
+                for key, value in template.items()
+                if key.startswith(prefix)
+            }
+
+        def remove(self, field, language):
+            translated_field = f'{field}_{language}'
+            template = self.service.data.templates[existing_template.xml_id]
+            if translated_field in template:
+                template[translated_field]=''
+
+        def edit(self, field, lang, values):
+            translated_field = f'{field}_{lang}'
+            template = self.service.data.templates[existing_template.xml_id]
+            if 'value' in values:
+                template[translated_field]=values['value']
+            if 'lang' in values and values['lang'] != lang:
+                template[translated_field] = ''
+
+    @pytest.fixture
+    def erp_translations(self, erp_services):
+        return Test_ErpServiceDouble.Translations(erp_services)
+
+    """Body traslations are still a implementation detaiil"""
+    def test__save_template__clonesBodyToItsTranslations(self):
+        pass
 
