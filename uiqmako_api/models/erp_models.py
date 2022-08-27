@@ -64,7 +64,7 @@ class IrTranslation:
         return self._IrTranslation.write(tr_ids, {'value': value})
 
     def download_template_subject_translations(self, template_id):
-        self.download_translations(
+        return self.download_translations(
             modelname = 'poweremail.templates',
             object_id = template_id,
             translated_field = 'def_subject',
