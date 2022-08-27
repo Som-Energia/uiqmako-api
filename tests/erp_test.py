@@ -16,28 +16,13 @@ class ERPTest:
         return True
 
 
-# TODO: Duplicated in test_erp_services
-existing_template = ns(
-    # An existing template with semantic id
-    erp_id = 183, # Extremely fragile
-    xml_id = 'giscedata_switching.notification_atr_M1_01',
-    name = 'ATR M101: Solicitud de modificación cambio de titular',
-    model = 'giscedata.switching',
-    subject_ca_ES =
-        'Som Energia: Canvi de titular. Verificació de dades. '
-        'Contracte ${object.polissa_ref_id.name}',
-    subject_es_ES = 
-        'Som Energia: Cambio de titular. Verificación de datos. '
-        'Contrato ${object.polissa_ref_id.name}',
-)
-
 class ErpServiceDouble():
     """
     Emulates an actual ErpService.
     """
     def __init__(self, data=None):
         self.data = data or ns(
-            templates={},
+            templates=ns()
         )
         self.dummyTemplate('som_test.id_test', 100) # test_templates.py
         self.dummyTemplate('module_test.xml_id', 102) # test_api.py
@@ -81,7 +66,6 @@ class ErpServiceDouble():
             return self.data.templates[id]['id']
         except KeyError:
             raise XmlIdNotFound(id)
-            raise XmlIdNotFound(f"No template found with id {id}")
 
 
     async def load_template(self, id):
