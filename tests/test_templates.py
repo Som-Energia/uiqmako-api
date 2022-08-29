@@ -68,35 +68,33 @@ class TestTemplates:
         assert template_info.model == 'res.partner'
 
     @pytest.mark.parametrize(
-        "body_text,split", [
-            (ONLY_PYTHON, [('python', ONLY_PYTHON)]),
-            (ONLY_HTML, [('html', ONLY_HTML.strip())]),
-            (ONLY_PYTHON+"\n"+ONLY_HTML, [
+        "body_text,split", [ pytest.param(*x[1:], id=x[0]) for x in [
+            ('python', ONLY_PYTHON, [('python', ONLY_PYTHON)]),
+            ('html', ONLY_HTML, [('html', ONLY_HTML.strip())]),
+            ('python_html', ONLY_PYTHON+"\n"+ONLY_HTML, [
                 ('python', ONLY_PYTHON),
                 ('html', ONLY_HTML.strip())
             ]),
-            (ONLY_HTML + "\n" + ONLY_PYTHON, [
+            ('html_python', ONLY_HTML + "\n" + ONLY_PYTHON, [
                 ('html', ONLY_HTML.replace('\n', '')),
                 ('python', ONLY_PYTHON)
             ]),
-            (ONLY_HTML + "\n" + ONLY_PYTHON + "\n" + ONLY_PYTHON, [
+            ('html_python_python', ONLY_HTML + "\n" + ONLY_PYTHON + "\n" + ONLY_PYTHON, [
                 ('html', ONLY_HTML.replace('\n', '')),
                 ('python', ONLY_PYTHON),
                 ('python', ONLY_PYTHON),
             ]),
-            ("\n" + ONLY_PYTHON + "\n" + ONLY_PYTHON + ONLY_HTML, [
+            ('python_python_html', "\n" + ONLY_PYTHON + "\n" + ONLY_PYTHON + ONLY_HTML, [
                 ('python', ONLY_PYTHON),
                 ('python', ONLY_PYTHON),
                 ('html', ONLY_HTML.strip()),
             ]),
-
-            ("\n" + ONLY_PYTHON + ONLY_HTML + ONLY_PYTHON, [
+            ('python_html_python', "\n" + ONLY_PYTHON + ONLY_HTML + ONLY_PYTHON, [
                 ('python', ONLY_PYTHON),
                 ('html', ONLY_HTML.replace('\n', '')),
                 ('python', ONLY_PYTHON),
             ]),
-
-        ]
+        ]]
     )
     def test_parse_body_by_language(self, body_text, split):
         assert parse_body_by_language(body_text) == split
@@ -117,4 +115,5 @@ class TestTemplates:
             result = await create_template_case(DB_MANAGER, template_id, 'repeat_case', 3)
         post = await get_template_cases(template_id)
         assert len(pre) + 1 == len(post)
+
 
