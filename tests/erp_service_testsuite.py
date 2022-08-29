@@ -288,7 +288,7 @@ class ErpService_TestSuite:
             **edited,
         )
 
-        erp_translations.list('def_subject') == {
+        assert erp_translations.list('def_subject') == {
             'es_ES': edited.def_subject_es_ES,
             # And the ca_ES is missing
         }

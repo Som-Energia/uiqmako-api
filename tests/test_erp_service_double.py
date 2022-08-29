@@ -41,6 +41,7 @@ def erp_translations(erp_service):
                 key[len(prefix):] : value
                 for key, value in template.items()
                 if key.startswith(prefix)
+                and value
             }
 
         def remove(self, field, language):
