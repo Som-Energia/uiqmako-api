@@ -61,5 +61,11 @@ async def create_case(
     created = await create_template_case(app.db_manager, template_id, case_name, case_id)
     return {'result': created}
 
+@router.get("/importable/{source}", dependencies=[Depends(get_current_active_user)])
+async def importable_template_list(source: str):
+    from . import app
+    templates = await app.ERP.service().template_list()
+    return {'templates': templates}
+
 
 

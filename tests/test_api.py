@@ -126,3 +126,18 @@ class TestApi:
             'allowed_fields': ["content","def_subject","def_subject_es_ES", "def_subject_ca_ES", "def_bcc","html","python","lang","def_body_text","def_to","def_cc"]
         })
         assert response.text == json.dumps(user_info).replace(' ','')
+
+    async def test_importable_template_list__default_source(self, test_app, override_get_current_active_user):
+        from uiqmako_api.api.dependencies import get_current_active_user
+        test_app.dependency_overrides[get_current_active_user] = lambda: override_get_current_active_user
+        async with AsyncClient(app=test_app, base_url="http://test") as ac:
+            response = await ac.get(
+                "templates/importable/PROD",
+                headers={'Authorization': "Bearer UserAll"},
+            )
+        assert response.status_code == 200
+        content = response.json()
+        assert 'templates' in content
+        assert content['templates'][0].keys() == set(
+            ('xml_id', 'name', 'erp_id')
+        )
