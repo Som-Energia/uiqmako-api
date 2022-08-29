@@ -51,6 +51,7 @@ def edited_values(**kwds):
     )
     return ns(result, **kwds)
 
+TEMPLATE_MODEL = 'poweremail.templates'
 
 class ErpService_TestSuite:
     # Fixture testing
@@ -124,16 +125,16 @@ class ErpService_TestSuite:
     # ErpService.erp_id
 
     async def test__erp_id__byId(self, erp_service):
-        id = await erp_service.erp_id('poweremail.templates', 1)
+        id = await erp_service.erp_id(TEMPLATE_MODEL, 1)
         assert id == 1
 
     async def test__erp_id__byStringNumeric(self, erp_service):
-        id = await erp_service.erp_id('poweremail.templates', '1')
+        id = await erp_service.erp_id(TEMPLATE_MODEL, '1')
         assert id == 1
 
     async def test__erp_id__bySemanticId(self, erp_service):
         id = await erp_service.erp_id(
-            'poweremail.templates',
+            TEMPLATE_MODEL,
             existing_template.xml_id,
         )
         assert type(id) == int
@@ -142,7 +143,7 @@ class ErpService_TestSuite:
     async def test__erp_id__badId(self, erp_service):
         with pytest.raises(InvalidId) as ctx:
             id = await erp_service.erp_id(
-                'poweremail.templates',
+                TEMPLATE_MODEL,
                 'badformattedid',
             )
 
@@ -154,7 +155,7 @@ class ErpService_TestSuite:
     async def test__erp_id__missingId(self, erp_service):
         with pytest.raises(XmlIdNotFound) as ctx:
             id = await erp_service.erp_id(
-                'poweremail.templates',
+                TEMPLATE_MODEL,
                 'properlyformated.butmissing',
             )
 
