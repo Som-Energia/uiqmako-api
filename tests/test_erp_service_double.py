@@ -87,6 +87,6 @@ def erp_backdoor(erp_service):
 
 class Test_ErpServiceDouble(ErpService_TestSuite):
 
-    def test__save_template__clonesBodyToItsTranslations(self):
+    def test__save_template__clonesBodyToItsTranslations(self, erp_translations, erp_backdoor):
         """Body traslations are still a implementation detaiil"""
 
