@@ -125,24 +125,24 @@ class ErpService_TestSuite:
     # ErpService.erp_id
 
     async def test__erp_id__byId(self, erp_service):
-        id = await erp_service.erp_id(TEMPLATE_MODEL, 1)
-        assert id == 1
+        erp_id = await erp_service.erp_id(TEMPLATE_MODEL, 1)
+        assert erp_id == 1
 
     async def test__erp_id__byStringNumeric(self, erp_service):
-        id = await erp_service.erp_id(TEMPLATE_MODEL, '1')
-        assert id == 1
+        erp_id = await erp_service.erp_id(TEMPLATE_MODEL, '1')
+        assert erp_id == 1
 
     async def test__erp_id__bySemanticId(self, erp_service):
-        id = await erp_service.erp_id(
+        erp_id = await erp_service.erp_id(
             TEMPLATE_MODEL,
             existing_template.xml_id,
         )
-        assert type(id) == int
-        assert id == existing_template.erp_id
+        assert type(erp_id) == int
+        assert erp_id == existing_template.erp_id
 
     async def test__erp_id__badId(self, erp_service):
         with pytest.raises(InvalidId) as ctx:
-            id = await erp_service.erp_id(
+            erp_id = await erp_service.erp_id(
                 TEMPLATE_MODEL,
                 'badformattedid',
             )
@@ -154,7 +154,7 @@ class ErpService_TestSuite:
 
     async def test__erp_id__missingId(self, erp_service):
         with pytest.raises(XmlIdNotFound) as ctx:
-            id = await erp_service.erp_id(
+            await erp_service.erp_id(
                 TEMPLATE_MODEL,
                 'properlyformated.butmissing',
             )
