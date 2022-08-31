@@ -13,6 +13,9 @@ class NoSuchExternalId(Exception):
         super().__init__(
             f"ERP instance {erp_instance_name} has no {model} object with external id '{id}'")
 
+TEMPLATE_MODEL = 'poweremail.templates'
+TRANSLATION_MODEL = 'ir.translation'
+
 class ErpService(object):
     """
     Facade that encapsulates all ERP operations in a
@@ -42,11 +45,11 @@ class ErpService(object):
 
     def __init__(self, erpclient):
         self.erp = erpclient
-        self._PoweremailTemplates = self.erp.model('poweremail.templates')
-        self._IrTranslation = self.erp.model('ir.translation')
+        self._PoweremailTemplates = self.erp.model(TEMPLATE_MODEL)
+        self._IrTranslation = self.erp.model(TRANSLATION_MODEL)
 
     async def template_list(self):
-        return await self.semantic_ids_for_model('poweremail.templates')
+        return await self.semantic_ids_for_model(TEMPLATE_MODEL)
 
     async def semantic_ids_for_model(self, model):
         external_ids = self.erp.model('ir.model.data').read([
@@ -108,14 +111,14 @@ class ErpService(object):
         return externalid[0]['res_id']
 
     async def load_template(self, id):
-        erp_id = await self.erp_id('poweremail.templates', id)
+        erp_id = await self.erp_id(TEMPLATE_MODEL, id)
         template = self._PoweremailTemplates.read([erp_id], self._template_fields)
         if not template:
             raise Exception(f"No template found with id {erp_id}")
         template = template[0]
 
         subject_translations = await self.load_translations(
-            modelname = 'poweremail.templates',
+            modelname = TEMPLATE_MODEL,
             object_id = erp_id,
             translated_field = 'def_subject',
         )
@@ -125,7 +128,7 @@ class ErpService(object):
 
     # TODO: Should receive a full object or dict not edition fields body and header
     async def save_template(self, id, **fields):
-        erp_id = await self.erp_id('poweremail.templates', id)
+        erp_id = await self.erp_id(TEMPLATE_MODEL, id)
 
         self._PoweremailTemplates.write(erp_id, {
             key: fields[key]
@@ -133,7 +136,7 @@ class ErpService(object):
         })
 
         await self.save_translation(
-            modelname = 'poweremail.templates',
+            modelname = TEMPLATE_MODEL,
             object_id = erp_id,
             translated_field = 'def_subject',
             fields = fields,
@@ -149,7 +152,7 @@ class ErpService(object):
             def_body_text=fields['def_body_text'],
         )
         await self.save_translation(
-            modelname = 'poweremail.templates',
+            modelname = TEMPLATE_MODEL,
             object_id = erp_id,
             translated_field = 'def_body_text',
             fields = body_translations,
@@ -157,7 +160,7 @@ class ErpService(object):
         # DGG: Alternative old behaviour:
         # Just set all existing, even non supported, do not create new ones
         # Maybe faster but not sure than correct
-        #self.set_all_field_translations(fieldname='def_body_text', model='poweremail.templates', res_id=self.id, value=body_text)
+        #self.set_all_field_translations(fieldname='def_body_text', model=TEMPLATE_MODEL, res_id=self.id, value=body_text)
 
     async def load_translations(self, modelname, object_id, translated_field):
         # Criteria:
