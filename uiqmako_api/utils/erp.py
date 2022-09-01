@@ -79,17 +79,6 @@ class ERP:
             raise InvalidId("xml_id does not refer to {}".format(expected_model))
         return _id
 
-    async def get_erp_template(self, xml_id=None, id=None):
-        if not xml_id and not id:
-            raise InvalidId("Missing id and xml_id")
-        erp_id = None
-        if xml_id:
-            erp_id = self.get_erp_id(xml_id=xml_id)
-        else:
-            erp_id = id
-        pem_template = await PoweremailTemplates.load(self, erp_id=erp_id)
-        return pem_template
-
     async def get_object(self, model, id):
         obj = self[model].browse(id)
         return obj
