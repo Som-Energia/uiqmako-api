@@ -47,7 +47,9 @@ jobs:
         run: |
           poetry install
       - name: Run Tests
-        run: poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=uiqmako_api tests/
+        run: |
+          cp tests/.env.test.example tests/.env.test
+          poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=uiqmako_api tests/
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
         with:
