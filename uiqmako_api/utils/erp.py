@@ -73,12 +73,6 @@ class ERP:
         model, _id = self.get_object_reference(module, name)
         return model, _id
 
-    def get_erp_id(self, xml_id, expected_model='poweremail.templates'):
-        model, _id = self.get_model_id(xml_id)
-        if model != expected_model:
-            raise InvalidId("xml_id does not refer to {}".format(expected_model))
-        return _id
-
     async def get_object(self, model, id):
         obj = self[model].browse(id)
         return obj
