@@ -64,8 +64,8 @@ async def upload_to_erp(edit_id: int, source: str,  current_user: User = Depends
     if source == app.ERP._name:
         delete_current_edit = True
     updated_template_id = await upload_edit(app.ERP_DICT[source], edit_id, delete_current_edit)
-    if updated_template_id:
-        if source == app.ERP._name:
-            updated_template = await get_single_template(app.ERP, app.template_repo, updated_template_id, current_user.username)
-        return updated_template_id
-    raise UnexpectedError
+    if not updated_template_id:
+        raise UnexpectedError
+    if source == app.ERP._name:
+        updated_template = await get_single_template(app.ERP, app.template_repo, updated_template_id, current_user.username)
+    return updated_template_id
