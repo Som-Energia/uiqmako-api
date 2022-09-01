@@ -49,6 +49,15 @@ jobs:
       - name: Run Tests
         run: |
           cp tests/.env.test.example tests/.env.test
+          cat >> tests/.env.test <<EOF
+          DB_CONFIG = '{
+              "NAME": "test_uiqmako",
+              "HOST": "0.0.0.0",
+              "PORT": "5432",
+              "USER": "$POSTGRES_USER",
+              "PWD": "$POSTGRES_PASSWORD"
+          }'
+          EOF
           poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=uiqmako_api tests/
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
