@@ -3,7 +3,8 @@ name: UI-QMAKO API
 
 on:
   pull_request:
-    branches: [ main ]
+  push:
+  workflow_dispatch:
 
 env:
   POSTGRES_USER: user
