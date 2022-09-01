@@ -51,11 +51,11 @@ class TestTemplates:
         db_m = test_app.db_manager
         # Given that we already imported an id
         xml_id = 'som_test.id_test'
-        created, template = await add_template_from_xml_id(test_app.ERP, xml_id)
+        await add_template_from_xml_id(test_app.ERP, xml_id)
         number_templates_pre = await db_m.count(TemplateInfoModel.select())
 
         # When we import it twice
-        template_info = await db_m.get(TemplateInfoModel, xml_id=xml_id)
+        created, template = await add_template_from_xml_id(test_app.ERP, xml_id)
 
         # Then no register is added
         number_templates_post = await db_m.count(TemplateInfoModel.select())
