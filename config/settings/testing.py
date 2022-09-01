@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from .local import LocalSettings
+from .base import APIBaseSettings
 
 
-class TestingSettings(LocalSettings):
+class TestingSettings(APIBaseSettings):
 
     class Config:
         env_file = 'tests/.env.test'
