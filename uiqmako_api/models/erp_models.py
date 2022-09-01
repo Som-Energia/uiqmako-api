@@ -8,8 +8,6 @@ class PoweremailTemplates:
 
     @classmethod
     async def load(cls, ERP, xml_id, erp_id=None):
-        self = cls(ERP)
-
         service = ERP.service()
         self = await service.load_template(xml_id or erp_id)
         for field, value in self.dict().items():
