@@ -46,10 +46,6 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install
-      - uses: BSFishy/pip-action@v1
-        with:
-          packages: |
-            coveralls
       - name: Run Tests
         run: poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=uiqmako_api tests/
       - name: Pytest coverage comment
