@@ -53,7 +53,9 @@ jobs:
         with:
           junitxml-path: ./pytest.xml
       - name: Coveralls
-        uses: AndreMiras/coveralls-python-action@develop
+        # As for 2022-09-01, AndreMiras has not integrated boholder fork to support pyproject.toml
+        #uses: AndreMiras/coveralls-python-action@develop
+        uses:  boholder/coveralls-python-action@develop
         with:
           parallel: true
           flag-name: Unit tests
@@ -63,6 +65,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      uses: AndreMiras/coveralls-python-action@develop
+      # As for 2022-09-01, AndreMiras has not integrated boholder fork to support pyproject.toml
+      #uses: AndreMiras/coveralls-python-action@develop
+      uses: boholder/coveralls-python-action@develop
       with:
         parallel-finished: true
