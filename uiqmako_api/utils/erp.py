@@ -68,11 +68,6 @@ class ERP:
             raise XmlIdNotFound(msg=e.faultCode)
         return model, _id
 
-    def get_model_id(self, xml_id):
-        module, name = xml_id.split('.')
-        model, _id = self.get_object_reference(module, name)
-        return model, _id
-
     async def get_object(self, model, id):
         obj = self[model].browse(id)
         return obj
