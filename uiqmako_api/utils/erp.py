@@ -61,13 +61,6 @@ class ERP:
             return False
         return True
 
-    def get_object_reference(self, module, name):
-        try:
-            model, _id = self.get_erp_conn().IrModelData.get_object_reference(module, name)
-        except Fault as e:
-            raise XmlIdNotFound(msg=e.faultCode)
-        return model, _id
-
     async def get_object(self, model, id):
         obj = self[model].browse(id)
         return obj
