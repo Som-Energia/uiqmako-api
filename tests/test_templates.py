@@ -99,7 +99,7 @@ class TestTemplates:
     def test_parse_body_by_language(self, body_text, split):
         assert parse_body_by_language(body_text) == split
 
-    async def test_create_template_case_ok(self):
+    async def test_create_template_case_ok(self, test_app):
         template_id = 1
         pre = await get_template_cases(template_id)
         result = await create_template_case(DB_MANAGER, template_id, 'test_case', 3)
@@ -107,7 +107,7 @@ class TestTemplates:
         assert len(pre) + 1 == len(post)
         assert result
 
-    async def test_create_template_case_repeated_name(self):
+    async def test_create_template_case_repeated_name(self, test_app):
         template_id = 1
         pre = await get_template_cases(template_id)
         await create_template_case(DB_MANAGER, template_id, 'repeat_case', 3)

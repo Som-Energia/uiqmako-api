@@ -76,18 +76,36 @@ def event_loop(request):
     yield loop
     loop.close()
 
-@pytest.fixture(scope='session')
-def test_app():
-    from uiqmako_api.models import drop_database
-    from .erp_test import ERPTest
-    drop_database()
+@pytest.fixture
+def database():
     from uiqmako_api.api.api import app
-    create_demo_data(app.db_manager)
-    git_create_file_with_content(app.template_repo)
+    from uiqmako_api.models import drop_database
+    try:
+        drop_database()
+        setup_database()
+        create_demo_data(app.db_manager)
+        yield
+    finally:
+        drop_database()
+
+@pytest.fixture
+def gitrepo():
+    from uiqmako_api.api.api import app
+    from uiqmako_api.utils.git import setup_template_repository
+    try:
+        app.template_repo = setup_template_repository()
+        git_create_file_with_content(app.template_repo)
+        yield app.template_repo
+    finally:
+        remove_git_repo()
+
+
+@pytest.fixture
+def test_app(database, gitrepo):
+    from .erp_test import ERPTest
+    from uiqmako_api.api.api import app
     app.ERP = ERPTest()
     yield app
-    drop_database()
-    remove_git_repo()
 
 
 
