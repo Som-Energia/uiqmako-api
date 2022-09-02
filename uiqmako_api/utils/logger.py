@@ -29,10 +29,12 @@ handler.setLevel(logging.DEBUG)
 handler.setFormatter(Formatter())
 log.addHandler(handler)
 
-if False: # Testing
-    log.critical("Ejemplo critical")
-    log.error("Ejemplo error")
-    log.warning("Ejemplo warning")
-    log.info("Ejemplo info")
-    log.debug("Ejemplo debug")
+"""
+# Examples
 
+log.critical("Ejemplo critical")
+log.error("Ejemplo error")
+log.warning("Ejemplo warning")
+log.info("Ejemplo info")
+log.debug("Ejemplo debug")
+"""
