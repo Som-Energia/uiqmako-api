@@ -31,8 +31,11 @@ async def get_or_create_template_edit_orm(template_id, user_id, last_updated):
         created = False
     except peewee.DoesNotExist as ex:
         edit, created = await db.create_or_get(
-            TemplateEditModel, template=template_id, user=user_id, original_update_date=last_updated,
-            date_start=datetime.now()
+            TemplateEditModel,
+            template=template_id,
+            user=user_id,
+            original_update_date=last_updated,
+            date_start=datetime.now(),
         )
     return edit, created
 
@@ -57,7 +60,7 @@ async def update_user_edit_orm(template_id, user_id, text, headers):
     edit.headers = headers
     edit.last_modified = datetime.now()
     await db.update(edit)
-    return True
+    return edit.id
 
 
 async def delete_user_edit_orm(template_id, user_id):

@@ -65,9 +65,6 @@ class ERP:
         obj = self[model].browse(id)
         return obj
 
-    async def upload_edit(self, body_text, headers, template_xml_id):
-        return await PoweremailTemplates.upload_edit(self, xml_id=template_xml_id, body_text=body_text, headers=headers)
-
     def service(self):
         return ErpService(self._erp_client)
 

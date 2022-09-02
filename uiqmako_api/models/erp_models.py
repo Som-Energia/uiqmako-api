@@ -14,10 +14,3 @@ class PoweremailTemplates:
             setattr(self, field, value)
         return self
 
-    @classmethod
-    async def upload_edit(cls, erp, xml_id, body_text, headers):
-        return await erp.service().save_template(**dict(
-            json.loads(headers),
-            id=xml_id,
-            def_body_text=body_text,
-        ))

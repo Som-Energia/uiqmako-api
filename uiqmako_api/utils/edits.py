@@ -12,7 +12,7 @@ from uiqmako_api.models.templates import (
     get_case_orm,
     get_template_orm,
 )
-
+import json
 
 async def get_or_create_template_edit(template_id, user):
     last_updated = (await get_template_orm(template_id=template_id)).last_updated
@@ -26,8 +26,8 @@ async def check_other_users_edits(template_id, user_id):
 
 
 async def save_user_edit(template_id, user_id, edit):
-    response = await update_user_edit_orm(template_id, user_id, edit.def_body_text, edit.headers)
-    return response
+    edit_id = await update_user_edit_orm(template_id, user_id, edit.def_body_text, edit.headers)
+    return edit_id
 
 
 async def delete_user_edit(template_id, user_id):
@@ -60,10 +60,12 @@ async def upload_edit(erp, edit_id, delete_current_edit=True):
     template_info = await get_template_orm(template_id=edit.template.id)
     if template_info.last_updated != edit.original_update_date:
         raise OutdatedEdit("Edit from an outdated template version")
-    await erp.upload_edit(
-        headers=edit.headers,
-        body_text=edit.body_text,
-        template_xml_id=edit.template.xml_id,
+    await erp.service().save_template(
+        **dict(
+            json.loads(edit.headers),
+            body_text=edit.body_text,
+            id=edit.template.xml_id,
+        )
     )
     if delete_current_edit:
         await delete_edit_orm(edit_id)
