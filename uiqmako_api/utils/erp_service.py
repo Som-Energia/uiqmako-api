@@ -15,6 +15,7 @@ class NoSuchExternalId(Exception):
 
 TEMPLATE_MODEL = 'poweremail.templates'
 TRANSLATION_MODEL = 'ir.translation'
+UIQMAKOHELPER_MODEL = 'som.uiqmako.helper'
 
 class ErpService(object):
     """
@@ -252,4 +253,13 @@ class ErpService(object):
         """
         tr_ids = self.erp.IrTranslation.search([('res_id', '=', res_id), ('name', '=', '{},{}'.format(model,fieldname))])
         return self.erp.IrTranslation.write(tr_ids, {'value': value})
+
+    async def render_template(self, headers, text, model, id):
+        erp_id = self.erp_id(model, id)
+        try:
+            # TODO: move to __init__
+            self._SomUiqmakoHelper = self.erp.model(UIQMAKOHELPER_MODEL)
+            return self._SomUiqmakoHelper.render_mako_text([], text, model, erp_id)
+        except xmlrpc.client.Fault as e:
+            raise UIQMakoBaseException("An error occurred while rendering: {}".format(e.faultCode))
 

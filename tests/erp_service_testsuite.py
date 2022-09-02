@@ -321,4 +321,24 @@ class ErpService_TestSuite:
             'ca_ES': edited.def_body_text,
         }
 
+    @pytest.mark.skip("Not yet deployed in testing")
+    async def test__render_template__by_erp_id(self, erp_service):
+        result = await erp_service.render_template(
+            headers = {},
+            text = "A text ${object.name}",
+            model = TEMPLATE_MODEL,
+            id = existing_template.erp_id,
+        )
+        assert result == f"A text {existing_template.name}"
+
+    @pytest.mark.skip("Not yet deployed in testing")
+    async def test__render_template__by_xml_id(self, erp_service):
+        result = await erp_service.render_template(
+            headers = {},
+            text = "A text ${object.name}",
+            model = TEMPLATE_MODEL,
+            id = existing_template.xml_id,
+        )
+        assert result == f"A text {existing_template.name}"
+
 

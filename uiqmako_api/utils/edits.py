@@ -42,17 +42,12 @@ async def render_edit(erp, edit_id, case_id):
     case = await get_case_orm(case_id=case_id)
     if not case: return ''
 
-    if case.case_xml_id:
-        model, object_id = erp.get_model_id(case.case_xml_id)
-        if model != edit.template.model:
-            raise InvalidId("XML_ID model is not the requested one")
-    elif case.case_erp_id:
-        object_id = case.case_erp_id
-    if not object_id:
-        raise InvalidId("No case found")
-    result = await erp.render_erp_text(edit.body_text, edit.template.model, object_id)
-    return result
-
+    return erp.service().render_template(
+        header=edit.header,
+        text=edit.body_text,
+        model=edit.template.model,
+        id=case.case_xml_id or case.case_erp_id,
+    )
 
 async def delete_edit(edit_id):
     return await delete_edit_orm(edit_id)

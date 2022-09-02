@@ -77,13 +77,6 @@ class ERP:
         obj = self[model].browse(id)
         return obj
 
-    async def render_erp_text(self, text, model, id):
-        try:
-            result = self.get_erp_conn().SomUiqmakoHelper.render_mako_text([], text, model, id)
-        except xmlrpc.client.Fault as e:
-            raise UIQMakoBaseException("An error occurred while rendering: {}".format(e.faultCode))
-        return result
-
     async def upload_edit(self, body_text, headers, template_xml_id):
         return await PoweremailTemplates.upload_edit(self, xml_id=template_xml_id, body_text=body_text, headers=headers)
 
