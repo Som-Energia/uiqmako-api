@@ -1,7 +1,6 @@
 import pytest, os
 from uiqmako_api.utils.git import *
 from .erp_test import ERPTest
-from uiqmako_api.models.erp_models  import PoweremailTemplates
 from uiqmako_api.schemas.templates import Template
 
 class TestGitUtils:
@@ -36,8 +35,7 @@ class TestGitUtils:
         file_name_yaml = os.path.join(gitrepo.working_dir, 'correu-xml_id_test.mako.yaml')
         assert not os.path.exists(file_name_mako)
         assert not os.path.exists(file_name_yaml)
-        pem_template = await PoweremailTemplates.load(ERP=ERPTest(), xml_id='module.id')
-        template = Template.from_orm(pem_template)
+        template = await test_app.ERP.service().load_template('module.id')
         a = await create_or_update_template('xml_id_test', template, test_app.template_repo)
         assert a
         assert os.path.exists(file_name_mako)

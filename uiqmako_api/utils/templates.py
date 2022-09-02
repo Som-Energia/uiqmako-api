@@ -1,6 +1,5 @@
 import re
 from uiqmako_api.errors.exceptions import UIQMakoBaseException
-from uiqmako_api.models.erp_models import PoweremailTemplates
 from uiqmako_api.models.templates import (
     get_template_orm,
     get_all_templates_orm,
@@ -16,12 +15,13 @@ from uiqmako_api.utils.git import create_or_update_template
 
 async def get_single_template(erp, git_repo, template_id, user_name=""):
     template = await get_template_orm(template_id=template_id)
-    t = await PoweremailTemplates.load(erp, erp_id=template.erp_id, xml_id=template.xml_id)
-    has_changes = await create_or_update_template(template.xml_id, Template.from_orm(t), git_repo, user_name)
+    erp_template = await erp.service().load_template(template.xml_id or template.erp_id)
+    has_changes = await create_or_update_template(template.xml_id, erp_template, git_repo, user_name)
 
     if has_changes or not template.last_updated:
         await set_last_updated(template_id=template_id)
-    return Template.from_orm(t)
+
+    return erp_template
 
 
 async def get_all_templates():
@@ -30,15 +30,13 @@ async def get_all_templates():
 
 
 async def add_template_from_xml_id(erp, xml_id):
-    erp_template = await PoweremailTemplates.load(erp, xml_id=xml_id)
-    template_info = None
-    if erp_template:
-        created, template_info = await add_or_get_template_orm(
-            xml_id=xml_id,
-            erp_id=erp_template.id,
-            name=erp_template.name,
-            model=erp_template.model_int_name,
-        )
+    erp_template = await erp.service().load_template(xml_id)
+    created, template_info = await add_or_get_template_orm(
+        xml_id=xml_id,
+        erp_id=erp_template.id,
+        name=erp_template.name,
+        model=erp_template.model_int_name,
+    )
     return created, TemplateInfoBase.from_orm(template_info)
 
 

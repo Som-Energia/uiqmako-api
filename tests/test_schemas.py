@@ -1,7 +1,6 @@
 from uiqmako_api.schemas.templates import TemplateInfoBase, Template
 from uiqmako_api.schemas.edits import RawEdit
 from uiqmako_api.schemas.users import User, UserCategory
-from uiqmako_api.models.erp_models import PoweremailTemplates
 from .erp_test import ERPTest
 from pydantic import ValidationError
 import pytest, json
@@ -46,8 +45,7 @@ def test_compose_text_types(input, expected):
 
 @pytest.mark.asyncio
 async def test_template_schema():
-    pem_template = await PoweremailTemplates.load(ERP=ERPTest(), xml_id='module.id')
-    template = Template.from_orm(pem_template)
+    template = await ERPTest().service().load_template('module.id')
     assert template.def_body_text == 'def_body_text_module.id'
     assert set(template.headers().keys()) == set([
         'def_subject', 'def_subject_es_ES', 'def_subject_ca_ES',

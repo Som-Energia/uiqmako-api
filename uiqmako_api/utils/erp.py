@@ -5,7 +5,6 @@ from erppeek import Client, Error, Fault
 from pool_transport import PoolTransport
 
 from uiqmako_api.errors.exceptions import UIQMakoBaseException, XmlIdNotFound, InvalidId, CantConnectERP
-from uiqmako_api.models.erp_models import PoweremailTemplates
 from uiqmako_api.utils.erp_service import ErpService
 
 
