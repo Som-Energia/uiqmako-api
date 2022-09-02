@@ -55,16 +55,16 @@ class ErpServiceDouble():
 
 
     async def load_template(self, id):
-        await self.erp_id('poweremail.templates', id)
+        erp_id = await self.erp_id('poweremail.templates', id)
         try:
-            return Template(**self.data.templates[id])
+            return Template(**self.data.templates[erp_id])
         except KeyError:
             raise XmlIdNotFound(f"No template found with id {id}")
 
     async def save_template(self, id, **kwds):
-        await self.erp_id('poweremail.templates', id)
+        erp_id = await self.erp_id('poweremail.templates', id)
         try:
-            template = self.data.templates[id]
+            template = self.data.templates[erp_id]
         except KeyError:
             raise XmlIdNotFound(str(id))
         if 'name' in kwds: del kwds['name']
