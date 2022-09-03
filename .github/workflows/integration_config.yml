@@ -9,7 +9,15 @@ on:
 env:
   POSTGRES_USER: user
   POSTGRES_PASSWORD: pwd
-
+  UIQMAKO_TEST_ERP: 1
+  ERP_HOST: ${{ secrets.ERP_HOST }}
+  ERP_PORT: ${{ secrets.ERP_PORT }}
+  ERP_USER: ${{ secrets.ERP_USER }}
+  ERP_PASS: ${{ secrets.ERP_PASS }}
+  VPNADDR: ${{ secrets.VPNADDR }}
+  VPNHASH: ${{ secrets.VPNHASH }}
+  VPNUSER: ${{ secrets.VPNUSER }}
+  VPNPASS: ${{ secrets.VPNPASS }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,6 +42,24 @@ jobs:
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
+      erptesting:
+        image: soarinferret/fortiproxy
+        ports:
+        - 18069:18069
+        env:
+          VPNADDR: ${{ env.VPNADDR }}
+          VPNHASH: ${{ env.VPNHASH }}
+          VPNUSER: ${{ env.VPNUSER }}
+          VPNPASS: ${{ env.VPNPASS }}
+          HOSTIP: ${{ env.ERP_HOST }}
+        options: >-
+          --privileged
+          --name erptesting
+          --health-cmd "ping -q -c1 $HOSTIP"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -56,6 +82,15 @@ jobs:
               "PORT": "5432",
               "USER": "$POSTGRES_USER",
               "PWD": "$POSTGRES_PASSWORD"
+          }'
+          ERP_CONNECTIONS= '{
+              "TESTING": {
+                  "DB_NAME": "somenergia",
+                  "PORT": $ERP_PORT,
+                  "URI": "http://localhost",
+                  "USER": "$ERP_USER",
+                  "PWD": "$ERP_PASS"
+              }
           }'
           EOF
           poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=uiqmako_api tests/
