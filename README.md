@@ -1,8 +1,7 @@
 # UI-QMako-API
 
 [![CI Status](https://github.com/Som-Energia/uiqmako-api/actions/workflows/integration_config.yml/badge.svg)](https://github.com/Som-Energia/uiqmako-api/actions/workflows/integration_config.yml)
-[![Coverage Status](https://coveralls.io/repos/github/Som-Energia/uiqmako-api/badge.svg?branch=master)](https://coveralls.io/github/Som-Energia/uiqmako-api?branch=master)
-
+[![Coverage Status](https://coveralls.io/repos/github/Som-Energia/uiqmako-api/badge.svg?branch=main)](https://coveralls.io/github/Som-Energia/uiqmako-api?branch=main)
 
 API of Som Energia UI-QMako tool.
 
