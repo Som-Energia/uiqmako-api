@@ -43,7 +43,7 @@ async def render_edit(erp, edit_id, case_id):
     if not case: return ''
 
     return erp.service().render_template(
-        header=edit.header,
+        headesr=edit.headers,
         text=edit.body_text,
         model=edit.template.model,
         id=case.case_xml_id or case.case_erp_id,
