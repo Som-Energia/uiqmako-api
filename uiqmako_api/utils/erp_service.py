@@ -255,7 +255,7 @@ class ErpService(object):
         return self.erp.IrTranslation.write(tr_ids, {'value': value})
 
     async def render_template(self, headers, text, model, id):
-        erp_id = self.erp_id(model, id)
+        erp_id = await self.erp_id(model, id)
         try:
             # TODO: move to __init__
             self._SomUiqmakoHelper = self.erp.model(UIQMAKOHELPER_MODEL)

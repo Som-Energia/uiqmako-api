@@ -42,7 +42,7 @@ async def render_edit(erp, edit_id, case_id):
     case = await get_case_orm(case_id=case_id)
     if not case: return ''
 
-    return erp.service().render_template(
+    return await erp.service().render_template(
         headers=edit.headers,
         text=edit.body_text,
         model=edit.template.model,
