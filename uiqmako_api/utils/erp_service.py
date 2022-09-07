@@ -130,7 +130,7 @@ class ErpService(object):
     # TODO: Should receive a full object or dict not edition fields body and header
     async def save_template(self, id, **fields):
         erp_id = await self.erp_id(TEMPLATE_MODEL, id)
-
+        fields['def_body_text'] = fields['body_text']
         self._PoweremailTemplates.write(erp_id, {
             key: fields[key]
             for key in self._template_editable_fields
