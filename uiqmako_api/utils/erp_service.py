@@ -259,7 +259,10 @@ class ErpService(object):
         try:
             # TODO: move to __init__
             self._SomUiqmakoHelper = self.erp.model(UIQMAKOHELPER_MODEL)
-            return self._SomUiqmakoHelper.render_mako_text([], text, model, erp_id)
+            # TODO: Cridem render_mako_text() a l'espera de decidir com presentar resultats
+            header_render = self._SomUiqmakoHelper.render_mako_text([], headers, model, erp_id) + "<br><br>"
+            body_render = self._SomUiqmakoHelper.render_mako_text([], text, model, erp_id)
+            return header_render + body_render
         except xmlrpc.client.Fault as e:
             raise UIQMakoBaseException("An error occurred while rendering: {}".format(e.faultCode))
 
