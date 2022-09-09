@@ -158,6 +158,11 @@ class ErpService(object):
             translated_field = 'def_body_text',
             fields = body_translations,
         )
+
+        wiz_obj = self.erp.WizardCleanCache
+        wiz_id = wiz_obj.create({})
+        wiz_obj.action_clean_cache([wiz_id.id])
+
         # DGG: Alternative old behaviour:
         # Just set all existing, even non supported, do not create new ones
         # Maybe faster but not sure than correct
