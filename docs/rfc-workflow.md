@@ -15,7 +15,7 @@ Just at the end of the process the result is uploaded to the production ERP.
 While the current view could have some sense in a desktop application,
 where the shared repository is the ERP and the user downloads and locks
 the resource until its done and it is uploaded or released,
-uiqmako is a shared server itself and has some control of what the users do.
+uiqmako is a shared server itself and has wide view on what the users are doing.
 
 Owning the workflow means that the current shared working version of a template
 is the one stored in uiqmako.
