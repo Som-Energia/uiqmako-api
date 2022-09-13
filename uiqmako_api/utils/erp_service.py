@@ -1,4 +1,5 @@
 import xmlrpc.client
+import json
 
 from config import settings
 from erppeek import Client, Error, Fault
@@ -158,6 +159,11 @@ class ErpService(object):
             translated_field = 'def_body_text',
             fields = body_translations,
         )
+
+        wiz_obj = self.erp.WizardCleanCache
+        wiz_id = wiz_obj.create({})
+        wiz_obj.action_clean_cache([wiz_id.id])
+
         # DGG: Alternative old behaviour:
         # Just set all existing, even non supported, do not create new ones
         # Maybe faster but not sure than correct
@@ -259,7 +265,10 @@ class ErpService(object):
         try:
             # TODO: move to __init__
             self._SomUiqmakoHelper = self.erp.model(UIQMAKOHELPER_MODEL)
-            return self._SomUiqmakoHelper.render_mako_text([], text, model, erp_id)
+            # TODO: Cridem render_mako_text() a l'espera de decidir com presentar resultats
+            render = json.loads(self._SomUiqmakoHelper.render_mako_text([], headers, model, erp_id))
+            render['body'] = self._SomUiqmakoHelper.render_mako_text([], text, model, erp_id)
+            return render
         except xmlrpc.client.Fault as e:
             raise UIQMakoBaseException("An error occurred while rendering: {}".format(e.faultCode))
 
