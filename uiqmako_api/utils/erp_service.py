@@ -1,4 +1,5 @@
 import xmlrpc.client
+import json
 
 from config import settings
 from erppeek import Client, Error, Fault
@@ -265,9 +266,9 @@ class ErpService(object):
             # TODO: move to __init__
             self._SomUiqmakoHelper = self.erp.model(UIQMAKOHELPER_MODEL)
             # TODO: Cridem render_mako_text() a l'espera de decidir com presentar resultats
-            header_render = self._SomUiqmakoHelper.render_mako_text([], headers, model, erp_id) + "<br><br>"
-            body_render = self._SomUiqmakoHelper.render_mako_text([], text, model, erp_id)
-            return header_render + body_render
+            render = json.loads(self._SomUiqmakoHelper.render_mako_text([], headers, model, erp_id))
+            render['body'] = self._SomUiqmakoHelper.render_mako_text([], text, model, erp_id)
+            return render
         except xmlrpc.client.Fault as e:
             raise UIQMakoBaseException("An error occurred while rendering: {}".format(e.faultCode))
 
