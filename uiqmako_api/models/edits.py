@@ -3,7 +3,7 @@ import peewee
 from . import database, get_db_manager
 from .users import UserModel
 from .templates import TemplateInfoModel
-from uiqmako_api.schemas.edits import TemplateEditInfo
+from uiqmako_api.schemas.edits import TemplateEditInfo, TemplateEditUser
 
 db = get_db_manager()
 
@@ -48,7 +48,7 @@ async def get_user_edits_info_orm(template_id, exclude_user):
                 TemplateEditModel.template_id == template_id
             ).join(UserModel, on=(UserModel.id == TemplateEditModel.user))
         )
-        result = [TemplateEditInfo.from_orm(e) for e in edits]
+        result = [TemplateEditUser.from_orm(e) for e in edits]
         return result
     except peewee.DoesNotExist as e:
         return []

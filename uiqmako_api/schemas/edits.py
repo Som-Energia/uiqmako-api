@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import json
 from pydantic import BaseModel
-
+from uiqmako_api.schemas.users import User
 
 class TemplateEditInfo(BaseModel):
     template_id: int
@@ -12,6 +12,11 @@ class TemplateEditInfo(BaseModel):
     class Config:
         orm_mode = True
 
+class TemplateEditUser(TemplateEditInfo):
+    user: User
+
+    class Config:
+        orm_mode = True
 
 class TemplateEdit(TemplateEditInfo):
 
