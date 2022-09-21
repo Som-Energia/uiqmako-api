@@ -6,12 +6,14 @@ from uiqmako_api.models.edits import (
     get_or_create_template_edit_orm,
     get_user_edits_info_orm,
     update_user_edit_orm,
+    get_all_edits_orm,
 )
 from uiqmako_api.utils.erp_service import ErpService
 from uiqmako_api.models.templates import (
     get_case_orm,
     get_template_orm,
 )
+from uiqmako_api.schemas.edits import TemplateEditUser
 import json
 
 async def get_or_create_template_edit(template_id, user):
@@ -70,3 +72,7 @@ async def upload_edit(erp, edit_id, delete_current_edit=True):
     if delete_current_edit:
         await delete_edit_orm(edit_id)
     return edit.template.id
+
+async def get_all_templates_edits():
+    edits = await get_all_edits_orm()
+    return edits

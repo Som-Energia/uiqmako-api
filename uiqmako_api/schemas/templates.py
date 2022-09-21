@@ -35,6 +35,13 @@ class TemplateInfoBase(BaseModel):
         orm_mode = True
 
 
+class TemplateInfoEdit(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True
+
 class CaseBase(BaseModel):
     """
     Test Case for a template
