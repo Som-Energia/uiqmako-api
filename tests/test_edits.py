@@ -46,7 +46,7 @@ class TestEdits:
         result = await save_user_edit(template_id=1, user_id=1, edit=edit)
         assert result
         current_edit = await get_edit_orm(1)
-        assert current_edit.body_text == 'New text\n\n'
+        assert current_edit.body_text == 'New text\n'
         assert current_edit.headers == "{'def_subject':'new_subject'}"
 
     async def test_delete_user_edit(self, test_app):

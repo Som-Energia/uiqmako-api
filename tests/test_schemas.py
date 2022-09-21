@@ -24,17 +24,16 @@ def test__xml_id_validator__ok(valid_xml_id):
 
 PYTHON_PART = ('python', '<%\nfor a in [1,2]:\n\tprint(a)\n%>')
 PYTHON_INLINE = ('python', ' % if a:')
-HTML_PART =('html', '<p>text</p><p><b>Bold text</b></p>')
-PRETTY_HTML = '<p>\n text\n</p>\n<p>\n <b>\n  Bold text\n </b>\n</p>\n'
+HTML_PART =('html', '<p>\n text\n</p>\n<p>\n <b>\n  Bold text\n </b>\n</p>\n')
 @pytest.mark.parametrize(
     "input,expected", [ pytest.param(*x[1:], id=x[0]) for x in [
     ('empty', [], "full text"),
-    ('python', [PYTHON_PART], PYTHON_PART[1]+'\n'),
-    ('html', [HTML_PART], PRETTY_HTML),
-    ('python_html',[PYTHON_PART, HTML_PART], PYTHON_PART[1]+'\n' + PRETTY_HTML),
+    ('python', [PYTHON_PART], PYTHON_PART[1] + '\n'),
+    ('html', [HTML_PART], HTML_PART[1] + '\n'),
+    ('python_html',[PYTHON_PART, HTML_PART], PYTHON_PART[1] + '\n' + HTML_PART[1] + '\n'),
     ('python_html_inline_python',
         [PYTHON_PART, HTML_PART, PYTHON_INLINE, HTML_PART],
-        PYTHON_PART[1] + '\n' + PRETTY_HTML + PYTHON_INLINE[1] + '\n' + PRETTY_HTML
+        PYTHON_PART[1] + '\n' + HTML_PART[1] + '\n' + PYTHON_INLINE[1] + '\n' + HTML_PART[1] + '\n'
     ),
 ]])
 def test_compose_text_types(input, expected):
