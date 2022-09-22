@@ -85,10 +85,9 @@ async def get_all_edits_orm():
         edits = await db.execute(
             TemplateEditModel
             .select(TemplateEditModel, UserModel, TemplateInfoModel)
-            .join(UserModel, on=(UserModel.id == TemplateEditModel.user))
-            .join(TemplateInfoModel, on=(TemplateInfoModel.id == TemplateEditModel.template_id))
+            .join(TemplateInfoModel, on=(TemplateEditModel.template == TemplateInfoModel.id))
+            .join(UserModel, on=(TemplateEditModel.user == UserModel.id))
         )
-
         result = [TemplateEditUser.from_orm(e) for e in edits]
         return result
     except peewee.DoesNotExist as e:

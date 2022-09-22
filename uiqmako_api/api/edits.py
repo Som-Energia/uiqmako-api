@@ -19,7 +19,6 @@ router = APIRouter(
 @router.get("")
 async def templates_edits_list():
     templates_edits = await get_all_templates_edits()
-    templates_edits.sort(key=lambda x: x.name)
     return templates_edits
 
 @router.post("/{template_id}", dependencies=[Depends(check_erp_conn)])

@@ -12,7 +12,7 @@ database = peewee_async.PostgresqlDatabase(
 
 def get_db_manager():
     objects = peewee_async.Manager(database)
-    database.set_allow_sync(False)
+    database.set_allow_sync(True)
     return objects
 
 
