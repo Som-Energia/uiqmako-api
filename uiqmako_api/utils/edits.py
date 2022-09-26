@@ -6,6 +6,8 @@ from uiqmako_api.models.edits import (
     get_or_create_template_edit_orm,
     get_user_edits_info_orm,
     update_user_edit_orm,
+    get_all_edits_orm,
+    transfer_user_edit_orm
 )
 from uiqmako_api.utils.erp_service import ErpService
 from uiqmako_api.models.templates import (
@@ -29,6 +31,9 @@ async def save_user_edit(template_id, user_id, edit):
     edit_id = await update_user_edit_orm(template_id, user_id, edit.def_body_text, edit.headers)
     return edit_id
 
+async def transfer_user_edit(template_id, edit):
+    edit_id = await transfer_user_edit_orm(template_id, edit.user_id)
+    return edit_id
 
 async def delete_user_edit(template_id, user_id):
     response = await delete_user_edit_orm(template_id, user_id)

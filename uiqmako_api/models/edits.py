@@ -63,6 +63,13 @@ async def update_user_edit_orm(template_id, user_id, text, headers):
     return edit.id
 
 
+async def transfer_user_edit_orm(template_id, new_user_id):
+    edit = await db.get(TemplateEditModel, template=template_id)
+    edit.user = new_user_id
+    await db.update(edit)
+    return edit.id
+
+
 async def delete_user_edit_orm(template_id, user_id):
     edit = await db.get(TemplateEditModel, template=template_id, user=user_id)
     return await delete_edit_orm(edit.id)
