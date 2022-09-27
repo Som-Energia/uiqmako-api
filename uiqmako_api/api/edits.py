@@ -78,6 +78,5 @@ async def upload_to_erp(edit_id: int, source: str,  current_user: User = Depends
 async def transfer_edit(
         template_id: int,
         body: TemplateEditUpdate):
-    import pudb; pu.db
     response = await transfer_user_edit(template_id, body)
     return {'result': response}
