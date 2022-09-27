@@ -76,7 +76,19 @@ async def get_edit_orm(edit_id):
     instances = [e for e in edit]
     return instances[0] if instances else False
 
-
 async def delete_edit_orm(edit_id):
     edit = await get_edit_orm(edit_id)
     return await db.delete(edit)
+
+async def get_all_edits_orm():
+    try:
+        edits = await db.execute(
+            TemplateEditModel
+            .select(TemplateEditModel, UserModel, TemplateInfoModel)
+            .join(TemplateInfoModel, on=(TemplateEditModel.template == TemplateInfoModel.id))
+            .join(UserModel, on=(TemplateEditModel.user == UserModel.id))
+        )
+        result = [TemplateEditUser.from_orm(e) for e in edits]
+        return result
+    except peewee.DoesNotExist as e:
+        return []

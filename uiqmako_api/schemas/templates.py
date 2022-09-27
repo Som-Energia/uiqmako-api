@@ -34,7 +34,6 @@ class TemplateInfoBase(BaseModel):
     class Config:
         orm_mode = True
 
-
 class CaseBase(BaseModel):
     """
     Test Case for a template

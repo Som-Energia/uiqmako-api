@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 from pydantic import BaseModel
 from uiqmako_api.schemas.users import User
+from uiqmako_api.schemas.templates import TemplateInfoBase
 
 class TemplateEditInfo(BaseModel):
     template_id: int
@@ -14,12 +15,12 @@ class TemplateEditInfo(BaseModel):
 
 class TemplateEditUser(TemplateEditInfo):
     user: User
+    template: TemplateInfoBase
 
     class Config:
         orm_mode = True
 
 class TemplateEdit(TemplateEditInfo):
-
     body_text: str = None
     headers: str = None
     original_update_date: datetime
