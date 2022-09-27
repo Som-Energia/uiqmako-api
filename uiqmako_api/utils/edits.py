@@ -6,7 +6,7 @@ from uiqmako_api.models.edits import (
     get_or_create_template_edit_orm,
     get_user_edits_info_orm,
     update_user_edit_orm,
-    transfer_user_edit_orm
+    transfer_user_edit_orm,
     get_all_edits_orm,
 )
 from uiqmako_api.utils.erp_service import ErpService
