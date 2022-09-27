@@ -33,7 +33,6 @@ class CaseModel(peewee.Model):
 
 async def get_all_templates_orm():
     templates = await db.execute(TemplateInfoModel.select())
-    result = [TemplateInfoBase.from_orm(t) for t in templates]
     return templates
 
 

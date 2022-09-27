@@ -58,7 +58,7 @@ def create_demo_data(db_manager):
         original_update_date=datetime.now(),
         date_start=datetime.now(),
     )
-    db_manager.database.set_allow_sync(False)
+    db_manager.database.set_allow_sync(True)
 
 
 def git_create_file_with_content(test_repo):

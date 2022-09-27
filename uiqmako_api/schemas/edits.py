@@ -23,12 +23,12 @@ class TemplateEditUpdate(BaseModel):
 
 class TemplateEditUser(TemplateEditInfo):
     user: User
+    template: TemplateInfoBase
 
     class Config:
         orm_mode = True
 
 class TemplateEdit(TemplateEditInfo):
-
     body_text: str = None
     headers: str = None
     original_update_date: datetime
