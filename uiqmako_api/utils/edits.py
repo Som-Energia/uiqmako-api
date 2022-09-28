@@ -33,8 +33,8 @@ async def save_user_edit(template_id, user_id, edit):
     return edit_id
 
 async def transfer_user_edit(template_id, edit):
-    edit_id = await transfer_user_edit_orm(template_id, edit.user_id)
-    return edit_id
+    user_id = await transfer_user_edit_orm(template_id, edit.user_id)
+    return user_id
 
 async def delete_user_edit(template_id, user_id):
     response = await delete_user_edit_orm(template_id, user_id)
