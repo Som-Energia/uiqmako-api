@@ -36,6 +36,32 @@ class TestEdits:
         assert current_edit.body_text == 'New text'
         assert current_edit.headers == "{'def_subject':'new_subject'}"
 
+    async def test_transfer_edit(self, test_app):
+        new_user = await get_user('UserBasic')
+        old_user = await get_user('UserAll')
+        edit = TemplateEditUpdate(
+            user_id = new_user.id,
+        )
+        current_edit = await get_edit_orm(1)
+        assert current_edit.user_id == old_user.id
+        result = await transfer_user_edit(template_id=1, edit=edit)
+        assert result
+        transfered_edit = await get_edit_orm(1)
+        assert transfered_edit.user_id == new_user.id
+
+    async def test_transfer_edit__invalid_user(self, test_app):
+        new_user = await get_user('UserBasic')
+        old_user = await get_user('UserAll')
+        edit = TemplateEditUpdate(
+            user_id = 10,
+        )
+        current_edit = await get_edit_orm(1)
+        assert current_edit.user_id == old_user.id
+        result = await transfer_user_edit(template_id=1, edit=edit)
+        assert result
+        transfered_edit = await get_edit_orm(1)
+        assert transfered_edit.user_id == old_user.id
+
     async def test_save_user_edit_by_type(self, test_app):
         edit = RawEdit(
             def_body_text='',
