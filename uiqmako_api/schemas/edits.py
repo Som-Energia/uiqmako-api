@@ -4,11 +4,19 @@ import json
 from pydantic import BaseModel
 from uiqmako_api.schemas.users import User
 from uiqmako_api.schemas.templates import TemplateInfoBase
+from typing import Optional
 
 class TemplateEditInfo(BaseModel):
     template_id: int
     user_id: int
     date_start: datetime = None
+
+    class Config:
+        orm_mode = True
+
+class TemplateEditUpdate(BaseModel):
+    template_id: Optional[int] = None
+    user_id: Optional[int] = None
 
     class Config:
         orm_mode = True

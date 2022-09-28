@@ -8,7 +8,7 @@ from uiqmako_api.utils.templates import (
     parse_body_by_language,
 )
 from uiqmako_api.errors.http_exceptions import UnexpectedError
-from uiqmako_api.schemas.edits import RawEdit
+from uiqmako_api.schemas.edits import RawEdit, TemplateEditUpdate
 from . import app
 
 router = APIRouter(
@@ -73,3 +73,10 @@ async def upload_to_erp(edit_id: int, source: str,  current_user: User = Depends
     if source == app.ERP._name:
         updated_template = await get_single_template(app.ERP, app.template_repo, updated_template_id, current_user.username)
     return updated_template_id
+
+@router.put("/{template_id}/transfer")
+async def transfer_edit(
+        template_id: int,
+        body: TemplateEditUpdate):
+    response = await transfer_user_edit(template_id, body)
+    return {'result': response}
