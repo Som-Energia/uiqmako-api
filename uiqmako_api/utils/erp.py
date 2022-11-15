@@ -32,11 +32,11 @@ class ERP:
     def _connect_with_erp(self):
 
         try:
+            self._uri = settings.erp_conn(self._name)['server']
             self._erp_client = Client(
-                 transport=PoolTransport(secure=False),
+                 transport=PoolTransport(secure=self._uri.startswith('https')),
                 **settings.erp_conn(self._name)
             )
-            self._uri = settings.erp_conn(self._name)['server']
         except:
             pass
             #raise CantConnectERP("Unable to connect to {} ERP".format(self._name))
