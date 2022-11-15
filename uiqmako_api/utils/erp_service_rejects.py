@@ -113,9 +113,8 @@ class ErpServiceRejects(ErpService):
         template = template[0]
         template['name'] = template['info_rebuig']
         template['model_int_name'] = 'giscedata.switching'
-        template['def_bofy_text'] = template['notify_text']
-        
-        import pudb; pu.db
+        template['def_body_text'] = template['notify_text']
+
         return TemplateRejects(**template)
 
     # TODO: Should receive a full object or dict not edition fields body and header

@@ -36,10 +36,12 @@ async def create_or_update_template(xml_id, template, git_repo, user_name=""):
         git_repo.index.add(body_filename)
         text_modified = True
         git_repo.index.commit("{}update body_text for {}".format(usr_msg, template.name))
-    headers_keys = 'cc,to,subject,subject_es_ES,subject_ca_ES,bcc'.split(',')
+
+    keys = template.headers().keys()
     with open(os.path.join(repo_working_dir, headers_filename), 'w') as f:
-        for key in headers_keys:
-            f.write("{}: {}\n".format(key, template["def_{}".format(key)]))
+        for key in keys:
+            if key.startswith('def_'):
+                f.write("{}: {}\n".format(key, template[key]))
 
     git_repo.index.add(headers_filename)
     if git_repo.is_dirty():
