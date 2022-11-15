@@ -6,6 +6,8 @@ from pool_transport import PoolTransport
 
 from uiqmako_api.errors.exceptions import UIQMakoBaseException, XmlIdNotFound, InvalidId, CantConnectERP
 from uiqmako_api.utils.erp_service import ErpService
+from uiqmako_api.utils.erp_service_poweremail import ErpServicePoweremail
+from uiqmako_api.utils.erp_service_rejects import ErpServiceRejects
 
 
 class ERP:
@@ -65,7 +67,8 @@ class ERP:
         return obj
 
     def service(self):
-        return ErpService(self._erp_client)
+        #return ErpServicePoweremail(self._erp_client)
+        return ErpServiceRejects(self._erp_client)
 
 class ERP_PROD(ERP):
     _name = 'PROD'

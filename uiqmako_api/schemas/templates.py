@@ -104,6 +104,45 @@ class Template(BaseModel):
     def __getitem__(self, key):
         return getattr(self, key)
 
+class TemplateRejects(BaseModel):
+    """
+    Editable ERP Template content
+    """
+    id: int
+    notify_text: str
+    info_rebuig: str
+    name: str
+    model_int_name: str
+    def_body_text: str
+
+    class Config:
+        orm_mode = True
+
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, **kwds)
+        self.notify_text.strip()
+
+    def headers(self):
+        return {
+        }
+
+    def meta_data(self):
+        return {
+            'id': self.id,
+            'name': self.info_rebuig,
+        }
+
+    def body_text(self):
+        from uiqmako_api.utils.templates import parse_body_by_language
+
+        return {
+            'def_body_text': self.notify_text,
+            'by_type': parse_body_by_language(self.notify_text,
+        )}
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
 
 class SourceInfo(BaseModel):
     """

@@ -9,7 +9,7 @@ from uiqmako_api.models.templates import (
     get_case_orm,
     get_or_create_template_case_orm,
 )
-from uiqmako_api.schemas.templates import Template, TemplateInfoBase
+from uiqmako_api.schemas.templates import Template, TemplateRejects, TemplateInfoBase
 from uiqmako_api.utils.git import create_or_update_template
 
 
