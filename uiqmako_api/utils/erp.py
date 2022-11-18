@@ -16,6 +16,7 @@ class ERP:
     _models = dict()
     _name = None
     _uri = None
+    _service = 'rejects'
 
     def __new__(cls):
 
@@ -66,9 +67,23 @@ class ERP:
         obj = self[model].browse(id)
         return obj
 
+    def set_service_type(self, service_type):
+        self._service = service_type
+
+    # def service(self):
+    #     service = None
+    #     if self._service == 'poweremail':
+    #         service = ErpServicePoweremail(self._erp_client)
+    #     elif self._service == 'rejects':
+    #         service = ErpServiceRejects(self._erp_client)
+    #     return service
+
     def service(self):
-        #return ErpServicePoweremail(self._erp_client)
-        return ErpServiceRejects(self._erp_client)
+        erpServicePoweremail = ErpServicePoweremail(self._erp_client)
+        erpServiceRejects = ErpServiceRejects(self._erp_client)
+        erpServicePoweremail.set_next(erpServiceRejects)
+        return erpServicePoweremail
+
 
 class ERP_PROD(ERP):
     _name = 'PROD'

@@ -72,7 +72,7 @@ class ErpServiceRejects(ErpService):
         return [x for x in external_ids.values()]
 
 
-    async def erp_id(self, model, id):
+    def erp_id(self, model, id):
         """
         Returns the equivalent numeric erp id for the model.
 
@@ -97,7 +97,7 @@ class ErpServiceRejects(ErpService):
         externalid = self.erp.IrModelData.read([
             ('module', '=', module),
             ('name', '=', shortname),
-            ('model', '=', model),
+            ('model', '=', TEMPLATE_MODEL),
         ], ['res_id'])
 
         if not externalid:
@@ -106,7 +106,7 @@ class ErpServiceRejects(ErpService):
         return externalid[0]['res_id']
 
     async def load_template(self, id):
-        erp_id = await self.erp_id(TEMPLATE_MODEL, id)
+        erp_id = self.erp_id(TEMPLATE_MODEL, id)
         template = self._SwitchingNotifyTemplate.read([erp_id], self._template_fields)
         if not template:
             raise Exception(f"No template found with id {erp_id}")
@@ -119,7 +119,7 @@ class ErpServiceRejects(ErpService):
 
     # TODO: Should receive a full object or dict not edition fields body and header
     async def save_template(self, id, **fields):
-        erp_id = await self.erp_id(TEMPLATE_MODEL, id)
+        erp_id = self.erp_id(TEMPLATE_MODEL, id)
 
         self._SwitchingNotifyTemplate.write(erp_id, {
             key: fields[key]

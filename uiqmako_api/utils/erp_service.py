@@ -29,6 +29,7 @@ class ErpService(object):
         'es_ES',
         'ca_ES',
     ]
+    _next_handler = object
 
     def __init__(self, erpclient):
         self.erp = erpclient
@@ -40,38 +41,15 @@ class ErpService(object):
     async def semantic_ids_for_model(self, model):
         pass
 
-    async def erp_id(self, model, id):
-        """
-        Returns the equivalent numeric erp id for the model.
+    def set_next(self, handler):
+        self._next_handler = handler
+        return handler
 
-        - If the id is already numeric or a digit string
-          return it as integer.
-        - Else it considers it a semantic/external id,
-          and it will look up in the current ERP instance
-          for an object in the model having such a semantic id.
-        """
-        if type(id) == int:
-            return id
+    def erp_id(self, model, id):
+        if self._next_handler:
+            return self._next_handler.erp_id(model, id)
 
-        if id.isdecimal():
-            return int(id)
-
-        try:
-            module, shortname = id.split('.')
-        except ValueError:
-            raise InvalidId(
-                f"Semantic id '{id}' does not have the expected format 'module.name'"
-            )
-        externalid = self.erp.IrModelData.read([
-            ('module', '=', module),
-            ('name', '=', shortname),
-            ('model', '=', model),
-        ], ['res_id'])
-
-        if not externalid:
-            raise XmlIdNotFound(id)
-
-        return externalid[0]['res_id']
+        return None
 
     async def load_template(self, id):
         pass
@@ -172,7 +150,6 @@ class ErpService(object):
         return self.erp.IrTranslation.write(tr_ids, {'value': value})
 
     async def render_template(self, headers, text, model, id):
-        import pudb; pu.db
         erp_id = await self.erp_id(model, id)
         try:
             # TODO: move to __init__
