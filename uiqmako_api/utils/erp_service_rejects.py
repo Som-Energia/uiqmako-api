@@ -130,14 +130,3 @@ class ErpServiceRejects(ErpService):
         wiz_id = wiz_obj.create({})
         wiz_obj.action_clean_cache([wiz_id.id])
 
-
-    def set_all_field_translations(self, model, fieldname, res_id, value):
-        """
-        Sets to the same value all existing translations of the field
-        of the model for the given object with res_id.
-        This is done this way because the body translations didn't work
-        due to a bug in our openerp version.
-        """
-        tr_ids = self.erp.IrTranslation.search([('res_id', '=', res_id), ('name', '=', '{},{}'.format(model, fieldname))])
-        return self.erp.IrTranslation.write(tr_ids, {'value': value})
-
