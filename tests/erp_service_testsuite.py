@@ -4,7 +4,7 @@ from uiqmako_api.schemas.templates import Template
 from uiqmako_api.errors.exceptions import InvalidId, XmlIdNotFound
 
 """
-Those are the test that are run for both ErpService and ErpServiceDouble.
+Tests that are run for both ErpService and ErpServiceDouble.
 They are important to preserve the functionality parity between them
 so that tests on the rest of the software can be safely run against
 the double.
@@ -12,7 +12,7 @@ the double.
 This test suite refers fixtures that should be implemented in derived classes:
 
 - erp_service: Returns an instance of the ErpService
-- erp_backdoor: Encapsulation on some operation performed agains the ERP
+- erp_backdoor: Encapsulation on some operation performed against the ERP from the test
 - erp_translations: Like erp_backdoor but specialized in erp field translations
 """
 
