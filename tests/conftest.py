@@ -16,6 +16,8 @@ import shutil, os
 
 from uiqmako_api.schemas.users import UserCategory
 
+pytest.register_assert_rewrite("tests.erp_service_testsuite")
+
 """"
 @pytest.fixture
 def template_infos():
