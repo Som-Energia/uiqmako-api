@@ -248,31 +248,27 @@ class ErpService_TestSuite:
 
     async def test__save_template__changingEditableFields(self, erp_service):
         edited = edited_values()
-        edited_new_values = dict(**edited)
-        edited_new_values['body_text'] = 'New body'
         await erp_service.save_template(
             id = existing_template.erp_id,
-            **edited_new_values,
+            **edited,
         )
 
         retrieved = await erp_service.load_template(existing_template.xml_id)
 
-        result = dict(
+        expected = dict(
             **edited,
             id = existing_template.erp_id,
             name = existing_template.name, # Unchanged!
             model_int_name = existing_template.model, # Unchanged!
         )
 
-        assert retrieved.dict() == result
+        assert retrieved.dict() == expected
 
     async def test__save_template__usingSemanticId(self, erp_service):
         edited = edited_values()
-        edited_new_values = dict(**edited)
-        edited_new_values['body_text'] = 'New body'
         await erp_service.save_template(
             id = existing_template.xml_id,
-            **edited_new_values,
+            **edited,
         )
 
         retrieved = await erp_service.load_template(existing_template.xml_id)
@@ -289,12 +285,9 @@ class ErpService_TestSuite:
             def_subject_ca_ES = "", # <- This changes
         )
 
-        edited_new_values = dict(**edited)
-        edited_new_values['body_text'] = 'New body'
-
         await erp_service.save_template(
             id = existing_template.erp_id,
-            **edited_new_values,
+            **edited,
         )
 
         assert erp_translations.list('def_subject') == {
@@ -308,12 +301,9 @@ class ErpService_TestSuite:
 
         edited = edited_values()
 
-        edited_new_values = dict(**edited)
-        edited_new_values['body_text'] = 'New body'
-
         await erp_service.save_template(
             id = existing_template.erp_id,
-            **edited_new_values,
+            **edited,
         )
 
         assert erp_translations.list('def_subject') == {
@@ -324,12 +314,9 @@ class ErpService_TestSuite:
     async def test__save_template__clonesBodyToItsTranslations(self, erp_service, erp_translations):
         edited = edited_values()
 
-        edited_new_values = dict(**edited)
-        edited_new_values['body_text'] = 'New body'
-
         await erp_service.save_template(
             id = existing_template.erp_id,
-            **edited_new_values,
+            **edited,
         )
 
         assert erp_translations.list('def_body_text') == {
