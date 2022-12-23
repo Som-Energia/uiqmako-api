@@ -106,14 +106,24 @@ def erp_translations(rollback_erp):
             if not translation_id: return
             self.erp.IrTranslation.unlink(translation_id)
 
-        def edit(self, field, lang, values):
+        def edit(self, field, lang, values, create=False):
             translation_id = self.erp.IrTranslation.search([
                 ('name', '=', self.model+','+field),
                 ('res_id', '=', existing_template.erp_id),
                 ('lang', '=', lang),
             ])
-            if not translation_id: return
-            self.erp.IrTranslation.write(translation_id, values)
+            if translation_id:
+                self.erp.IrTranslation.write(translation_id, values)
+                return
+            if not create: return
+            self.erp.IrTranslation.create(dict(
+                dict(
+                    name= self.model+','+field,
+                    res_id=existing_template.erp_id,
+                    lang=lang,
+                ),
+                **values, # values overwrite name, res_id and lang
+            ))
 
     return TranslationsHelper(rollback_erp)
 

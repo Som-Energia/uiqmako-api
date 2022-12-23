@@ -57,9 +57,15 @@ class ErpServiceDouble():
     async def load_template(self, id):
         erp_id = await self.erp_id('poweremail.templates', id)
         try:
-            return Template(**self.data.templates[erp_id])
+            template = dict(self.data.templates[erp_id])
         except KeyError:
             raise XmlIdNotFound(f"No template found with id {id}")
+
+        supported_languages = 'ca_ES', 'es_ES'
+        for lang in supported_languages:
+            template.setdefault('def_subject_'+lang, '')
+
+        return Template(**template)
 
     async def save_template(self, id, **kwds):
         erp_id = await self.erp_id('poweremail.templates', id)
@@ -70,6 +76,20 @@ class ErpServiceDouble():
         if 'name' in kwds: del kwds['name']
         if 'id' in kwds: del kwds['id']
         if 'model_int_name' in kwds: del kwds['model_int_name']
+
+        supported_languages = 'ca_ES', 'es_ES'
+        for lang in supported_languages:
+            subject_lang = 'def_subject_'+lang
+            kwds.setdefault(subject_lang, '')
+
+        existing_body_langs = [
+            attribute[len('def_body_text_'):]
+            for attribute in template.keys()
+            if attribute.startswith('def_body_text_')
+        ]
+        for lang in {*supported_languages, *existing_body_langs}:
+            kwds['def_body_text_'+lang] = kwds['def_body_text']
+
         template.update(kwds)
 
     async def template_list(self):

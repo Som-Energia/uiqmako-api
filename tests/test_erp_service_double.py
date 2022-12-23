@@ -18,6 +18,8 @@ def erp_service():
         def_subject = "Untranslated subject",
         def_subject_es_ES = existing_template.subject_es_ES,
         def_subject_ca_ES = existing_template.subject_ca_ES,
+        def_body_text_es_ES = "Previous Body",
+        def_body_text_ca_ES = "Previous Body",
         name = existing_template.name,
         model_int_name = existing_template.model,
     )
@@ -30,11 +32,6 @@ def erp_translations(erp_service):
             self.service = service
 
         def list(self, field):
-            if field == 'def_body_text':
-                return {
-                    'ca_ES': '',
-                    'es_ES': '',
-                }
             template = self.service.data.templates[existing_template.xml_id]
             prefix = field+'_'
             return {
@@ -48,13 +45,14 @@ def erp_translations(erp_service):
             translated_field = f'{field}_{language}'
             template = self.service.data.templates[existing_template.xml_id]
             if translated_field in template:
-                template[translated_field]=''
+                del template[translated_field]
 
-        def edit(self, field, lang, values):
+        def edit(self, field, lang, values, create=False):
             translated_field = f'{field}_{lang}'
             template = self.service.data.templates[existing_template.xml_id]
             if 'value' in values:
-                template[translated_field]=values['value']
+                if create or translated_field in template:
+                    template[translated_field]=values['value']
             if 'lang' in values and values['lang'] != lang:
                 template[translated_field] = ''
 
@@ -86,7 +84,5 @@ def erp_backdoor(erp_service):
     return BackendBackdoor(erp_service)
 
 class Test_ErpServiceDouble(ErpService_TestSuite):
-
-    def test__save_template__clonesBodyToItsTranslations(self, erp_backdoor, erp_translations):
-        """Body traslations are still a implementation detaiil"""
+    pass
 

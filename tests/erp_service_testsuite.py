@@ -311,7 +311,7 @@ class ErpService_TestSuite:
             'ca_ES': edited.def_subject_ca_ES,
         }
 
-    async def test__save_template__clonesBodyToItsTranslations(self, erp_service, erp_translations):
+    async def test__save_template__bodyTranslation_cloneSuppoerted(self, erp_service, erp_translations):
         edited = edited_values()
 
         await erp_service.save_template(
@@ -322,6 +322,37 @@ class ErpService_TestSuite:
         assert erp_translations.list('def_body_text') == {
             'es_ES': edited.def_body_text,
             'ca_ES': edited.def_body_text,
+        }
+
+    async def test__save_template__bodyTranslation_cloneMissingSupported(self, erp_service, erp_translations):
+        erp_translations.remove('def_body_text', 'es_ES')
+
+        edited = edited_values()
+
+        await erp_service.save_template(
+            id = existing_template.erp_id,
+            **edited,
+        )
+
+        assert erp_translations.list('def_body_text') == {
+            'es_ES': edited.def_body_text,
+            'ca_ES': edited.def_body_text,
+        }
+
+    async def test__save_template__bodyTranslation_cloneExistingUnsupported(self, erp_service, erp_translations):
+        erp_translations.edit('def_body_text', 'en_US', dict(value='Former value'), create=True)
+
+        edited = edited_values()
+
+        await erp_service.save_template(
+            id = existing_template.erp_id,
+            **edited,
+        )
+
+        assert erp_translations.list('def_body_text') == {
+            'es_ES': edited.def_body_text,
+            'ca_ES': edited.def_body_text,
+            'en_US': edited.def_body_text,
         }
 
     @pytest.mark.skip("Not yet deployed in testing")

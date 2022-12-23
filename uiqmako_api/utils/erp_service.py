@@ -131,6 +131,7 @@ class ErpService(object):
     # TODO: Should receive a full object or dict not edition fields body and header
     async def save_template(self, id, **fields):
         erp_id = await self.erp_id(TEMPLATE_MODEL, id)
+        body_text = fields.setdefault('def_body_text','')
         self._PoweremailTemplates.write(erp_id, {
             key: fields[key]
             for key in self._template_editable_fields
@@ -142,15 +143,25 @@ class ErpService(object):
             translated_field = 'def_subject',
             fields = fields,
         )
-        # Because laguage selction for body translation is not properly
-        # working right now, we are currenly copying the body to all
-        # translations and do language selection inside the mako template.
+        # Because laguage selection for body translation is not properly
+        # working right now in the erp, we are currenly copying the body
+        # to all translations and perform language selection inside
+        # the mako template.
+
+        # All existing
+        await self.set_all_field_translations(
+            fieldname='def_body_text',
+            model=TEMPLATE_MODEL,
+            res_id=erp_id,
+            value=body_text,
+        )
+        # And all supported
         body_translations = dict(
             {
-                'def_body_text_' + lang: fields['def_body_text']
+                'def_body_text_' + lang: body_text
                 for lang in self._supported_languages
             },
-            def_body_text=fields['def_body_text'],
+            def_body_text=body_text,
         )
         await self.save_translation(
             modelname = TEMPLATE_MODEL,
@@ -162,11 +173,6 @@ class ErpService(object):
         wiz_obj = self.erp.WizardCleanCache
         wiz_id = wiz_obj.create({})
         wiz_obj.action_clean_cache([wiz_id.id])
-
-        # DGG: Alternative old behaviour:
-        # Just set all existing, even non supported, do not create new ones
-        # Maybe faster but not sure than correct
-        #self.set_all_field_translations(fieldname='def_body_text', model=TEMPLATE_MODEL, res_id=self.id, value=body_text)
 
     async def load_translations(self, modelname, object_id, translated_field):
         # Criteria:
@@ -249,7 +255,7 @@ class ErpService(object):
                 value=fields[prefix + lang],
             ))
 
-    def set_all_field_translations(self, model, fieldname, res_id, value):
+    async def set_all_field_translations(self, model, fieldname, res_id, value):
         """
         Sets to the same value all existing translations of the field
         of the model for the given object with res_id.
