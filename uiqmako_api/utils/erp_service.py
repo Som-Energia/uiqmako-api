@@ -231,7 +231,8 @@ class ErpService(object):
             if lang not in edited_languages:
                 continue
 
-            language_to_create.remove(lang)
+            if lang in language_to_create:
+                language_to_create.remove(lang)
 
             if not fields[prefix + lang]:
                 self._IrTranslation.unlink(translation_id)
