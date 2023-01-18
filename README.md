@@ -55,9 +55,22 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs) or [http://localho
 
 6. Run tests  and coverage
 
-```
+```bash
     createdb test_uiqmako
     cp test/.env.test.example test/.env.test
     # Review and edit test/.env.test
     poetry run pytest -v --cov=uiqmako_api
 ```
+
+Some infrastructure tests that access private servers are disabled by default until
+you enable them using env var `UIQMAKO_TEST_ERP`.
+
+```bash
+    UIQMAKO_TEST_ERP=1 poetry run pytest -v --cov=uiqmako_api
+```
+
+## Server deploy
+
+## Releasing
+
+## Deploying upgrades
