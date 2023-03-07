@@ -43,6 +43,7 @@ class ErpService(object):
     _supported_languages = [
         'es_ES',
         'ca_ES',
+        'en_US',
     ]
 
     def __init__(self, erpclient):
@@ -213,6 +214,7 @@ class ErpService(object):
             if field.startswith(prefix)
         ]
 
+        edited_languages += ['en_US']
         erp_translations = self._IrTranslation.read([
             ('name', '=', qualified_field),
             ('res_id', '=', object_id),
