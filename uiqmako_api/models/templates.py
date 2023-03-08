@@ -108,3 +108,11 @@ async def get_or_create_template_case_orm(template_id, case_name, case_id):
         name=case_name, case_erp_id=int(case_id), template=template_id
     )
     return case, created
+
+
+async def delete_template_case_orm(case_id):
+    case = await db.get(
+        CaseModel,
+        id=case_id
+    )
+    return case.delete_instance()
