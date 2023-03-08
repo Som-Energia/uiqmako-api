@@ -74,11 +74,11 @@ async def get_template_cases(template_id):
     return cases
 
 
-async def create_template_case(db, template_id, case_name, case_id):
+async def create_template_case(db, template_id, case_name, erp_case_id):
     case_same_name = await get_case_orm(name=case_name, template_id=template_id)
     if case_same_name:
         raise UIQMakoBaseException("Existing name case for template")
-    case, created = await get_or_create_template_case_orm(template_id, case_name, case_id)
+    case, created = await get_or_create_template_case_orm(template_id, case_name, erp_case_id)
     return created
 
 

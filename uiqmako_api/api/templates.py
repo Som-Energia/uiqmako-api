@@ -58,7 +58,12 @@ async def create_case(
         case_name: str = Form(...),
         case_id: str = Form(..., regex=".+\..+|[1-9][0-9]?")):
     from .api import app
-    created = await create_template_case(app.db_manager, template_id, case_name, case_id)
+    created = await create_template_case(
+        app.db_manager,
+        template_id,
+        case_name,
+        erp_case_id=case_id
+    )
     return {'result': created}
 
 
