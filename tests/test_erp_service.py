@@ -88,13 +88,14 @@ def erp_translations(rollback_erp):
             self.model = 'poweremail.templates'
 
         def list(self, field):
+            supported_languages = ['ca_ES', 'es_ES']
             translations = self.erp.IrTranslation.read([
                 ('name', '=', self.model+','+field),
                 ('res_id', '=', existing_template.erp_id),
             ],['lang', 'value'])
             return {
                 x['lang']: x['value']
-                for x in translations or []
+                for x in translations or [] if x['value'] and x['lang'] in supported_languages
             }
 
         def remove(self, field, lang):

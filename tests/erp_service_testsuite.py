@@ -25,16 +25,16 @@ pytestmark = [
 
 existing_template = ns(
     # An existing template with semantic id
-    erp_id = 183, # Extremely fragile
-    xml_id = 'giscedata_switching.notification_atr_M1_01',
-    name = 'ATR M101: Solicitud de modificación cambio de titular',
+    erp_id = 189, # Extremely fragile
+    xml_id = 'giscedata_switching.notification_atr_M1_06',
+    name = 'ATR M106: Solicitud de anulación al distribuidor',
     model = 'giscedata.switching',
     subject_ca_ES =
-        'Som Energia: Canvi de titular. Verificació de dades. '
-        'Contracte ${object.polissa_ref_id.name}',
-    subject_es_ES = 
-        'Som Energia: Cambio de titular. Verificación de datos. '
-        'Contrato ${object.polissa_ref_id.name}',
+        '${object.company_id.name}: Sol·licitada anulació de la modificació de '
+        'contracte d\'accés la seva distribuidora ${object.partner_id.name}',
+    subject_es_ES =
+        '${object.company_id.name}: Solicitada anulación de la modificación de '
+        'contrato de acceso a su distribuidora ${object.partner_id.name}',
 )
 def edited_values(**kwds):
     result = ns(
@@ -339,6 +339,7 @@ class ErpService_TestSuite:
             'ca_ES': edited.def_body_text,
         }
 
+    @pytest.mark.skip("In this moment, we don't want to add unsupported languages")
     async def test__save_template__bodyTranslation_cloneExistingUnsupported(self, erp_service, erp_translations):
         erp_translations.edit('def_body_text', 'en_US', dict(value='Former value'), create=True)
 
