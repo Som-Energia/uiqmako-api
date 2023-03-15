@@ -342,21 +342,24 @@ class ErpService_TestSuite:
         }
 
     async def test__save_template__bodyTranslation_cloneExistingUnsupported(self, erp_service, erp_translations):
+        # Given a template with the body translated to an unsupported language
         erp_translations.edit('def_body_text', 'de_DE', dict(value='Former value'), create=True)
 
         edited = edited_values()
-
+        # When we save the templated
         await erp_service.save_template(
             id = existing_template.erp_id,
             **edited,
         )
-
+        # Then the body is copied also into the unsupported language
         assert erp_translations.list('def_body_text') == {
             'es_ES': edited.def_body_text,
             'ca_ES': edited.def_body_text,
             'en_US': edited.def_body_text,
             'de_DE': edited.def_body_text,
         }
+        # Because our template bodies have mako code handling the language
+        # and we want that code to run whichever the language.
 
     @pytest.mark.skip("Not yet deployed in testing")
     async def test__render_template__by_erp_id(self, erp_service):
