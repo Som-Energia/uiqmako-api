@@ -341,9 +341,8 @@ class ErpService_TestSuite:
             'en_US': edited.def_body_text,
         }
 
-    @pytest.mark.skip("In this moment, we don't want to add unsupported languages")
     async def test__save_template__bodyTranslation_cloneExistingUnsupported(self, erp_service, erp_translations):
-        erp_translations.edit('def_body_text', 'en_US', dict(value='Former value'), create=True)
+        erp_translations.edit('def_body_text', 'de_DE', dict(value='Former value'), create=True)
 
         edited = edited_values()
 
@@ -356,6 +355,7 @@ class ErpService_TestSuite:
             'es_ES': edited.def_body_text,
             'ca_ES': edited.def_body_text,
             'en_US': edited.def_body_text,
+            'de_DE': edited.def_body_text,
         }
 
     @pytest.mark.skip("Not yet deployed in testing")
