@@ -116,4 +116,20 @@ class TestTemplates:
         post = await get_template_cases(template_id)
         assert len(pre) + 1 == len(post)
 
+    async def test_delete_template_case_not_exists(self, test_app):
+        template_id = 1
+        pre = await get_template_cases(template_id)
+        # await delete_template_case(DB_MANAGER, template_id, 'not_exist_case', 3)
+        with pytest.raises(UIQMakoBaseException):
+            result = await delete_template_case(DB_MANAGER, 3)
+        post = await get_template_cases(template_id)
+        assert len(pre) == len(post)
 
+    async def test_delete_template_case_ok(self, test_app):
+        template_id = 1
+        await create_template_case(DB_MANAGER, template_id, 'case_exists', 3)
+        pre = await get_template_cases(template_id)
+        case_id = pre[0].id
+        result = await delete_template_case(DB_MANAGER, case_id)
+        post = await get_template_cases(template_id)
+        assert len(pre) - 1 == len(post)

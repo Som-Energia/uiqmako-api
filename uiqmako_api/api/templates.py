@@ -58,14 +58,24 @@ async def create_case(
         case_name: str = Form(...),
         case_id: str = Form(..., regex=".+\..+|[1-9][0-9]?")):
     from .api import app
-    created = await create_template_case(app.db_manager, template_id, case_name, case_id)
+    created = await create_template_case(
+        app.db_manager,
+        template_id,
+        case_name,
+        erp_case_id=case_id
+    )
     return {'result': created}
+
+
+@router.delete("/{template_id}/cases/{case_id}", dependencies=[Depends(get_current_active_user)])
+async def delete_case(case_id: int):
+    from .api import app
+    deleted = await delete_template_case(app.db_manager, case_id)
+    return {'result': deleted}
+
 
 @router.get("/importable/{source}", dependencies=[Depends(get_current_active_user)])
 async def importable_template_list(source: str):
     from . import app
     templates = await app.ERP.service().template_list()
     return {'templates': templates}
-
-
-

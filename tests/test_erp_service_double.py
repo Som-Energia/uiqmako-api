@@ -18,8 +18,10 @@ def erp_service():
         def_subject = "Untranslated subject",
         def_subject_es_ES = existing_template.subject_es_ES,
         def_subject_ca_ES = existing_template.subject_ca_ES,
+        def_subject_en_US = "",
         def_body_text_es_ES = "Previous Body",
         def_body_text_ca_ES = "Previous Body",
+        def_body_text_en_US = "",
         name = existing_template.name,
         model_int_name = existing_template.model,
     )

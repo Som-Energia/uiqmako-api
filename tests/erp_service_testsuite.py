@@ -25,16 +25,16 @@ pytestmark = [
 
 existing_template = ns(
     # An existing template with semantic id
-    erp_id = 183, # Extremely fragile
-    xml_id = 'giscedata_switching.notification_atr_M1_01',
-    name = 'ATR M101: Solicitud de modificación cambio de titular',
+    erp_id = 189, # Extremely fragile
+    xml_id = 'giscedata_switching.notification_atr_M1_06',
+    name = 'ATR M106: Solicitud de anulación al distribuidor',
     model = 'giscedata.switching',
     subject_ca_ES =
-        'Som Energia: Canvi de titular. Verificació de dades. '
-        'Contracte ${object.polissa_ref_id.name}',
-    subject_es_ES = 
-        'Som Energia: Cambio de titular. Verificación de datos. '
-        'Contrato ${object.polissa_ref_id.name}',
+        '${object.company_id.name}: Sol·licitada anulació de la modificació de '
+        'contracte d\'accés la seva distribuidora ${object.partner_id.name}',
+    subject_es_ES =
+        '${object.company_id.name}: Solicitada anulación de la modificación de '
+        'contrato de acceso a su distribuidora ${object.partner_id.name}',
 )
 def edited_values(**kwds):
     result = ns(
@@ -311,7 +311,7 @@ class ErpService_TestSuite:
             'ca_ES': edited.def_subject_ca_ES,
         }
 
-    async def test__save_template__bodyTranslation_cloneSuppoerted(self, erp_service, erp_translations):
+    async def test__save_template__bodyTranslation_cloneSupported(self, erp_service, erp_translations):
         edited = edited_values()
 
         await erp_service.save_template(
@@ -322,6 +322,7 @@ class ErpService_TestSuite:
         assert erp_translations.list('def_body_text') == {
             'es_ES': edited.def_body_text,
             'ca_ES': edited.def_body_text,
+            'en_US': edited.def_body_text,
         }
 
     async def test__save_template__bodyTranslation_cloneMissingSupported(self, erp_service, erp_translations):
@@ -337,23 +338,28 @@ class ErpService_TestSuite:
         assert erp_translations.list('def_body_text') == {
             'es_ES': edited.def_body_text,
             'ca_ES': edited.def_body_text,
+            'en_US': edited.def_body_text,
         }
 
     async def test__save_template__bodyTranslation_cloneExistingUnsupported(self, erp_service, erp_translations):
-        erp_translations.edit('def_body_text', 'en_US', dict(value='Former value'), create=True)
+        # Given a template with the body translated to an unsupported language
+        erp_translations.edit('def_body_text', 'de_DE', dict(value='Former value'), create=True)
 
         edited = edited_values()
-
+        # When we save the templated
         await erp_service.save_template(
             id = existing_template.erp_id,
             **edited,
         )
-
+        # Then the body is copied also into the unsupported language
         assert erp_translations.list('def_body_text') == {
             'es_ES': edited.def_body_text,
             'ca_ES': edited.def_body_text,
             'en_US': edited.def_body_text,
+            'de_DE': edited.def_body_text,
         }
+        # Because our template bodies have mako code handling the language
+        # and we want that code to run whichever the language.
 
     @pytest.mark.skip("Not yet deployed in testing")
     async def test__render_template__by_erp_id(self, erp_service):

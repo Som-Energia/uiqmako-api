@@ -94,7 +94,7 @@ def erp_translations(rollback_erp):
             ],['lang', 'value'])
             return {
                 x['lang']: x['value']
-                for x in translations or []
+                for x in translations or [] if x['value']
             }
 
         def remove(self, field, lang):
