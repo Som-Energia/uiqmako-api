@@ -57,7 +57,7 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs) or [http://localho
 
 ```bash
     createdb test_uiqmako
-    cp test/.env.test.example test/.env.test
+    cp tests/.env.test.example tests/.env.test
     # Review and edit test/.env.test
     poetry run pytest -v --cov=uiqmako_api
 ```
