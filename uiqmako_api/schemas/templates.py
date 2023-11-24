@@ -26,6 +26,7 @@ class TemplateInfoBase(BaseModel):
     xml_id: Optional[str] = None
     erp_id: Optional[int] = None
     last_updated: Optional[datetime] = None
+    from_server: Optional[str] = None
 
     @validator('xml_id')
     def validate_xml_id(cls, v):

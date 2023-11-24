@@ -77,5 +77,7 @@ async def delete_case(case_id: int):
 @router.get("/importable/{source}", dependencies=[Depends(get_current_active_user)])
 async def importable_template_list(source: str):
     from . import app
+    app.ERP = app.ERP_DICT[source]
+
     templates = await app.ERP.service().template_list()
     return {'templates': templates}
