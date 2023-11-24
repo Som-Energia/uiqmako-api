@@ -53,6 +53,17 @@ async def get_user_edits_info_orm(template_id, exclude_user):
     except peewee.DoesNotExist as e:
         return []
 
+async def get_template_edits_orm(template_id):
+    try:
+        edits = await db.execute(
+            TemplateEditModel.select(TemplateEditModel).where(
+                TemplateEditModel.template_id == template_id
+            )
+        )
+        result = [TemplateEditUser.from_orm(e) for e in edits]
+        return result
+    except peewee.DoesNotExist as e:
+        return []
 
 async def update_user_edit_orm(template_id, user_id, text, headers):
     edit = await db.get(TemplateEditModel, template=template_id, user=user_id)
