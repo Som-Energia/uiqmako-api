@@ -37,6 +37,7 @@ async def add_template_from_xml_id(erp, xml_id):
         erp_id=erp_template.id,
         name=erp_template.name,
         model=erp_template.model_int_name,
+        from_server=erp._name,
     )
     return created, TemplateInfoBase.from_orm(template_info)
 

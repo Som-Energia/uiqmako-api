@@ -13,6 +13,7 @@ class TemplateInfoModel(peewee.Model):
     xml_id = peewee.CharField(null=True, unique=True)
     erp_id = peewee.IntegerField(null=True, unique=True)
     last_updated = peewee.DateTimeField(null=True)
+    from_server = peewee.CharField(null=True)
 
     class Meta:
         database = database
@@ -53,7 +54,7 @@ async def get_template_orm(template_id=None, erp_id=None, xml_id=None, name=None
         return None
 
 
-async def add_or_get_template_orm(name, xml_id, model, erp_id=None):
+async def add_or_get_template_orm(name, xml_id, model, from_server, erp_id=None):
     created = False
     template_info = await get_template_orm(xml_id=xml_id)
     if not template_info and erp_id:
@@ -63,7 +64,7 @@ async def add_or_get_template_orm(name, xml_id, model, erp_id=None):
     if not template_info:
         template_info, created = await db.create_or_get(
             TemplateInfoModel,
-            name=name, model=model, xml_id=xml_id, erp_id=erp_id
+            name=name, model=model, xml_id=xml_id, erp_id=erp_id, from_server=from_server
         )
 
     return created, template_info
