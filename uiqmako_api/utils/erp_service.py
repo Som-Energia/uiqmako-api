@@ -43,6 +43,8 @@ class ErpService(object):
     _supported_languages = [
         'es_ES',
         'ca_ES',
+        'eu_ES',
+        'gl_ES',
     ]
 
     def __init__(self, erpclient):

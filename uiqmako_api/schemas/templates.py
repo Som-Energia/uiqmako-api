@@ -61,6 +61,8 @@ class Template(BaseModel):
     def_subject: str
     def_subject_es_ES: str
     def_subject_ca_ES: str
+    def_subject_eu_ES: str
+    def_subject_gl_ES: str
     def_body_text: str
     def_to: str
     def_cc: str
@@ -85,6 +87,8 @@ class Template(BaseModel):
             'lang': self.lang,
             'def_subject_es_ES': self.def_subject_es_ES,
             'def_subject_ca_ES': self.def_subject_ca_ES,
+            'def_subject_eu_ES': self.def_subject_eu_ES,
+            'def_subject_gl_ES': self.def_subject_gl_ES,
         }
 
     def meta_data(self):
