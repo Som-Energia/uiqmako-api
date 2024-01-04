@@ -117,3 +117,13 @@ async def delete_template_case_orm(case_id):
         id=case_id
     )
     return case.delete_instance()
+
+async def delete_template_orm(template_id):
+    try:
+        template = await db.get(
+            TemplateInfoModel,
+            id=template_id
+        )
+        return template.delete_instance()
+    except peewee.IntegrityError as e:
+        return False

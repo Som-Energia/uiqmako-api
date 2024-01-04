@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Form
 from uiqmako_api.schemas.users import User
 from .dependencies import check_erp_conn, get_current_active_user
-from uiqmako_api.utils.edits import check_other_users_edits
+from uiqmako_api.utils.edits import check_other_users_edits, get_current_edits
 from uiqmako_api.utils.templates import *
 
 router = APIRouter(
@@ -27,6 +27,30 @@ async def get_template(template_id: int):
         'headers': template.headers()
     }
     return template_data
+
+
+@router.delete("/{template_id}", dependencies=[Depends(check_erp_conn), Depends(get_current_active_user)])
+async def delete_template(template_id: int):
+    from . import app
+    response = {
+        'deleted': False,
+        'message' : "No s'ha pogut esborrar:\n"
+    }
+    current_edits = await get_current_edits(template_id)
+    if current_edits:
+        response['message'] += "- Edicions en curs\n"
+    current_cases = await get_template_cases(template_id)
+    if current_cases:
+        response['message'] += "- Casos de prova\n"
+
+    if not current_edits and not current_cases:
+        response['deleted'] = await delete_single_template(app.db_manager, template_id)
+        if response['deleted']:
+            response['message'] = "S'ha esborrat correctament"
+        else:
+            response['message'] += "S'ha produit un error inesperat\n"
+
+    return response
 
 
 @router.post("", dependencies=[Depends(check_erp_conn), Depends(get_current_active_user)])

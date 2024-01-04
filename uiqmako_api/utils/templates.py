@@ -9,6 +9,7 @@ from uiqmako_api.models.templates import (
     get_case_orm,
     get_or_create_template_case_orm,
     delete_template_case_orm,
+    delete_template_orm
 )
 from uiqmako_api.schemas.templates import Template, TemplateInfoBase
 from uiqmako_api.utils.git import create_or_update_template
@@ -89,3 +90,6 @@ async def delete_template_case(db, case_id):
         raise UIQMakoBaseException("Not existing name case for template")
     deleted = await delete_template_case_orm(case_id)
     return deleted
+
+async def delete_single_template(db, template_id):
+    return await delete_template_orm(template_id)
