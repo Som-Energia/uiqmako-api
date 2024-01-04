@@ -248,7 +248,7 @@ class ErpService(object):
             if not fields[prefix + lang]:
                 continue
             self._IrTranslation.create(dict(
-                type='field',
+                type='model',
                 name=qualified_field,
                 res_id=object_id,
                 lang=lang,
