@@ -10,7 +10,7 @@ db = get_db_manager()
 
 class TemplateEditModel(peewee.Model):
     id = peewee.AutoField()
-    template = peewee.ForeignKeyField(TemplateInfoModel, backref="edits")
+    template = peewee.ForeignKeyField(TemplateInfoModel, backref="edits", unique=True)
     user = peewee.ForeignKeyField(UserModel, backref="edits")
     body_text = peewee.TextField(null=True)
     headers = peewee.TextField(null=True)
