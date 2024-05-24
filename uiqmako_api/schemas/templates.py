@@ -63,8 +63,8 @@ class Template(BaseModel):
     def_subject_ca_ES: str
     def_body_text: str
     def_to: str
-    def_cc: str
-    def_bcc: str
+    def_cc: str = ""
+    def_bcc: str = ""
     model_int_name: str
     lang: str
     name: str
@@ -75,6 +75,12 @@ class Template(BaseModel):
     def __init__(self, *args, **kwds):
         super().__init__(*args, **kwds)
         self.def_body_text.strip()
+
+    @validator('*', pre=True, always=True)
+    def replace_false_with_empty_string(cls, v, field):
+        if field.type_ == str and v is False:
+            return ""
+        return v
 
     def headers(self):
         return {
