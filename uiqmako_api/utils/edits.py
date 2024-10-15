@@ -73,7 +73,7 @@ async def upload_edit(erp, edit_id, delete_current_edit=True):
     await erp.service().save_template(
         **dict(
             json.loads(edit.headers),
-            def_body_text=edit.body_text,
+            def_body_text=edit.body_text.replace("<br><br>","<br>\n<br>"),
             id=edit.template.xml_id,
         )
     )
